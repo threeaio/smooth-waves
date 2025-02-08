@@ -73,7 +73,10 @@ export default function Wave() {
     });
 
     return (
-        <motion.div className="absolute inset-0 ">
+        <motion.div
+            className="absolute inset-0"
+            style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 30%)' }}
+        >
             <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
                 <motion.path
                     className="fill-[#171C1A]"
@@ -82,7 +85,6 @@ export default function Wave() {
                     transition={{ type: 'spring', stiffness: 100, damping: 50 }}
                 />
             </svg>
-            {/* <div className="fixed top-0 left-0 text-black">{currentVariant}</div> */}
         </motion.div>
     );
 }
