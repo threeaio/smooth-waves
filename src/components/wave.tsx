@@ -31,6 +31,9 @@ interface WaveAnimation {
     in: WaveConfig;
     out: WaveConfig;
     scrollOffset?: ScrollOffset;
+    curveAmount?: number;
+    offsetLeft?: number;
+    offsetRight?: number;
 }
 
 const WIDTH = 100;
@@ -69,7 +72,13 @@ function lerpBeziers(start: WaveConfig, end: WaveConfig, t: number): WaveConfig 
 }
 
 // Helper function to create wave path using BezierConfig
-function createWavePath(config: WaveConfig, curveIntensity: number = 1) {
+function createWavePath(
+    config: WaveConfig,
+    curveIntensity: number = 1,
+    curveAmount = 1,
+    offsetLeft = 0,
+    offsetRight = 0,
+) {
     const startPoint = `M 0,0`;
     const topLine = `L ${WIDTH},0`;
     const rightLine = `L ${WIDTH},${HEIGHT * config.right[0]}`;
@@ -83,11 +92,24 @@ function createWavePath(config: WaveConfig, curveIntensity: number = 1) {
     const curveEnd = config.left[0] * HEIGHT;
 
     const fullPath = `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
-    const curvePath = `M ${WIDTH},${HEIGHT * config.right[0]} C ${curveControl1} ${curveControl2} 0,${curveEnd}`;
+
+    // Generate array of curve paths with offsets
+    const curvePaths = Array.from({ length: curveAmount }, (_, index) => {
+        const offset = index + 1;
+        const curveControl1 = `${WIDTH - config.right[1] * WIDTH},${
+            config.right[0] * HEIGHT + config.right[2] * curveIntensity * HEIGHT + offsetRight * offset
+        }`;
+        const curveControl2 = `${config.left[1] * WIDTH},${
+            config.left[0] * HEIGHT + config.left[2] * curveIntensity * HEIGHT + offsetLeft * offset
+        }`;
+        const curveEnd = config.left[0] * HEIGHT + offsetLeft * offset;
+
+        return `M ${WIDTH},${HEIGHT * config.right[0] + offsetRight * offset} C ${curveControl1} ${curveControl2} 0,${curveEnd}`;
+    });
 
     return {
         fullPath,
-        curvePath,
+        curvePaths,
     };
 }
 
@@ -98,8 +120,25 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         offset: curveConfig.scrollOffset,
     });
 
-    const [currentPath, setCurrentPath] = useState<string>(createWavePath(curveConfig.in).fullPath);
-    const [currentCurve, setCurrentCurve] = useState<string>(createWavePath(curveConfig.in).curvePath);
+    const [currentPath, setCurrentPath] = useState<string>(
+        createWavePath(
+            curveConfig.in,
+            1,
+            curveConfig.curveAmount ?? 1,
+            curveConfig.offsetLeft ?? 0,
+            curveConfig.offsetRight ?? 0,
+        ).fullPath,
+    );
+
+    const [currentCurves, setCurrentCurves] = useState<string[]>(
+        createWavePath(
+            curveConfig.in,
+            1,
+            curveConfig.curveAmount ?? 1,
+            curveConfig.offsetLeft ?? 0,
+            curveConfig.offsetRight ?? 0,
+        ).curvePaths,
+    );
 
     const getVariantFromScrollYProgress = () => {
         const sp = scrollYProgress.get();
@@ -111,14 +150,19 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             const progressIn = sp * 2;
             lerpedConfig = lerpBeziers(curveConfig.in, curveConfig.stable, progressIn);
         }
-        const paths = createWavePath(lerpedConfig);
-        return paths;
+        return createWavePath(
+            lerpedConfig,
+            1,
+            curveConfig.curveAmount ?? 1,
+            curveConfig.offsetLeft ?? 0,
+            curveConfig.offsetRight ?? 0,
+        );
     };
 
     useAnimationFrame(() => {
         const paths = getVariantFromScrollYProgress();
         setCurrentPath(paths.fullPath);
-        setCurrentCurve(paths.curvePath);
+        setCurrentCurves(paths.curvePaths);
     });
 
     return (
@@ -136,23 +180,26 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
                             duration: 0.3,
                         }}
                     />
-                    <motion.path
-                        initial={false}
-                        className=" stroke-red-500"
-                        d={currentCurve}
-                        fill="none"
-                        stroke="white"
-                        strokeWidth=".04"
-                        strokeDasharray={'0.2 0.4'}
-                        strokeDashoffset={1}
-                        animate={{
-                            d: currentCurve,
-                        }}
-                        transition={{
-                            ease: 'easeOut',
-                            duration: 0.3,
-                        }}
-                    />
+                    {/* {currentCurves.map((curve, index) => (
+                        <motion.path
+                            key={index}
+                            initial={false}
+                            className="stroke-red-500"
+                            d={curve}
+                            fill="none"
+                            stroke="white"
+                            strokeWidth=".04"
+                            strokeDasharray={'0.2 0.4'}
+                            strokeDashoffset={1}
+                            animate={{
+                                d: curve,
+                            }}
+                            transition={{
+                                ease: 'easeOut',
+                                duration: 0.3,
+                            }}
+                        />
+                    ))} */}
                 </svg>
             )}
             <div
@@ -172,31 +219,25 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
                             duration: 0.3,
                         }}
                     />
-                    <motion.path
-                        initial={false}
-                        className="opacity-100 stroke-red-500"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth=".04"
-                        strokeDasharray={'0.2 0.4'}
-                        strokeDashoffset={1}
-                        animate={{
-                            d: currentCurve,
-                        }}
-                        transition={{
-                            ease: 'easeOut',
-                            duration: 0.3,
-                        }}
-                    />
-                    {/* <path
-                    className="opacity-50"
-                    d={currentCurve}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth=".1"
-                    strokeDasharray={0.2}
-                    strokeDashoffset={1}
-                /> */}
+                    {currentCurves.map((curve, index) => (
+                        <motion.path
+                            key={index}
+                            initial={false}
+                            className="opacity-100 stroke-red-500"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth=".04"
+                            strokeDasharray={'0.2 0.4'}
+                            strokeDashoffset={1}
+                            animate={{
+                                d: curve,
+                            }}
+                            transition={{
+                                ease: 'easeOut',
+                                duration: 0.3,
+                            }}
+                        />
+                    ))}
                 </svg>
             </div>
         </>
