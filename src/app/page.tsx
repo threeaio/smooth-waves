@@ -5,24 +5,27 @@ import Image from 'next/image';
 
 export default function Home() {
     return (
-        <div className="relative min-h-screen bg-[#181e1c] font-[family-name:var(--font-geist)]">
+        <div className="relative min-h-screen bg-[#181e1c] font-[family-name:var(--font-geist)] max-w-full  !pb-[500px] overflow-x-hidden">
             <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-between ">
                 <div className="absolute -left-1/2 top-0 w-full h-full bg-[#172125] blur-[500px] rounded-full "></div>
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         curveConfig={{
                             initialCurveIntensity: 0,
-                            effectStrength: 0.3,
-                            left: {
-                                y: 0.3,
-                                controlShiftX: 0.4,
-                                verticalShiftY: 0.4,
+                            effectStrength: 1,
+                            stable: {
+                                left: [0.5, 0.4, 1],
+                                right: [0.2, 0.7, 0.1],
                             },
-                            right: {
-                                y: 0.2,
-                                controlShiftX: 0.7,
-                                verticalShiftY: 0.1,
+                            in: {
+                                left: [0.3, 0.2, 0.2],
+                                right: [0.05, 0.7, 0.1],
                             },
+                            out: {
+                                left: [0.9, 0.5, 0],
+                                right: [0, 0.9, 0],
+                            },
+                            scrollOffset: ['0% 0%', 'end 85%'],
                         }}
                     />
                 </div>
@@ -35,7 +38,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, transition: { delay: 0.7, duration: 0.7 } }}
                 >
                     <div className="grid grid-cols-8 gap-4 pb-24">
-                        <h1 className="relative z-20 text-5xl leading-tight col-span-2 flex flex-col col-start-5 gap-6">
+                        <h1 className="relative z-20 text-7xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
                             <span className="">
                                 ai powered <br />
                                 enthusiasm
@@ -54,18 +57,21 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         curveConfig={{
-                            effectStrength: 0.4,
+                            effectStrength: 1,
                             initialCurveIntensity: 0.9,
-                            left: {
-                                y: 0.2,
-                                controlShiftX: 0.7,
-                                verticalShiftY: -1.2,
+                            stable: {
+                                left: [0, 0.7, 0],
+                                right: [0.5, 0.2, 0.6],
                             },
-                            right: {
-                                y: 0.3,
-                                controlShiftX: 0.3,
-                                verticalShiftY: 1,
+                            in: {
+                                left: [0, 1, 0],
+                                right: [0.5, 0, 0],
                             },
+                            out: {
+                                left: [1, 0.3, -0.2],
+                                right: [1, 0.3, -0.2],
+                            },
+                            scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />
                 </div>
@@ -96,18 +102,21 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         curveConfig={{
-                            initialCurveIntensity: -2,
-                            effectStrength: 0.1,
-                            left: {
-                                y: 0.4,
-                                controlShiftX: 0.3,
-                                verticalShiftY: -0.5,
+                            initialCurveIntensity: 1,
+                            effectStrength: 1,
+                            stable: {
+                                left: [0.3, 0.5, 0.2],
+                                right: [0.1, 0.6, 0.2],
                             },
-                            right: {
-                                y: 0.1,
-                                controlShiftX: 0.2,
-                                verticalShiftY: 0.4,
+                            in: {
+                                left: [0.4, 0.3, -0.8],
+                                right: [0.6, 0.2, -0.7],
                             },
+                            out: {
+                                left: [0.9, 0.3, -0.2],
+                                right: [1, 0.2, -0.1],
+                            },
+                            scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />
                 </div>
