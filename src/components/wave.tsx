@@ -82,20 +82,13 @@ function createWavePath(config: WaveConfig, curveIntensity: number = 1) {
     }`;
     const curveEnd = config.left[0] * HEIGHT;
 
-    return `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
-}
+    const fullPath = `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
+    const curvePath = `M ${WIDTH},${HEIGHT * config.right[0]} C ${curveControl1} ${curveControl2} 0,${curveEnd}`;
 
-function getCurrentCurve(path: string) {
-    // Extract just the curve portion (everything after "C" until "Z")
-    const curveMatch = path.match(/C ([^Z]+)/);
-    if (!curveMatch) return '';
-
-    // Get the end point (last coordinate pair before Z)
-    const endPointMatch = path.match(/(\d+,\d+) Z$/);
-    const endPoint = endPointMatch ? endPointMatch[1] : '0,0';
-
-    // Construct the curve-only path
-    return `M ${WIDTH},${HEIGHT * defaultCurveConfig.stable.right[0]} C ${curveMatch[1]} ${endPoint}`;
+    return {
+        fullPath,
+        curvePath,
+    };
 }
 
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
@@ -105,8 +98,8 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         offset: curveConfig.scrollOffset,
     });
 
-    const [currentPath, setCurrentPath] = useState<string>(createWavePath(curveConfig.in));
-    const [currentCurve, setCurrentCurve] = useState<string>(createWavePath(curveConfig.in));
+    const [currentPath, setCurrentPath] = useState<string>(createWavePath(curveConfig.in).fullPath);
+    const [currentCurve, setCurrentCurve] = useState<string>(createWavePath(curveConfig.in).curvePath);
 
     const getVariantFromScrollYProgress = () => {
         const sp = scrollYProgress.get();
@@ -118,12 +111,14 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             const progressIn = sp * 2;
             lerpedConfig = lerpBeziers(curveConfig.in, curveConfig.stable, progressIn);
         }
-        return createWavePath(lerpedConfig);
+        const paths = createWavePath(lerpedConfig);
+        return paths;
     };
 
     useAnimationFrame(() => {
-        setCurrentPath(getVariantFromScrollYProgress());
-        setCurrentCurve(getCurrentCurve(currentPath));
+        const paths = getVariantFromScrollYProgress();
+        setCurrentPath(paths.fullPath);
+        setCurrentCurve(paths.curvePath);
     });
 
     return (
