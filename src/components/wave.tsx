@@ -25,18 +25,17 @@ interface WaveConfig {
     right: BezierConfig;
 }
 
-interface CurveConfig {
-    initialCurveIntensity: number;
-    effectStrength: number;
+interface WaveAnimation {
     stable: WaveConfig;
     in: WaveConfig;
     out: WaveConfig;
     scrollOffset?: ScrollOffset;
 }
 
-const defaultCurveConfig: CurveConfig = {
-    initialCurveIntensity: 0.5,
-    effectStrength: 1,
+const WIDTH = 100;
+const HEIGHT = 100;
+
+const defaultCurveConfig: WaveAnimation = {
     stable: {
         right: [0.2, 0.9, -0.5],
         left: [0.7, 0.6, 0.6],
@@ -52,82 +51,80 @@ const defaultCurveConfig: CurveConfig = {
     scrollOffset: ['start 80%', 'end 90%'],
 };
 
-export default function Wave({ curveConfig = defaultCurveConfig }: { curveConfig?: CurveConfig }) {
+function lerpNumber(start: number, end: number, t: number): number {
+    return start + (end - start) * t;
+}
+
+function lerpBezier(start: BezierConfig, end: BezierConfig, t: number): BezierConfig {
+    return [lerpNumber(start[0], end[0], t), lerpNumber(start[1], end[1], t), lerpNumber(start[2], end[2], t)];
+}
+
+function lerpBeziers(start: WaveConfig, end: WaveConfig, t: number): WaveConfig {
+    return {
+        left: lerpBezier(start.left, end.left, t),
+        right: lerpBezier(start.right, end.right, t),
+    };
+}
+
+// Helper function to create wave path using BezierConfig
+function createWavePath(config: WaveConfig, curveIntensity: number = 1) {
+    const startPoint = `M 0,0`;
+    const topLine = `L ${WIDTH},0`;
+    const rightLine = `L ${WIDTH},${HEIGHT * config.right[0]}`;
+
+    const curveControl1 = `${WIDTH - config.right[1] * WIDTH},${
+        config.right[0] * HEIGHT + config.right[2] * curveIntensity * HEIGHT
+    }`;
+    const curveControl2 = `${config.left[1] * WIDTH},${
+        config.left[0] * HEIGHT + config.left[2] * curveIntensity * HEIGHT
+    }`;
+    const curveEnd = config.left[0] * HEIGHT;
+
+    return `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
+}
+
+export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const waveRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: waveRef,
         offset: curveConfig.scrollOffset,
     });
-    const [currentVariant, setCurrentVariant] = useState<
-        'neutral' | 'strongUp' | 'slightUp' | 'strongDown' | 'slightDown'
-    >('neutral');
 
-    const WIDTH = 100;
-    const HEIGHT = 100;
-
-    // Helper function to create wave path using BezierConfig
-    const createWavePath = (config: WaveConfig, curveIntensity: number = 1) => {
-        const startPoint = `M 0,0`;
-        const topLine = `L ${WIDTH},0`;
-        const rightLine = `L ${WIDTH},${HEIGHT * config.right[0]}`;
-
-        const curveControl1 = `${WIDTH - config.right[1] * WIDTH},${
-            config.right[0] * HEIGHT + config.right[2] * curveIntensity * HEIGHT
-        }`;
-        const curveControl2 = `${config.left[1] * WIDTH},${
-            config.left[0] * HEIGHT + config.left[2] * curveIntensity * HEIGHT
-        }`;
-        const curveEnd = config.left[0] * HEIGHT;
-
-        return `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
-    };
-
-    // Define variants using the helper function
-    const pathVariants = {
-        neutral: {
-            d: createWavePath(curveConfig.stable, curveConfig.initialCurveIntensity * curveConfig.effectStrength),
-        },
-        strongUp: {
-            d: createWavePath(curveConfig.out, curveConfig.effectStrength),
-        },
-        slightUp: {
-            d: createWavePath(curveConfig.out, curveConfig.effectStrength),
-        },
-        strongDown: {
-            d: createWavePath(curveConfig.in, curveConfig.effectStrength),
-        },
-        slightDown: {
-            d: createWavePath(curveConfig.in, curveConfig.effectStrength),
-        },
-    };
+    const [currentPath, setCurrentPath] = useState<string>(createWavePath(curveConfig.in));
 
     const getVariantFromScrollYProgress = () => {
         const sp = scrollYProgress.get();
-        console.log('sp', sp);
-        if (sp > 0.9) return 'strongUp';
-        if (sp < 0.3) return 'strongDown';
-        return 'neutral';
+        let lerpedConfig: WaveConfig;
+        if (sp > 0.5) {
+            const progressOut = (sp - 0.5) * 2;
+            lerpedConfig = lerpBeziers(curveConfig.stable, curveConfig.out, progressOut);
+        } else {
+            const progressIn = sp * 2;
+            lerpedConfig = lerpBeziers(curveConfig.in, curveConfig.stable, progressIn);
+        }
+        return createWavePath(lerpedConfig);
     };
 
     useAnimationFrame(() => {
-        setCurrentVariant(getVariantFromScrollYProgress());
+        setCurrentPath(getVariantFromScrollYProgress());
     });
 
     return (
         <div
             ref={waveRef}
             className="absolute inset-0"
-            style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 30%)' }}
+            style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 50%)' }}
         >
             <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
                 <motion.path
                     initial={false}
-                    className="fill-[#171C1A]"
-                    variants={pathVariants}
-                    animate={currentVariant}
+                    className="fill-[hsl(162,12%,14%)]"
+                    animate={{
+                        d: currentPath,
+                    }}
                     transition={{
                         ease: 'easeOut',
-                        duration: 1,
+                        duration: 0.3,
                     }}
                 />
             </svg>
