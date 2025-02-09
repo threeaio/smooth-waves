@@ -26,6 +26,7 @@ interface WaveConfig {
 }
 
 interface WaveAnimation {
+    forceOverlay: boolean;
     stable: WaveConfig;
     in: WaveConfig;
     out: WaveConfig;
@@ -36,6 +37,7 @@ const WIDTH = 100;
 const HEIGHT = 100;
 
 const defaultCurveConfig: WaveAnimation = {
+    forceOverlay: false,
     stable: {
         right: [0.2, 0.9, -0.5],
         left: [0.7, 0.6, 0.6],
@@ -83,6 +85,19 @@ function createWavePath(config: WaveConfig, curveIntensity: number = 1) {
     return `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
 }
 
+function getCurrentCurve(path: string) {
+    // Extract just the curve portion (everything after "C" until "Z")
+    const curveMatch = path.match(/C ([^Z]+)/);
+    if (!curveMatch) return '';
+
+    // Get the end point (last coordinate pair before Z)
+    const endPointMatch = path.match(/(\d+,\d+) Z$/);
+    const endPoint = endPointMatch ? endPointMatch[1] : '0,0';
+
+    // Construct the curve-only path
+    return `M ${WIDTH},${HEIGHT * defaultCurveConfig.stable.right[0]} C ${curveMatch[1]} ${endPoint}`;
+}
+
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const waveRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
@@ -91,6 +106,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     });
 
     const [currentPath, setCurrentPath] = useState<string>(createWavePath(curveConfig.in));
+    const [currentCurve, setCurrentCurve] = useState<string>(createWavePath(curveConfig.in));
 
     const getVariantFromScrollYProgress = () => {
         const sp = scrollYProgress.get();
@@ -107,27 +123,87 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
     useAnimationFrame(() => {
         setCurrentPath(getVariantFromScrollYProgress());
+        setCurrentCurve(getCurrentCurve(currentPath));
     });
 
     return (
-        <div
-            ref={waveRef}
-            className="absolute inset-0"
-            style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 50%)' }}
-        >
-            <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
-                <motion.path
-                    initial={false}
-                    className="fill-[hsl(162,12%,14%)]"
-                    animate={{
-                        d: currentPath,
-                    }}
-                    transition={{
-                        ease: 'easeOut',
-                        duration: 0.3,
-                    }}
-                />
-            </svg>
-        </div>
+        <>
+            {curveConfig.forceOverlay && (
+                <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
+                    <motion.path
+                        initial={false}
+                        fill="#242e2b"
+                        animate={{
+                            d: currentPath,
+                        }}
+                        transition={{
+                            ease: 'easeOut',
+                            duration: 0.3,
+                        }}
+                    />
+                    <motion.path
+                        initial={false}
+                        className=" stroke-red-500"
+                        d={currentCurve}
+                        fill="none"
+                        stroke="white"
+                        strokeWidth=".04"
+                        strokeDasharray={'0.2 0.4'}
+                        strokeDashoffset={1}
+                        animate={{
+                            d: currentCurve,
+                        }}
+                        transition={{
+                            ease: 'easeOut',
+                            duration: 0.3,
+                        }}
+                    />
+                </svg>
+            )}
+            <div
+                ref={waveRef}
+                className="absolute inset-0"
+                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 50%)' }}
+            >
+                <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
+                    <motion.path
+                        initial={false}
+                        fill="hsl(162,12%,14%)"
+                        animate={{
+                            d: currentPath,
+                        }}
+                        transition={{
+                            ease: 'easeOut',
+                            duration: 0.3,
+                        }}
+                    />
+                    <motion.path
+                        initial={false}
+                        className="opacity-100 stroke-red-500"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth=".04"
+                        strokeDasharray={'0.2 0.4'}
+                        strokeDashoffset={1}
+                        animate={{
+                            d: currentCurve,
+                        }}
+                        transition={{
+                            ease: 'easeOut',
+                            duration: 0.3,
+                        }}
+                    />
+                    {/* <path
+                    className="opacity-50"
+                    d={currentCurve}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth=".1"
+                    strokeDasharray={0.2}
+                    strokeDashoffset={1}
+                /> */}
+                </svg>
+            </div>
+        </>
     );
 }
