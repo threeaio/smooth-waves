@@ -1,9 +1,66 @@
 'use client';
 import { motion, useAnimationFrame, useScroll, useVelocity } from 'motion/react';
+import { config } from 'process';
 import { useState } from 'react';
 
-export default function Wave() {
-    const { scrollY } = useScroll();
+/**
+ * Bezier config is an array of 3 numbers
+ * The first number is the y coordinate of the control point (left and right is determined by the direction of the curve)
+ * the second number is the x-offset, the third number is the y-offset from the control point
+ */
+type bezierConfig = [number, number, number];
+// TODO: need 3 exölicit configs, in, out stable for:
+// use the bezierConfig type for the configs
+/*
+  right: {
+        y: number;
+        controlShiftX: number;
+        verticalShiftY: number;
+    };
+    left: {
+        y: number;
+        controlShiftX: number;
+        verticalShiftY: number;
+    };
+
+
+*/
+interface CurveConfig {
+    initialCurveIntensity: number;
+    effectStrength: number;
+    right: {
+        y: number;
+        controlShiftX: number;
+        verticalShiftY: number;
+    };
+    left: {
+        y: number;
+        controlShiftX: number;
+        verticalShiftY: number;
+    };
+}
+
+interface WaveProps {
+    curveConfig?: CurveConfig;
+}
+
+const defaultCurveConfig: CurveConfig = {
+    initialCurveIntensity: 0.5,
+    effectStrength: 1,
+    right: {
+        y: 0.2,
+        controlShiftX: 0.9,
+        verticalShiftY: -0.5,
+    },
+    left: {
+        y: 0.7,
+        controlShiftX: 0.6,
+        verticalShiftY: 0.6,
+    },
+};
+
+export default function Wave({ curveConfig = defaultCurveConfig }: WaveProps) {
+    const { scrollY, scrollYProgress } = useScroll();
     const velocity = useVelocity(scrollY);
     const [currentVariant, setCurrentVariant] = useState<
         'neutral' | 'strongUp' | 'slightUp' | 'strongDown' | 'slightDown'
@@ -12,28 +69,15 @@ export default function Wave() {
     const WIDTH = 100;
     const HEIGHT = 100;
 
-    const curve = {
-        right: {
-            y: 0.2,
-            controlShiftX: 0.9,
-            verticalShiftY: -0.5,
-        },
-        left: {
-            y: 0.7,
-            controlShiftX: 0.6,
-            verticalShiftY: 0.6,
-        },
-    };
-
     // Helper function to create wave path
     const createWavePath = (curveIntensity: number = 1) => {
         const startPoint = `M 0,0`;
         const topLine = `L ${WIDTH},0`;
-        const rightLine = `L ${WIDTH},${HEIGHT * curve.right.y}`;
+        const rightLine = `L ${WIDTH},${HEIGHT * curveConfig.right.y}`;
 
-        const curveControl1 = `${WIDTH - curve.right.controlShiftX * WIDTH * curveIntensity},${curve.right.y * HEIGHT + curve.right.verticalShiftY * curveIntensity * HEIGHT}`;
-        const curveControl2 = `${curve.left.controlShiftX * WIDTH * curveIntensity},${curve.left.y * HEIGHT + curve.left.verticalShiftY * curveIntensity * HEIGHT}`;
-        const curveEnd = curve.left.y * HEIGHT;
+        const curveControl1 = `${WIDTH - curveConfig.right.controlShiftX * WIDTH},${curveConfig.right.y * HEIGHT + curveConfig.right.verticalShiftY * curveIntensity * HEIGHT}`;
+        const curveControl2 = `${curveConfig.left.controlShiftX * WIDTH},${curveConfig.left.y * HEIGHT + curveConfig.left.verticalShiftY * curveIntensity * HEIGHT}`;
+        const curveEnd = curveConfig.left.y * HEIGHT;
 
         const waveCurve = `C ${curveControl1} ${curveControl2} 0,${curveEnd}`;
 
@@ -43,19 +87,19 @@ export default function Wave() {
     // Define variants using the helper function
     const pathVariants = {
         neutral: {
-            d: createWavePath(0.4),
+            d: createWavePath(curveConfig.initialCurveIntensity * curveConfig.effectStrength),
         },
         strongUp: {
-            d: createWavePath(-1),
+            d: createWavePath(-0.4 * curveConfig.effectStrength),
         },
         slightUp: {
-            d: createWavePath(-0.8),
+            d: createWavePath(-0.2 * curveConfig.effectStrength),
         },
         strongDown: {
-            d: createWavePath(1),
+            d: createWavePath(0.4 * curveConfig.effectStrength),
         },
         slightDown: {
-            d: createWavePath(0.8),
+            d: createWavePath(0.2 * curveConfig.effectStrength),
         },
     };
 
@@ -68,8 +112,14 @@ export default function Wave() {
         return 'neutral';
     };
 
+    const getVariantFromScrollYProgress = () => {
+        if (scrollYProgress.get() > 0.8) return 'strongUp';
+        if (scrollYProgress.get() < 0.3) return 'strongDown';
+        return 'neutral';
+    };
+
     useAnimationFrame(() => {
-        setCurrentVariant(getVariantFromVelocity(velocity.get()));
+        setCurrentVariant(getVariantFromScrollYProgress());
     });
 
     return (
@@ -82,7 +132,10 @@ export default function Wave() {
                     className="fill-[#171C1A]"
                     variants={pathVariants}
                     animate={currentVariant}
-                    transition={{ type: 'spring', stiffness: 100, damping: 50 }}
+                    transition={{
+                        ease: 'easeInOut',
+                        duration: 0.5,
+                    }}
                 />
             </svg>
         </motion.div>
