@@ -72,7 +72,7 @@ export default function Home() {
                 {/* <div className="absolute z-20 -right-1/3 -top-1/3 w-1/2 h-1/2 bg-[#414795] blur-[500px] rounded-full "></div>
                 <div className="absolute z-20 left-1/2 top-0 w-1/2 h-1/2 bg-[#322343] blur-[500px] rounded-full "></div> */}
                 <div
-                    className="absolute -right-1/3 -top-1/3 w-full h-full opacity-30"
+                    className="absolute -right-1/3 -top-1/4 w-full h-full opacity-30"
                     style={{
                         background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
                     }}
