@@ -180,32 +180,12 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
                             duration: 0.3,
                         }}
                     />
-                    {/* {currentCurves.map((curve, index) => (
-                        <motion.path
-                            key={index}
-                            initial={false}
-                            className="stroke-red-500"
-                            d={curve}
-                            fill="none"
-                            stroke="white"
-                            strokeWidth=".04"
-                            strokeDasharray={'0.2 0.4'}
-                            strokeDashoffset={1}
-                            animate={{
-                                d: curve,
-                            }}
-                            transition={{
-                                ease: 'easeOut',
-                                duration: 0.3,
-                            }}
-                        />
-                    ))} */}
                 </svg>
             )}
             <div
                 ref={waveRef}
                 className="absolute inset-0"
-                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 50%)' }}
+                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 30%)' }}
             >
                 <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
                     <motion.path

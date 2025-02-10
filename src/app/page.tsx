@@ -22,7 +22,7 @@ export default function Home() {
                             forceOverlay: false,
                             curveAmount: 1,
                             offsetLeft: -10,
-                            offsetRight: -1,
+                            offsetRight: -3,
                             stable: {
                                 left: [0.5, 0.2, 1],
                                 right: [0.05, 0.7, -0.2],
@@ -45,6 +45,7 @@ export default function Home() {
                 <motion.div
                     className="opacity-0"
                     initial={{ opacity: 0, y: 20 }}
+                    viewport={{ once: true }}
                     whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
                 >
                     <div className="grid grid-cols-8 gap-4 pb-32">
@@ -91,6 +92,7 @@ export default function Home() {
                 </div>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
+                    viewport={{ once: true }}
                     whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
                 >
                     <div className="relative z-10 p-24 grid grid-cols-8 gap-4">
@@ -137,6 +139,7 @@ export default function Home() {
                 <div className="absolute -left-1/3 top-0 w-1/2 h-1/2 bg-[#414795] blur-[500px] rounded-full "></div>
                 <motion.div
                     initial={{ opacity: 0, y: 100 }}
+                    viewport={{ once: true }}
                     whileInView={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.7 } }}
                 >
                     <div className="relative  z-10 p-24 grid grid-cols-12 gap-12  ">
