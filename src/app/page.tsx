@@ -16,6 +16,12 @@ export default function Home() {
         <div className="relative min-h-screen bg-[#242e2b] font-[family-name:var(--font-geist)] max-w-full  overflow-x-hidden">
             <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-between ">
                 {/* <div className="absolute -left-1/2 top-0 w-full h-1/2 bg-[#2d3a64] blur-[500px] rounded-full  "></div> */}
+                <div
+                    className="absolute -left-1/2 -top-1/3 w-full h-full"
+                    style={{
+                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
+                    }}
+                />
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
@@ -65,6 +71,19 @@ export default function Home() {
             <div className=" relative py-56 z-10 flex flex-col justify-center">
                 {/* <div className="absolute z-20 -right-1/3 -top-1/3 w-1/2 h-1/2 bg-[#414795] blur-[500px] rounded-full "></div>
                 <div className="absolute z-20 left-1/2 top-0 w-1/2 h-1/2 bg-[#322343] blur-[500px] rounded-full "></div> */}
+                <div
+                    className="absolute -right-1/3 -top-1/3 w-full h-full opacity-30"
+                    style={{
+                        background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
+                    }}
+                />
+                <div
+                    className="absolute left-1/2 top-0 w-full h-1/2 opacity-70"
+                    style={{
+                        transform: 'translateX(-50%)',
+                        background: 'radial-gradient(ellipse at center, #322343 0%, transparent 70%)',
+                    }}
+                />
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
@@ -134,6 +153,12 @@ export default function Home() {
                     />
                 </div>
                 {/* <div className="absolute z-10 -left-1/3 top-0 w-1/2 h-1/2 bg-[#414795] blur-[500px] rounded-full "></div> */}
+                <div
+                    className="absolute z-10 -left-1/3 top-0 w-[200%] h-full rounded-full opacity-40"
+                    style={{
+                        background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
+                    }}
+                />
                 <motion.div
                     className="relative  z-10 p-24 grid grid-cols-12 gap-12  "
                     initial={{ opacity: 0, y: 100 }}
