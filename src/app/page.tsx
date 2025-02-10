@@ -21,8 +21,8 @@ export default function Home() {
                         waveConfig={{
                             forceOverlay: false,
                             curveAmount: 1,
-                            offsetLeft: -10,
-                            offsetRight: -3,
+                            offsetLeft: -20,
+                            offsetRight: -80,
                             stable: {
                                 left: [0.5, 0.2, 1],
                                 right: [0.05, 0.7, -0.2],
@@ -72,8 +72,8 @@ export default function Home() {
                         waveConfig={{
                             forceOverlay: false,
                             curveAmount: 1,
-                            offsetLeft: -1,
-                            offsetRight: -10,
+                            offsetLeft: -10,
+                            offsetRight: -60,
                             stable: {
                                 left: [0, 0.7, 0],
                                 right: [0.5, 0.2, 0.6],
@@ -118,8 +118,8 @@ export default function Home() {
                         waveConfig={{
                             forceOverlay: true,
                             curveAmount: 1,
-                            offsetLeft: -5,
-                            offsetRight: -3,
+                            offsetLeft: -100,
+                            offsetRight: -10,
                             stable: {
                                 left: [0.3, 0.5, 0.2],
                                 right: [0.1, 0.6, 0.2],

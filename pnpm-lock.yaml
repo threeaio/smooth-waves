@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@threeaio/utils':
+        specifier: ^0.10.0
+        version: 0.10.0
       motion:
         specifier: ^12.4.1
         version: 12.4.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -331,6 +334,9 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@threeaio/utils@0.10.0':
+    resolution: {integrity: sha512-NpRTeR49ZTcfR1HkOT3SjHF7RWHF0/6FVdcZIwPspvexL6P0Yfhl7VxsNnJvz77FYQ9fpoRfYfVhkCpywAkrTA==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -1946,6 +1952,8 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@threeaio/utils@0.10.0': {}
 
   '@types/estree@1.0.6': {}
 

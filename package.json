@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@threeaio/utils": "^0.10.0",
     "motion": "^12.4.1",
     "next": "15.1.6",
     "prettier": "^3.4.2",
