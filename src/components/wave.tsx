@@ -119,7 +119,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     const easingFunction = easeInOutCubic;
 
     // Add inView detection with some margin to preload
-    const isInView = useInView(waveRef, { margin: '100px' });
+    const isInView = useInView(waveRef, { margin: '400px' });
 
     const { scrollYProgress } = useScroll({
         target: waveRef,
