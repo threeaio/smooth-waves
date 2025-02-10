@@ -1,6 +1,6 @@
 'use client';
-import { motion, useAnimationFrame, useScroll } from 'motion/react';
-import { useRef, useState } from 'react';
+import { useAnimationFrame, useScroll } from 'motion/react';
+import { useRef, useState, useEffect } from 'react';
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
 type EdgeUnit = `${number}${SupportedEdgeUnit}`;
@@ -36,9 +36,6 @@ interface WaveAnimation {
     offsetRight?: number;
 }
 
-const WIDTH = 100;
-const HEIGHT = 100;
-
 const defaultCurveConfig: WaveAnimation = {
     forceOverlay: false,
     stable: {
@@ -71,78 +68,136 @@ function lerpBeziers(start: WaveConfig, end: WaveConfig, t: number): WaveConfig 
     };
 }
 
-// Helper function to create wave path using BezierConfig
-function createWavePath(
+function drawWavePath(
+    ctx: CanvasRenderingContext2D,
     config: WaveConfig,
     curveIntensity: number = 1,
     curveAmount = 1,
     offsetLeft = 0,
     offsetRight = 0,
+    width: number,
+    height: number,
 ) {
-    const startPoint = `M 0,0`;
-    const topLine = `L ${WIDTH},0`;
-    const rightLine = `L ${WIDTH},${HEIGHT * config.right[0]}`;
+    // Draw main wave
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(width, 0);
+    ctx.lineTo(width, height * config.right[0]);
 
-    const curveControl1 = `${WIDTH - config.right[1] * WIDTH},${
-        config.right[0] * HEIGHT + config.right[2] * curveIntensity * HEIGHT
-    }`;
-    const curveControl2 = `${config.left[1] * WIDTH},${
-        config.left[0] * HEIGHT + config.left[2] * curveIntensity * HEIGHT
-    }`;
-    const curveEnd = config.left[0] * HEIGHT;
+    // Main curve
+    ctx.bezierCurveTo(
+        width - config.right[1] * width,
+        config.right[0] * height + config.right[2] * curveIntensity * height,
+        config.left[1] * width,
+        config.left[0] * height + config.left[2] * curveIntensity * height,
+        0,
+        config.left[0] * height,
+    );
+    ctx.closePath();
+    ctx.fill();
 
-    const fullPath = `${startPoint} ${topLine} ${rightLine} C ${curveControl1} ${curveControl2} 0,${curveEnd} Z`;
-
-    // Generate array of curve paths with offsets
-    const curvePaths = Array.from({ length: curveAmount }, (_, index) => {
-        const offset = index + 1;
-        const curveControl1 = `${WIDTH - config.right[1] * WIDTH},${
-            config.right[0] * HEIGHT + config.right[2] * curveIntensity * HEIGHT + offsetRight * offset
-        }`;
-        const curveControl2 = `${config.left[1] * WIDTH},${
-            config.left[0] * HEIGHT + config.left[2] * curveIntensity * HEIGHT + offsetLeft * offset
-        }`;
-        const curveEnd = config.left[0] * HEIGHT + offsetLeft * offset;
-
-        return `M ${WIDTH},${HEIGHT * config.right[0] + offsetRight * offset} C ${curveControl1} ${curveControl2} 0,${curveEnd}`;
-    });
-
-    return {
-        fullPath,
-        curvePaths,
-    };
+    // Draw decorative curves
+    for (let i = 0; i < curveAmount; i++) {
+        const offset = i + 1;
+        ctx.beginPath();
+        ctx.moveTo(width, height * config.right[0] + offsetRight * offset);
+        ctx.bezierCurveTo(
+            width - config.right[1] * width,
+            config.right[0] * height + config.right[2] * curveIntensity * height + offsetRight * offset,
+            config.left[1] * width,
+            config.left[0] * height + config.left[2] * curveIntensity * height + offsetLeft * offset,
+            0,
+            config.left[0] * height + offsetLeft * offset,
+        );
+        ctx.stroke();
+    }
 }
 
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const waveRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+
     const { scrollYProgress } = useScroll({
         target: waveRef,
         offset: curveConfig.scrollOffset,
     });
 
-    const [currentPath, setCurrentPath] = useState<string>(
-        createWavePath(
-            curveConfig.in,
+    const [dpr, setDpr] = useState(1);
+
+    useEffect(() => {
+        setDpr(window.devicePixelRatio || 1);
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const canvas = canvasRef.current;
+            const overlayCanvas = overlayCanvasRef.current;
+            if (!canvas || !waveRef.current) return;
+
+            const container = waveRef.current;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Set display size
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+
+            // Set actual size in memory
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            // Handle overlay canvas if it exists
+            if (overlayCanvas && curveConfig.forceOverlay) {
+                overlayCanvas.style.width = `${width}px`;
+                overlayCanvas.style.height = `${height}px`;
+                overlayCanvas.width = width * dpr;
+                overlayCanvas.height = height * dpr;
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [dpr, curveConfig.forceOverlay]);
+
+    const drawWave = (canvas: HTMLCanvasElement | null, config: WaveConfig, fillStyle: string) => {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Reset transformation to ensure no accumulation from previous frames.
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Clear the entire canvas using its full size in device pixels.
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Apply scaling for HiDPI rendering.
+        ctx.scale(dpr, dpr);
+
+        // Set styles for drawing.
+        ctx.fillStyle = fillStyle;
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 0.4;
+        ctx.setLineDash([4, 8]);
+
+        drawWavePath(
+            ctx,
+            config,
             1,
             curveConfig.curveAmount ?? 1,
             curveConfig.offsetLeft ?? 0,
             curveConfig.offsetRight ?? 0,
-        ).fullPath,
-    );
+            canvas.width / dpr,
+            canvas.height / dpr,
+        );
+    };
 
-    const [currentCurves, setCurrentCurves] = useState<string[]>(
-        createWavePath(
-            curveConfig.in,
-            1,
-            curveConfig.curveAmount ?? 1,
-            curveConfig.offsetLeft ?? 0,
-            curveConfig.offsetRight ?? 0,
-        ).curvePaths,
-    );
-
-    const getVariantFromScrollYProgress = () => {
+    useAnimationFrame(() => {
         const sp = scrollYProgress.get();
+
         let lerpedConfig: WaveConfig;
+
         if (sp > 0.5) {
             const progressOut = (sp - 0.5) * 2;
             lerpedConfig = lerpBeziers(curveConfig.stable, curveConfig.out, progressOut);
@@ -150,75 +205,22 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             const progressIn = sp * 2;
             lerpedConfig = lerpBeziers(curveConfig.in, curveConfig.stable, progressIn);
         }
-        return createWavePath(
-            lerpedConfig,
-            1,
-            curveConfig.curveAmount ?? 1,
-            curveConfig.offsetLeft ?? 0,
-            curveConfig.offsetRight ?? 0,
-        );
-    };
 
-    useAnimationFrame(() => {
-        const paths = getVariantFromScrollYProgress();
-        setCurrentPath(paths.fullPath);
-        setCurrentCurves(paths.curvePaths);
+        if (curveConfig.forceOverlay) {
+            drawWave(overlayCanvasRef.current, lerpedConfig, '#242e2b');
+        }
+        drawWave(canvasRef.current, lerpedConfig, 'hsl(162,12%,14%)');
     });
 
     return (
         <>
-            {curveConfig.forceOverlay && (
-                <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
-                    <motion.path
-                        initial={false}
-                        fill="#242e2b"
-                        animate={{
-                            d: currentPath,
-                        }}
-                        transition={{
-                            ease: 'easeOut',
-                            duration: 0.3,
-                        }}
-                    />
-                </svg>
-            )}
+            {curveConfig.forceOverlay && <canvas ref={overlayCanvasRef} className="size-full" />}
             <div
                 ref={waveRef}
                 className="absolute inset-0"
                 style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 30%)' }}
             >
-                <svg className="size-full" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
-                    <motion.path
-                        initial={false}
-                        fill="hsl(162,12%,14%)"
-                        animate={{
-                            d: currentPath,
-                        }}
-                        transition={{
-                            ease: 'easeOut',
-                            duration: 0.3,
-                        }}
-                    />
-                    {currentCurves.map((curve, index) => (
-                        <motion.path
-                            key={index}
-                            initial={false}
-                            className="opacity-100 stroke-red-500"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth=".04"
-                            strokeDasharray={'0.2 0.4'}
-                            strokeDashoffset={1}
-                            animate={{
-                                d: curve,
-                            }}
-                            transition={{
-                                ease: 'easeOut',
-                                duration: 0.3,
-                            }}
-                        />
-                    ))}
-                </svg>
+                <canvas ref={canvasRef} className="size-full" />
             </div>
         </>
     );
