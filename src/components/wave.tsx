@@ -112,14 +112,12 @@ function drawWavePath(
 }
 
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
+    const containerRef = useRef<HTMLDivElement>(null);
     const waveRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const easingFunction = easeInOutCubic;
-
-    // Add inView detection with some margin to preload
-    const isInView = useInView(waveRef, { margin: '400px' });
 
     const { scrollYProgress } = useScroll({
         target: waveRef,
@@ -131,7 +129,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     // Add state for current configuration and transition
     const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.in);
     const transitionTimeRef = useRef<number | null>(null);
-    const TRANSITION_DURATION = 4000; // 1 second in milliseconds
+    const TRANSITION_DURATION = 4000;
 
     // Add a ref to track the last scroll position
     const lastScrollRef = useRef(0);
@@ -206,8 +204,6 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
     // Modified animation frame handling
     useAnimationFrame((time) => {
-        // if (!isInView) return;
-
         const sp = scrollYProgress.get();
 
         // Calculate target configuration
@@ -237,7 +233,6 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         };
 
         // Reset transition timing and update current config if scroll position changed
-
         setCurrentConfig(lerpedConfig);
 
         if (sp !== lastScrollRef.current) {
@@ -252,26 +247,8 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         drawWave(canvasRef.current, lerpedConfig, 'hsl(162,12%,14%)');
     });
 
-    // Cleanup canvases when not in view
-    useEffect(() => {
-        if (!isInView) {
-            const canvas = canvasRef.current;
-            const overlayCanvas = overlayCanvasRef.current;
-
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx?.clearRect(0, 0, canvas.width, canvas.height);
-            }
-
-            if (overlayCanvas) {
-                const ctx = overlayCanvas.getContext('2d');
-                ctx?.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            }
-        }
-    }, [isInView]);
-
     return (
-        <>
+        <div className="absolute inset-0" ref={containerRef}>
             {curveConfig.forceOverlay && <canvas ref={overlayCanvasRef} className="size-full" />}
             <div
                 ref={waveRef}
@@ -280,6 +257,6 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             >
                 <canvas ref={canvasRef} className="size-full" />
             </div>
-        </>
+        </div>
     );
 }
