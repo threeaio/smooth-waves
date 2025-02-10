@@ -72,7 +72,7 @@ export default function Home() {
                 {/* <div className="absolute z-20 -right-1/3 -top-1/3 w-1/2 h-1/2 bg-[#414795] blur-[500px] rounded-full "></div>
                 <div className="absolute z-20 left-1/2 top-0 w-1/2 h-1/2 bg-[#322343] blur-[500px] rounded-full "></div> */}
                 <div
-                    className="absolute -right-1/3 -top-1/4 w-full h-full opacity-30"
+                    className="absolute -right-1/2 -top-1/4 w-full h-full opacity-30"
                     style={{
                         background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
                     }}
@@ -168,7 +168,7 @@ export default function Home() {
                     <div className="relative col-span-8 col-start-3">
                         {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
                         {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
-                        <div className="relative grid grid-cols-8 border border-[#252631] gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-[#1b191e] to-[#26303e]   rounded-full shadow-xl ">
+                        <div className="relative grid grid-cols-8 border border-[#252631] gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-[#1b191e] to-[#26303e]  rounded-full shadow-xl shadow-[#414795]/20">
                             <DrizzleLogo className="size-8 mx-auto text-[#C5F74F]" />
                             <ReactLogo className="size-8 mx-auto text-[#00D8FF]" />
                             <ZodLogo className="size-8 mx-auto text-[#3068B7]" />
