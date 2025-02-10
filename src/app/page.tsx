@@ -96,8 +96,8 @@ export default function Home() {
                                 right: [0.5, 0.2, 0.6],
                             },
                             in: {
-                                left: [0, 1, 0],
-                                right: [0.5, 0, 0],
+                                left: [0, 0.6, 0],
+                                right: [0.5, 0.2, 0],
                             },
                             out: {
                                 left: [1, 0.3, -0.2],
