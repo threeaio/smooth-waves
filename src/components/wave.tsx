@@ -206,7 +206,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
     // Modified animation frame handling
     useAnimationFrame((time) => {
-        if (!isInView) return;
+        // if (!isInView) return;
 
         const sp = scrollYProgress.get();
 
