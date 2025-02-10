@@ -1,5 +1,5 @@
 'use client';
-import { useAnimationFrame, useScroll, useInView } from 'motion/react';
+import { useAnimationFrame, useScroll } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
 import { easeInOutCubic } from '@threeaio/utils/animation';
 import { lerp } from '@threeaio/utils/math';
@@ -120,19 +120,19 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     const easingFunction = easeInOutCubic;
 
     const { scrollYProgress } = useScroll({
-        target: waveRef,
+        target: containerRef,
         offset: curveConfig.scrollOffset,
     });
 
     const [dpr, setDpr] = useState(1);
 
     // Add state for current configuration and transition
-    const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.in);
+    const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.stable);
     const transitionTimeRef = useRef<number | null>(null);
     const TRANSITION_DURATION = 4000;
 
     // Add a ref to track the last scroll position
-    const lastScrollRef = useRef(0);
+    const lastScrollRef = useRef(scrollYProgress.get());
 
     useEffect(() => {
         setDpr(window.devicePixelRatio || 1);
