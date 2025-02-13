@@ -1,0 +1,32 @@
+{
+  "name": "@threeaio/smooth-waves",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --watch --format cjs,esm --dts",
+    "lint": "eslint .",
+    "release": "npm run build && npm publish"
+  },
+  "peerDependencies": {
+    "@threeaio/utils": "latest",
+    "framer-motion": ">=12.0.0",
+    "react": ">=19.0.0"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.0.0"
+  }
+}
