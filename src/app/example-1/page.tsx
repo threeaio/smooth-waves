@@ -3,7 +3,6 @@ import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings
 import { Wave } from '@/components/wave';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
-import { easeOut } from 'motion';
 
 export const dynamic = 'force-static';
 

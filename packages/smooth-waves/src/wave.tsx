@@ -2,7 +2,6 @@
 import { useAnimationFrame, useScroll } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
 import { lerp, remap } from '@threeaio/utils/math';
-import { circInOut } from 'motion';
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
 type EdgeUnit = `${number}${SupportedEdgeUnit}`;
