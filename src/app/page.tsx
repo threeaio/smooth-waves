@@ -25,18 +25,20 @@ export default function Home() {
                             curveAmount: 14,
                             offsetLeft: -24,
                             offsetRight: -8,
-                            stable: {
-                                left: [0.5, 0.2, 1],
-                                right: [0.05, 0.7, -0.2],
-                            },
-                            in: {
-                                left: [0.6, 0.2, 0.4],
-                                right: [0.2, 0.6, -0.2],
-                            },
-                            out: {
-                                left: [0.9, 0.6, 0.2],
-                                right: [0.3, 0.4, -0.4],
-                            },
+                            configs: [
+                                {
+                                    left: [0.5, 0.2, 1],
+                                    right: [0.05, 0.7, -0.2],
+                                },
+                                {
+                                    left: [0.6, 0.2, 0.4],
+                                    right: [0.2, 0.6, -0.2],
+                                },
+                                {
+                                    left: [0.9, 0.6, 0.2],
+                                    right: [0.3, 0.4, -0.4],
+                                },
+                            ],
                             scrollOffset: ['5% 0%', '150% 80%'],
                         }}
                     />
@@ -81,18 +83,20 @@ export default function Home() {
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
-                            stable: {
-                                left: [0, 0.7, 0],
-                                right: [0.5, 0.2, 0.6],
-                            },
-                            in: {
-                                left: [0, 0.6, 0],
-                                right: [0.5, 0.2, 0],
-                            },
-                            out: {
-                                left: [1, 0.3, -0.2],
-                                right: [1, 0.3, -0.2],
-                            },
+                            configs: [
+                                {
+                                    left: [0, 0.7, 0],
+                                    right: [0.5, 0.2, 0.6],
+                                },
+                                {
+                                    left: [0, 0.6, 0],
+                                    right: [0.5, 0.2, 0],
+                                },
+                                {
+                                    left: [1, 0.3, -0.2],
+                                    right: [1, 0.3, -0.2],
+                                },
+                            ],
                             scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />
@@ -124,18 +128,20 @@ export default function Home() {
                             curveAmount: 4,
                             offsetLeft: -24,
                             offsetRight: -7,
-                            stable: {
-                                left: [0.3, 0.5, 0.2],
-                                right: [0.1, 0.6, 0.2],
-                            },
-                            in: {
-                                left: [0.4, 0.3, -0.4],
-                                right: [0.6, 0.2, -0.6],
-                            },
-                            out: {
-                                left: [1, 0.3, -0.3],
-                                right: [1, 0.2, -0.2],
-                            },
+                            configs: [
+                                {
+                                    left: [0.3, 0.5, 0.2],
+                                    right: [0.1, 0.6, 0.2],
+                                },
+                                {
+                                    left: [0.4, 0.3, -0.4],
+                                    right: [0.6, 0.2, -0.6],
+                                },
+                                {
+                                    left: [1, 0.3, -0.3],
+                                    right: [1, 0.2, -0.2],
+                                },
+                            ],
                             scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />

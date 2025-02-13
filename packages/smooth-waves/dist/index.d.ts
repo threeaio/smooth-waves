@@ -25,9 +25,7 @@ interface WaveAnimation {
     featheredFill: string;
     strokeStyle?: string;
     fill?: string;
-    stable: WaveConfig;
-    in: WaveConfig;
-    out: WaveConfig;
+    configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
     curveAmount?: number;
     offsetLeft?: number;

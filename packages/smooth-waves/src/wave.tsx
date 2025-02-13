@@ -1,7 +1,7 @@
 'use client';
 import { useAnimationFrame, useScroll } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
-import { lerp } from '@threeaio/utils/math';
+import { lerp, remap } from '@threeaio/utils/math';
 import { circInOut } from 'motion';
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
@@ -32,9 +32,7 @@ export interface WaveAnimation {
     featheredFill: string; // the fill color will be masked so that a smooth gradient is visible
     strokeStyle?: string;
     fill?: string; // this is the solid fill color
-    stable: WaveConfig;
-    in: WaveConfig;
-    out: WaveConfig;
+    configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
     curveAmount?: number;
     offsetLeft?: number;
@@ -46,18 +44,20 @@ const defaultCurveConfig: WaveAnimation = {
     featheredFill: '#fff',
     strokeStyle: '#fff',
     fill: 'rgba(0,0,0,0.1)',
-    stable: {
-        right: [0.2, 0.9, -0.5],
-        left: [0.7, 0.6, 0.6],
-    },
-    in: {
-        right: [0.2, 0.9, -0.8],
-        left: [0.7, 0.6, 0.9],
-    },
-    out: {
-        right: [0.2, 0.9, -0.2],
-        left: [0.7, 0.6, 0.3],
-    },
+    configs: [
+        {
+            right: [0.2, 0.9, -0.8],
+            left: [0.7, 0.6, 0.9],
+        },
+        {
+            right: [0.2, 0.9, -0.5],
+            left: [0.7, 0.6, 0.6],
+        },
+        {
+            right: [0.2, 0.9, -0.2],
+            left: [0.7, 0.6, 0.3],
+        },
+    ],
     scrollOffset: ['start 80%', 'end 90%'],
 };
 
@@ -122,7 +122,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const easingFunction = circInOut;
+    const easingFunction = (x: number) => x;
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -132,9 +132,9 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     const [dpr, setDpr] = useState(1);
 
     // Add state for current configuration and transition
-    const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.in);
+    const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.configs[0]);
     const transitionTimeRef = useRef<number | null>(null);
-    const TRANSITION_DURATION = 4000;
+    const TRANSITION_DURATION = 20;
 
     // Add a ref to track the last scroll position
     const lastScrollRef = useRef(scrollYProgress.get());
@@ -210,16 +210,31 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     // Modified animation frame handling
     useAnimationFrame((time) => {
         const sp = scrollYProgress.get();
+        const configCount = curveConfig.configs.length;
 
-        // Calculate target configuration
-        let targetConfig: WaveConfig;
-        if (sp > 0.5) {
-            const progressOut = (sp - 0.5) * 2;
-            targetConfig = lerpBeziers(curveConfig.stable, curveConfig.out, progressOut);
-        } else {
-            const progressIn = sp * 2;
-            targetConfig = lerpBeziers(curveConfig.in, curveConfig.stable, progressIn);
-        }
+        // If only one config is provided, use it directly without interpolation
+        const targetConfig =
+            configCount === 1
+                ? curveConfig.configs[0]
+                : (() => {
+                      // Calculate which segment we're in and the progress within that segment
+                      const segmentSize = 1 / (configCount - 1);
+                      const segmentIndex = Math.min(Math.floor(sp / segmentSize), configCount - 2);
+                      const segmentProgress = remap(
+                          segmentIndex * segmentSize,
+                          (segmentIndex + 1) * segmentSize,
+                          0,
+                          1,
+                          sp,
+                      );
+
+                      // Get the two configs to interpolate between
+                      const startConfig = curveConfig.configs[segmentIndex];
+                      const endConfig = curveConfig.configs[segmentIndex + 1];
+
+                      // Calculate target configuration
+                      return lerpBeziers(startConfig, endConfig, segmentProgress);
+                  })();
 
         // Handle transition timing
         if (!transitionTimeRef.current) {

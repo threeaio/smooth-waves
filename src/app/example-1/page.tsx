@@ -3,13 +3,14 @@ import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings
 import { Wave } from '@/components/wave';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
+import { easeOut } from 'motion';
 
 export const dynamic = 'force-static';
 
 export default function Home() {
     return (
         <div className="relative min-h-screen bg-white-washed max-w-full  overflow-x-hidden">
-            <div className=" relative z-10 py-16 px-24 mx-auto mt-32 overflow-hidden rounded rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20">
+            <div className=" relative z-10 py-16 px-24 mx-auto mt-[500px] mb-[500px] overflow-hidden rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20">
                 {/* <div
                     className="absolute -left-1/2 -top-1/3 w-full h-full"
                     style={{
@@ -26,18 +27,16 @@ export default function Home() {
                             curveAmount: 0,
                             offsetLeft: -32,
                             offsetRight: -8,
-                            stable: {
-                                left: [0.8, 0.4, -0.6],
-                                right: [0.05, 0.2, 0.3],
-                            },
-                            in: {
-                                left: [1, 0.3, -1.9],
-                                right: [0.5, 0.7, 0.4],
-                            },
-                            out: {
-                                left: [1, 0.6, -0.2],
-                                right: [1, 0.6, -0.2],
-                            },
+                            configs: [
+                                {
+                                    left: [1, 0.3, -0.6],
+                                    right: [0, 0.3, 0.6],
+                                },
+                                {
+                                    left: [0, 0.3, 0.6],
+                                    right: [1, 0.3, -0.6],
+                                },
+                            ],
                             scrollOffset: ['start start', 'end end'],
                         }}
                     />
@@ -102,18 +101,20 @@ export default function Home() {
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
-                            stable: {
-                                left: [0, 0.7, 0],
-                                right: [0.5, 0.2, 0.6],
-                            },
-                            in: {
-                                left: [0, 0.6, 0],
-                                right: [0.5, 0.2, 0],
-                            },
-                            out: {
-                                left: [1, 0.3, -0.2],
-                                right: [1, 0.3, -0.2],
-                            },
+                            configs: [
+                                {
+                                    left: [0, 0.7, 0],
+                                    right: [0.5, 0.2, 0.6],
+                                },
+                                {
+                                    left: [0, 0.6, 0],
+                                    right: [0.5, 0.2, 0],
+                                },
+                                {
+                                    left: [1, 0.3, -0.2],
+                                    right: [1, 0.3, -0.2],
+                                },
+                            ],
                             scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />
@@ -145,18 +146,20 @@ export default function Home() {
                             curveAmount: 4,
                             offsetLeft: -24,
                             offsetRight: -7,
-                            stable: {
-                                left: [0.3, 0.5, 0.2],
-                                right: [0.1, 0.6, 0.2],
-                            },
-                            in: {
-                                left: [0.4, 0.3, -0.4],
-                                right: [0.6, 0.2, -0.6],
-                            },
-                            out: {
-                                left: [1, 0.3, -0.3],
-                                right: [1, 0.2, -0.2],
-                            },
+                            configs: [
+                                {
+                                    left: [0.3, 0.5, 0.2],
+                                    right: [0.1, 0.6, 0.2],
+                                },
+                                {
+                                    left: [0.4, 0.3, -0.4],
+                                    right: [0.6, 0.2, -0.6],
+                                },
+                                {
+                                    left: [1, 0.3, -0.3],
+                                    right: [1, 0.2, -0.2],
+                                },
+                            ],
                             scrollOffset: ['start 70%', '100% 30%'],
                         }}
                     />
