@@ -29,9 +29,9 @@ export interface WaveConfig {
 
 export interface WaveAnimation {
     forceOverlay: boolean;
-    fillStyle: string;
+    featheredFill: string; // the fill color will be masked so that a smooth gradient is visible
     strokeStyle?: string;
-    fillStyleOverlay?: string;
+    fill?: string; // this is the solid fill color
     stable: WaveConfig;
     in: WaveConfig;
     out: WaveConfig;
@@ -43,9 +43,9 @@ export interface WaveAnimation {
 
 const defaultCurveConfig: WaveAnimation = {
     forceOverlay: false,
-    fillStyle: '#fff',
+    featheredFill: '#fff',
     strokeStyle: '#fff',
-    fillStyleOverlay: 'rgba(0,0,0,0.1)',
+    fill: 'rgba(0,0,0,0.1)',
     stable: {
         right: [0.2, 0.9, -0.5],
         left: [0.7, 0.6, 0.6],
@@ -247,9 +247,9 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
         // Draw the wave with lerped configuration
         if (curveConfig.forceOverlay) {
-            drawWave(overlayCanvasRef.current, lerpedConfig, curveConfig.fillStyleOverlay ?? '#242e2b');
+            drawWave(overlayCanvasRef.current, lerpedConfig, curveConfig.fill ?? '#242e2b');
         }
-        drawWave(canvasRef.current, lerpedConfig, curveConfig.fillStyle);
+        drawWave(canvasRef.current, lerpedConfig, curveConfig.featheredFill);
     });
 
     return (

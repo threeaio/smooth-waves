@@ -22,9 +22,9 @@ interface WaveConfig {
 }
 interface WaveAnimation {
     forceOverlay: boolean;
-    fillStyle: string;
+    featheredFill: string;
     strokeStyle?: string;
-    fillStyleOverlay?: string;
+    fill?: string;
     stable: WaveConfig;
     in: WaveConfig;
     out: WaveConfig;

@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-    --black-washed: #171c1a;
-    --gray-darkest-washed: #242e2b;
-    --white-washed: #d9d9d9;
-    --white-washed-dark: #b4bcba;
+    --black-washed: 160 8% 10%;
+    --gray-darkest-washed: 160 10% 16%;
+    --white-washed: 0 0% 85%;
+    --white-washed-dark: 165 5% 72%;
 
-    --ui-gradient-bottom: #1a211f;
-    --ui-gradient-top: #2a3532;
+    --ui-gradient-bottom: 160 10% 12%;
+    --ui-gradient-top: 165 10% 19%;
     --ui-border: var(--ui-gradient-top);
-    --ui-shadow: #242e2b;
+    --ui-shadow: var(--gray-darkest-washed);
 }
 
 html {
@@ -19,6 +19,6 @@ html {
 }
 
 body {
-    color: var(--white-washed);
-    background: var(--black-washed);
+    color: hsl(var(--white-washed));
+    background: hsl(var(--black-washed));
 }

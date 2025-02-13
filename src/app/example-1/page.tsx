@@ -1,6 +1,6 @@
 'use client';
-import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
 import { Wave } from '@threeaio/smooth-waves';
+import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 
@@ -40,9 +40,6 @@ export default function Home() {
                             scrollOffset: ['5% 0%', '150% 80%'],
                         }}
                     />
-                </div>
-                <div className={` fixed top-12 left-12 z-200`}>
-                    <Image className=" " src="logo_triangle.svg" width={180} height={200} alt="logo" />
                 </div>
                 <motion.div
                     className="grid grid-cols-8 gap-4 pb-32"
