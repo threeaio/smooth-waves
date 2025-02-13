@@ -5,11 +5,15 @@ import './globals.css';
 const geistSans = Geist({
     variable: '--font-geist-sans',
     subsets: ['latin'],
+    weight: ['300', '500'],
+    style: 'normal',
+    display: 'swap',
 });
 
 const geistMono = Geist_Mono({
     variable: '--font-geist-mono',
     subsets: ['latin'],
+    display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -23,8 +27,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="bg-[#171C1A]">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+        <html lang="en" className="bg-black-washed">
+            <body className={`${geistSans.variable} ${geistMono.variable} font-sans font-normal antialiased`}>
+                {children}
+            </body>
         </html>
     );
 }

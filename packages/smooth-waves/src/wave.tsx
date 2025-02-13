@@ -43,9 +43,9 @@ export interface WaveAnimation {
 
 const defaultCurveConfig: WaveAnimation = {
     forceOverlay: false,
-    fillStyle: 'hsl(162,12%,14%)',
-    strokeStyle: 'white',
-    fillStyleOverlay: '#242e2b',
+    fillStyle: '#fff',
+    strokeStyle: '#fff',
+    fillStyleOverlay: 'rgba(0,0,0,0.1)',
     stable: {
         right: [0.2, 0.9, -0.5],
         left: [0.7, 0.6, 0.6],
@@ -150,7 +150,6 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             const container = containerRef.current;
             if (!canvas || !container) return;
 
-            
             const width = container.clientWidth;
             const height = container.clientHeight;
 

@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 export default function Home() {
     return (
-        <div className="relative min-h-screen bg-[#242e2b] font-[family-name:var(--font-geist)] max-w-full  overflow-x-hidden">
+        <div className="relative min-h-screen bg-gray-darkest-washed max-w-full  overflow-x-hidden">
             <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-end ">
                 {/* <div
                     className="absolute -left-1/2 -top-1/3 w-full h-full"
@@ -121,7 +121,7 @@ export default function Home() {
                 </motion.div>
             </div>
 
-            <div className=" relative  py-56 flex flex-col justify-center bg-[#b4bcba]">
+            <div className=" relative  py-56 flex flex-col justify-center bg-white-washed-dark">
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
@@ -163,20 +163,20 @@ export default function Home() {
                     <div className="relative col-span-8 col-start-3">
                         {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
                         {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
-                        <div className="relative grid grid-cols-8 border border-[#2a3532] gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-[#1a211f] to-[#2a3532]  rounded-full shadow-xl shadow-[#242e2b]/20">
-                            <SkipBack className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Play className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <SkipForward className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Volume2 className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Music2 className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Repeat className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Shuffle className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
-                            <Settings className="size-4 mx-auto text-white/80 hover:text-white transition-colors" />
+                        <div className="relative grid grid-cols-8 border border-ui-border gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom  to-ui-gradient-top  rounded-full shadow-xl shadow-ui-shadow/20">
+                            <SkipBack className="size-4 mx-auto text-white-washed" />
+                            <Play className="size-4 mx-auto text-white-washed" />
+                            <SkipForward className="size-4 mx-auto text-white-washed" />
+                            <Volume2 className="size-4 mx-auto text-white-washed" />
+                            <Music2 className="size-4 mx-auto text-white-washed" />
+                            <Repeat className="size-4 mx-auto text-white-washed" />
+                            <Shuffle className="size-4 mx-auto text-white-washed" />
+                            <Settings className="size-4 mx-auto text-white-washed" />
                         </div>
                     </div>
                 </motion.div>
             </div>
-            <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-[#b4bcba]">
+            <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
                 <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
                 {/* <p className="text-center mt-6 text-lg font-mono text-[#1b191e]">solutions</p> */}
             </div>
