@@ -257,7 +257,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             {curveConfig.forceOverlay && <canvas ref={overlayCanvasRef} className="size-full" />}
             <div
                 className="absolute inset-0"
-                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 30%)' }}
+                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 40%)' }}
             >
                 <canvas ref={canvasRef} className="size-full" />
             </div>

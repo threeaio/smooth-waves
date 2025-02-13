@@ -1,8 +1,8 @@
-'use client';
+// 'use client';
 import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
-import { Wave } from '@threeaio/smooth-waves';
-import { motion } from 'motion/react';
+import { Wave } from '@/components/wave';
 import Image from 'next/image';
+import { MotionDiv } from '@/components/motion-div';
 
 export const dynamic = 'force-static';
 
@@ -44,12 +44,7 @@ export default function Home() {
                 <div className={` fixed top-12 left-12 z-200`}>
                     <Image className=" " src="logo_triangle.svg" width={180} height={200} alt="logo" />
                 </div>
-                <motion.div
-                    className="grid grid-cols-8 gap-4 pb-32"
-                    initial={{ opacity: 0, y: 20 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
-                >
+                <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
                     <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
                         <span className="">
                             ai empowered <br />
@@ -60,7 +55,7 @@ export default function Home() {
                             <br /> your business
                         </span>
                     </h1>
-                </motion.div>
+                </MotionDiv>
             </div>
 
             <div className=" relative py-56  flex flex-col justify-center">
@@ -102,12 +97,7 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <motion.div
-                    className="relative z-10 p-24 grid grid-cols-8 gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
-                >
+                <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4">
                     <div className="relative col-start-3 col-span-2 flex flex-col gap-8">
                         <h2 className=" text-4xl leading-1 font-bold">change has come</h2>
                         <p className="">
@@ -120,7 +110,7 @@ export default function Home() {
                             where creativity, empathy, and intellectual depth can naturally unfold.
                         </p>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
 
             <div className=" relative  py-56 flex flex-col justify-center bg-white-washed-dark">
@@ -156,12 +146,7 @@ export default function Home() {
                         background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
                     }}
                 /> */}
-                <motion.div
-                    className="relative  z-10 p-24 grid grid-cols-12 gap-12  "
-                    initial={{ opacity: 0, y: 100 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.7 } }}
-                >
+                <MotionDiv className="relative  z-10 p-24 grid grid-cols-12 gap-12  ">
                     <div className="relative col-span-8 col-start-3">
                         {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
                         {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
@@ -176,7 +161,7 @@ export default function Home() {
                             <Settings className="size-4 mx-auto text-white-washed" />
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
             <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
                 <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />

@@ -1,15 +1,15 @@
-'use client';
-import { Wave } from '@threeaio/smooth-waves';
+// 'use client';
 import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Wave } from '@/components/wave';
 import Image from 'next/image';
+import { MotionDiv } from '@/components/motion-div';
 
 export const dynamic = 'force-static';
 
 export default function Home() {
     return (
-        <div className="relative min-h-screen bg-gray-darkest-washed max-w-full  overflow-x-hidden">
-            <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-end ">
+        <div className="relative min-h-screen bg-white-washed max-w-full  overflow-x-hidden">
+            <div className=" relative z-10 py-16 px-24 mx-auto mt-32 overflow-hidden rounded rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20">
                 {/* <div
                     className="absolute -left-1/2 -top-1/3 w-full h-full"
                     style={{
@@ -20,34 +20,53 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             featheredFill: 'transparent',
-                            strokeStyle: 'rgba(255,255,255,0.4)',
-                            forceOverlay: false,
-                            curveAmount: 14,
-                            offsetLeft: -24,
+                            fill: 'hsl(165 75% 32%)',
+                            forceOverlay: true,
+                            strokeStyle: 'rgba(0,0,0,0.4)',
+                            curveAmount: 0,
+                            offsetLeft: -32,
                             offsetRight: -8,
                             stable: {
-                                left: [0.5, 0.2, 1],
-                                right: [0.05, 0.7, -0.2],
+                                left: [0.8, 0.4, -0.6],
+                                right: [0.05, 0.2, 0.3],
                             },
                             in: {
-                                left: [0.6, 0.2, 0.4],
-                                right: [0.2, 0.6, -0.2],
+                                left: [1, 0.3, -1.9],
+                                right: [0.5, 0.7, 0.4],
                             },
                             out: {
-                                left: [0.9, 0.6, 0.2],
-                                right: [0.3, 0.4, -0.4],
+                                left: [1, 0.6, -0.2],
+                                right: [1, 0.6, -0.2],
+                            },
+                            scrollOffset: ['start start', 'end end'],
+                        }}
+                    />
+                    {/* <Wave
+                        waveConfig={{
+                            featheredFill: 'transparent',
+                            strokeStyle: 'rgba(0,0,0,0.4)',
+                            forceOverlay: false,
+                            curveAmount: 12,
+                            offsetLeft: -18,
+                            offsetRight: -8,
+                            stable: {
+                                left: [0.1, 0.1, -0.3],
+                                right: [0.8, 0.7, -0.2],
+                            },
+                            in: {
+                                left: [0.1, 0.1, -0.3],
+                                right: [0.8, 0.7, -0.2],
+                            },
+                            out: {
+                                left: [0.1, 0.1, -0.3],
+                                right: [0.8, 0.7, -0.2],
                             },
                             scrollOffset: ['5% 0%', '150% 80%'],
                         }}
-                    />
+                    /> */}
                 </div>
-                <motion.div
-                    className="grid grid-cols-8 gap-4 pb-32"
-                    initial={{ opacity: 0, y: 20 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
-                >
-                    <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
+                <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
+                    <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6 text-black-washed">
                         <span className="">
                             ai empowered <br />
                             enthusiasm
@@ -57,7 +76,7 @@ export default function Home() {
                             <br /> your business
                         </span>
                     </h1>
-                </motion.div>
+                </MotionDiv>
             </div>
 
             <div className=" relative py-56  flex flex-col justify-center">
@@ -99,12 +118,7 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <motion.div
-                    className="relative z-10 p-24 grid grid-cols-8 gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.7, duration: 0.7 } }}
-                >
+                <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4">
                     <div className="relative col-start-3 col-span-2 flex flex-col gap-8">
                         <h2 className=" text-4xl leading-1 font-bold">change has come</h2>
                         <p className="">
@@ -117,7 +131,7 @@ export default function Home() {
                             where creativity, empathy, and intellectual depth can naturally unfold.
                         </p>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
 
             <div className=" relative  py-56 flex flex-col justify-center bg-white-washed-dark">
@@ -153,12 +167,7 @@ export default function Home() {
                         background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
                     }}
                 /> */}
-                <motion.div
-                    className="relative  z-10 p-24 grid grid-cols-12 gap-12  "
-                    initial={{ opacity: 0, y: 100 }}
-                    viewport={{ once: true }}
-                    whileInView={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.7 } }}
-                >
+                <MotionDiv className="relative  z-10 p-24 grid grid-cols-12 gap-12  ">
                     <div className="relative col-span-8 col-start-3">
                         {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
                         {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
@@ -173,7 +182,7 @@ export default function Home() {
                             <Settings className="size-4 mx-auto text-white-washed" />
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
             <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
                 <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
