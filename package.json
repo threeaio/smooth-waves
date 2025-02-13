@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build:packages": "pnpm --filter=@threeaio/smooth-waves exec pnpm install && pnpm --filter=@threeaio/smooth-waves run build && pnpm install",
+    "build:packages": "pnpm --filter=@threeaio/smooth-waves exec pnpm install --prod=false && pnpm --filter=@threeaio/smooth-waves run build && pnpm install",
     "prebuild": "pnpm run build:packages",
     "build": "next build",
     "start": "next start",
