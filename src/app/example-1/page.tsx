@@ -8,8 +8,8 @@ export const dynamic = 'force-static';
 
 export default function Home() {
     return (
-        <div className="relative min-h-screen bg-white-washed max-w-full  overflow-x-hidden">
-            <div className=" relative z-10 py-16 px-24 mx-auto mt-[500px] mb-[500px] overflow-hidden rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20">
+        <div className="relative min-h-screen bg-white-washed-dark max-w-full  overflow-x-hidden">
+            <div className=" relative z-10 py-16 px-24 mx-auto mt-[500px] mb-[500px] overflow-hidden rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20 bg-white-washed rounded-[48px] shadow-2xl shadow-ui-shadow/10">
                 {/* <div
                     className="absolute -left-1/2 -top-1/3 w-full h-full"
                     style={{
@@ -19,11 +19,9 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
                             fill: 'hsl(165 75% 32%)',
-                            forceOverlay: true,
                             strokeStyle: 'rgba(0,0,0,0.4)',
-                            curveAmount: 0,
+                            curveAmount: 20,
                             offsetLeft: -32,
                             offsetRight: -8,
                             configs: [
@@ -36,35 +34,32 @@ export default function Home() {
                                     right: [1, 0.3, -0.6],
                                 },
                             ],
-                            scrollOffset: ['start start', 'end end'],
+                            scrollOffset: ['start start', '60% end'],
                         }}
                     />
-                    {/* <Wave
+                    <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
-                            strokeStyle: 'rgba(0,0,0,0.4)',
-                            forceOverlay: false,
+                            fill: 'transparent',
+                            strokeStyle: 'rgba(255,255,255,1)',
                             curveAmount: 12,
-                            offsetLeft: -18,
+                            offsetLeft: -32,
                             offsetRight: -8,
-                            stable: {
-                                left: [0.1, 0.1, -0.3],
-                                right: [0.8, 0.7, -0.2],
-                            },
-                            in: {
-                                left: [0.1, 0.1, -0.3],
-                                right: [0.8, 0.7, -0.2],
-                            },
-                            out: {
-                                left: [0.1, 0.1, -0.3],
-                                right: [0.8, 0.7, -0.2],
-                            },
-                            scrollOffset: ['5% 0%', '150% 80%'],
+                            configs: [
+                                {
+                                    left: [0.6, 0.2, -0.5],
+                                    right: [0, 0.3, 0.6],
+                                },
+                                {
+                                    left: [0, 0.7, 0.2],
+                                    right: [1, 0, -0.05],
+                                },
+                            ],
+                            scrollOffset: ['start start', '20% end'],
                         }}
-                    /> */}
+                    />
                 </div>
-                <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
-                    <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6 text-black-washed">
+                <MotionDiv className="grid grid-cols-8 gap-4 pb-1 pt-72">
+                    <h1 className="relative z-20 text-lg leading-1 font-bold col-span-3 flex flex-col col-start-7 gap-6 text-black-washed">
                         <span className="">
                             ai empowered <br />
                             enthusiasm
@@ -94,9 +89,9 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
-                            strokeStyle: 'rgba(255,255,255,0.4)',
-                            forceOverlay: false,
+                            featheredOut: 'top',
+                            fill: 'hsl(165 5% 72%)',
+                            strokeStyle: 'rgba(0,0,0,1)',
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
@@ -118,8 +113,8 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4">
-                    <div className="relative col-start-3 col-span-2 flex flex-col gap-8">
+                <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4 ">
+                    <div className="relative col-start-3 col-span-2 flex flex-col gap-8 text-black-washed">
                         <h2 className=" text-4xl leading-1 font-bold">change has come</h2>
                         <p className="">
                             We believe that the careful alignment of efficiency and standards can carve out space for
@@ -138,10 +133,9 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
-                            fill: '#242e2b',
-                            strokeStyle: 'rgba(255,255,255,0.3)',
-                            forceOverlay: true,
+                            featheredOut: 'top',
+                            fill: 'hsl(165 5% 72%)',
+                            strokeStyle: 'rgba(0,0,0,1)',
                             curveAmount: 4,
                             offsetLeft: -24,
                             offsetRight: -7,

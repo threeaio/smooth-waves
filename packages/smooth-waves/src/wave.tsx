@@ -2,6 +2,7 @@
 import { useAnimationFrame, useScroll } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
 import { lerp, remap } from '@threeaio/utils/math';
+import { easeOut } from 'motion';
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
 type EdgeUnit = `${number}${SupportedEdgeUnit}`;
@@ -13,11 +14,11 @@ type Intersection = `${Edge} ${Edge}`;
 type ScrollOffset = Array<Edge | Intersection | ProgressIntersection>;
 
 /**
- * Bezier config is an array of 3 numbers
+ * Bezier config is an tuple of 3 numbers
  * [y-coordinate, x-offset, y-offset]
- * y-coordinate: The y coordinate of the control point
- * x-offset: The horizontal shift of the control point
- * y-offset: The vertical shift from the control point
+ * y-coordinate: The y coordinate of the source
+ * x-offset: The horizontal shift of the control point from the source
+ * y-offset: The vertical shift from the control point from the source
  */
 type BezierConfig = [number, number, number];
 
@@ -27,10 +28,9 @@ export interface WaveConfig {
 }
 
 export interface WaveAnimation {
-    forceOverlay: boolean;
-    featheredFill: string; // the fill color will be masked so that a smooth gradient is visible
+    featheredOut?: 'top' | 'bottom' | 'both';
     strokeStyle?: string;
-    fill?: string; // this is the solid fill color
+    fill: string;
     configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
     curveAmount?: number;
@@ -39,8 +39,7 @@ export interface WaveAnimation {
 }
 
 const defaultCurveConfig: WaveAnimation = {
-    forceOverlay: false,
-    featheredFill: '#fff',
+    featheredOut: 'top',
     strokeStyle: '#fff',
     fill: 'rgba(0,0,0,0.1)',
     configs: [
@@ -119,9 +118,9 @@ function drawWavePath(
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+    // const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const easingFunction = (x: number) => x;
+    const easingFunction = easeOut;
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -133,7 +132,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     // Add state for current configuration and transition
     const [currentConfig, setCurrentConfig] = useState<WaveConfig>(curveConfig.configs[0]);
     const transitionTimeRef = useRef<number | null>(null);
-    const TRANSITION_DURATION = 20;
+    const TRANSITION_DURATION = 60;
 
     // Add a ref to track the last scroll position
     const lastScrollRef = useRef(scrollYProgress.get());
@@ -145,7 +144,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     useEffect(() => {
         const handleResize = () => {
             const canvas = canvasRef.current;
-            const overlayCanvas = overlayCanvasRef.current;
+            // const overlayCanvas = overlayCanvasRef.current;
             const container = containerRef.current;
             if (!canvas || !container) return;
 
@@ -161,18 +160,18 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             canvas.height = height * dpr;
 
             // Handle overlay canvas if it exists
-            if (overlayCanvas && curveConfig.forceOverlay) {
-                overlayCanvas.style.width = `${width}px`;
-                overlayCanvas.style.height = `${height}px`;
-                overlayCanvas.width = width * dpr;
-                overlayCanvas.height = height * dpr;
-            }
+            // if (overlayCanvas && curveConfig.forceOverlay) {
+            //     overlayCanvas.style.width = `${width}px`;
+            //     overlayCanvas.style.height = `${height}px`;
+            //     overlayCanvas.width = width * dpr;
+            //     overlayCanvas.height = height * dpr;
+            // }
         };
 
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [dpr, curveConfig.forceOverlay]);
+    }, [dpr]);
 
     const drawWave = (canvas: HTMLCanvasElement | null, config: WaveConfig, fillStyle: string) => {
         if (!canvas) return;
@@ -260,18 +259,27 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         }
 
         // Draw the wave with lerped configuration
-        if (curveConfig.forceOverlay) {
-            drawWave(overlayCanvasRef.current, lerpedConfig, curveConfig.fill ?? '#242e2b');
-        }
-        drawWave(canvasRef.current, lerpedConfig, curveConfig.featheredFill);
+        // if (curveConfig.forceOverlay) {
+        //     drawWave(overlayCanvasRef.current, lerpedConfig, curveConfig.fill ?? '#242e2b');
+        // }
+        drawWave(canvasRef.current, lerpedConfig, curveConfig.fill ?? defaultCurveConfig.fill!);
     });
 
     return (
         <div className="absolute inset-0" ref={containerRef}>
-            {curveConfig.forceOverlay && <canvas ref={overlayCanvasRef} className="size-full" />}
+            {/* {curveConfig.forceOverlay && <canvas ref={overlayCanvasRef} className="size-full" />} */}
             <div
                 className="absolute inset-0"
-                style={{ mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 100) 40%)' }}
+                style={{
+                    mask:
+                        curveConfig.featheredOut === 'top'
+                            ? 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)'
+                            : curveConfig.featheredOut === 'bottom'
+                              ? 'linear-gradient(rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%)'
+                              : curveConfig.featheredOut === 'both'
+                                ? 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%)'
+                                : undefined,
+                }}
             >
                 <canvas ref={canvasRef} className="size-full" />
             </div>

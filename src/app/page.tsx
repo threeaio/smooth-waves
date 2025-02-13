@@ -19,15 +19,15 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
+                            featheredOut: 'top',
                             strokeStyle: 'rgba(255,255,255,0.4)',
-                            forceOverlay: false,
+                            fill: 'hsl(160 10% 14%)',
                             curveAmount: 14,
                             offsetLeft: -24,
                             offsetRight: -8,
                             configs: [
                                 {
-                                    left: [0.5, 0.2, 1],
+                                    left: [0.5, 0.2, 0.2],
                                     right: [0.05, 0.7, -0.2],
                                 },
                                 {
@@ -42,9 +42,6 @@ export default function Home() {
                             scrollOffset: ['5% 0%', '150% 80%'],
                         }}
                     />
-                </div>
-                <div className={` fixed top-12 left-12 z-200`}>
-                    <Image className=" " src="logo_triangle.svg" width={180} height={200} alt="logo" />
                 </div>
                 <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
                     <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
@@ -77,9 +74,9 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
+                            featheredOut: 'top',
+                            fill: 'hsl(160 10% 16%)',
                             strokeStyle: 'rgba(255,255,255,0.4)',
-                            forceOverlay: false,
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
@@ -121,10 +118,8 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
-                            featheredFill: 'transparent',
-                            fill: '#242e2b',
+                            fill: 'hsl(160 10% 16%)',
                             strokeStyle: 'rgba(255,255,255,0.3)',
-                            forceOverlay: true,
                             curveAmount: 4,
                             offsetLeft: -24,
                             offsetRight: -7,
