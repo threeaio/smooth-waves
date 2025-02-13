@@ -21,7 +21,7 @@ export default function Home() {
                         waveConfig={{
                             featheredOut: 'top',
                             strokeStyle: 'rgba(255,255,255,0.4)',
-                            fill: 'hsl(160 10% 14%)',
+                            fill: 'hsl(160 10% 16%)',
                             curveAmount: 14,
                             offsetLeft: -24,
                             offsetRight: -8,

@@ -13,7 +13,7 @@ export function NavBar() {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50">
-            <div className="bg-gray-darkest-washed  border-b  absolute top-0 inset-x-2 grid border border-ui-border  bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom  to-ui-gradient-top  rounded-b-[48px] shadow-xl shadow-ui-shadow/20">
+            <div className="  border-b  absolute top-0 inset-x-2 grid border border-ui-border  bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom/90  to-ui-gradient-top/85 backdrop-blur  rounded-b-[48px] shadow-xl shadow-ui-shadow/20">
                 <div className="relative flex items-center justify-between px-16 py-8">
                     <Link href="/">
                         <Image src="/logo_triangle.svg" width={160} height={140} alt="logo" />
