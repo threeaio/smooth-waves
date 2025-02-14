@@ -17,6 +17,7 @@ export default {
         normal: '300',
       },
       colors: {
+        '3a-green': 'hsl(var(--3a-green))',
         'black-washed': 'hsl(var(--black-washed))',
         'gray-darkest-washed': 'hsl(var(--gray-darkest-washed))',
         'white-washed': 'hsl(var(--white-washed))',

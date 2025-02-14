@@ -19,19 +19,19 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
-                            fill: 'hsl(165 75% 32%)',
-                            strokeStyle: 'rgba(0,0,0,0.4)',
+                            fill: 'hsl(160 10% 16%)',
+                            strokeStyle: 'rgba(255,255,255,.6)',
                             curveAmount: 20,
                             offsetLeft: -32,
                             offsetRight: -8,
                             configs: [
                                 {
-                                    left: [1, 0.3, -0.6],
-                                    right: [0, 0.3, 0.6],
+                                    left: [0, 1, 0.3, -0.6],
+                                    right: [0, 0, 0.3, 0.6],
                                 },
                                 {
-                                    left: [0, 0.3, 0.6],
-                                    right: [1, 0.3, -0.6],
+                                    left: [0, 0, 0.3, 0.6],
+                                    right: [0, 1, 0.3, -0.6],
                                 },
                             ],
                             scrollOffset: ['start start', '60% end'],
@@ -40,21 +40,21 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             fill: 'transparent',
-                            strokeStyle: 'rgba(255,255,255,1)',
+                            strokeStyle: 'hsl(35 15% 62%)',
                             curveAmount: 12,
                             offsetLeft: -32,
                             offsetRight: -8,
                             configs: [
                                 {
-                                    left: [0.6, 0.2, -0.5],
-                                    right: [0, 0.3, 0.6],
+                                    left: [0.5, 0.8, -0.3, -0.6],
+                                    right: [0, 0.1, 0.3, 0.6],
                                 },
                                 {
-                                    left: [0, 0.7, 0.2],
-                                    right: [1, 0, -0.05],
+                                    left: [0.5, 0.1, -0.8, 0.6],
+                                    right: [0, 0.9, 0.3, -0.6],
                                 },
                             ],
-                            scrollOffset: ['start start', '20% end'],
+                            scrollOffset: ['start start', '60% end'],
                         }}
                     />
                 </div>
@@ -90,23 +90,23 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
-                            fill: 'hsl(165 5% 72%)',
+                            fill: 'hsl(155 85% 62%)',
                             strokeStyle: 'rgba(0,0,0,1)',
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
                             configs: [
                                 {
-                                    left: [0, 0.7, 0],
-                                    right: [0.5, 0.2, 0.6],
+                                    left: [0, 0, 0.7, 0],
+                                    right: [0, 0.5, 0.2, 0.6],
                                 },
                                 {
-                                    left: [0, 0.6, 0],
-                                    right: [0.5, 0.2, 0],
+                                    left: [0, 0, 0.6, 0],
+                                    right: [0, 0.5, 0.2, 0],
                                 },
                                 {
-                                    left: [1, 0.3, -0.2],
-                                    right: [1, 0.3, -0.2],
+                                    left: [0, 1, 0.3, -0.2],
+                                    right: [0, 1, 0.3, -0.2],
                                 },
                             ],
                             scrollOffset: ['start 70%', '100% 30%'],
@@ -141,16 +141,16 @@ export default function Home() {
                             offsetRight: -7,
                             configs: [
                                 {
-                                    left: [0.3, 0.5, 0.2],
-                                    right: [0.1, 0.6, 0.2],
+                                    left: [0, 0.3, 0.5, 0.2],
+                                    right: [0, 0.1, 0.6, 0.2],
                                 },
                                 {
-                                    left: [0.4, 0.3, -0.4],
-                                    right: [0.6, 0.2, -0.6],
+                                    left: [0, 0.4, 0.3, -0.4],
+                                    right: [0, 0.6, 0.2, -0.6],
                                 },
                                 {
-                                    left: [1, 0.3, -0.3],
-                                    right: [1, 0.2, -0.2],
+                                    left: [0, 1, 0.3, -0.3],
+                                    right: [0, 1, 0.2, -0.2],
                                 },
                             ],
                             scrollOffset: ['start 70%', '100% 30%'],

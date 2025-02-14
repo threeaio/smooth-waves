@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+    --3a-green: 150 86.5% 59.4%;
+
     --black-washed: 160 8% 10%;
     --gray-darkest-washed: 160 10% 16%;
     --white-washed: 0 0% 85%;
@@ -21,4 +23,21 @@ html {
 body {
     color: hsl(var(--white-washed));
     background: hsl(var(--black-washed));
+}
+
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+    pointer-events: none;
 }
