@@ -13,14 +13,13 @@ type Intersection = `${Edge} ${Edge}`;
 type ScrollOffset = Array<Edge | Intersection | ProgressIntersection>;
 
 /**
- * Bezier config is an tuple of 3 numbers
- * [y-coordinate, x-coordinate, x-offset, y-offset]
- * TODO: x-coordinate: The x coordinate of the source
+ * Bezier config is a tuple of 3 numbers
+ * [y-coordinate, x-offset, y-offset]
  * y-coordinate: The y coordinate of the source
  * x-offset: The horizontal shift of the control point from the source
  * y-offset: The vertical shift from the control point from the source
  */
-type BezierConfig = [number, number, number, number]; // TODO: x-coordinate: The x coordinate of the source
+type BezierConfig = [number, number, number]; // [y-coordinate, x-offset, y-offset]
 
 export interface WaveConfig {
     left: BezierConfig;
@@ -30,6 +29,7 @@ export interface WaveConfig {
 export interface WaveAnimation {
     featheredOut?: 'top' | 'bottom' | 'both';
     strokeStyle?: string;
+    strokeWidth?: number;
     fill: string;
     configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
@@ -41,26 +41,27 @@ export interface WaveAnimation {
 const defaultCurveConfig: WaveAnimation = {
     featheredOut: 'top',
     strokeStyle: '#fff',
+    strokeWidth: 0.4,
     fill: 'rgba(0,0,0,0.1)',
     configs: [
         {
-            right: [0, 0.2, 0.9, -0.8],
-            left: [0, 0.7, 0.6, 0.9],
+            right: [0.2, 0.9, -0.8],
+            left: [0.7, 0.6, 0.9],
         },
         {
-            right: [0, 0.2, 0.9, -0.5],
-            left: [0, 0.7, 0.6, 0.6],
+            right: [0.2, 0.9, -0.5],
+            left: [0.7, 0.6, 0.6],
         },
         {
-            right: [0, 0.2, 0.9, -0.2],
-            left: [0, 0.7, 0.6, 0.3],
+            right: [0.2, 0.9, -0.2],
+            left: [0.7, 0.6, 0.3],
         },
     ],
     scrollOffset: ['start 80%', 'end 90%'],
 };
 
 function lerpBezier(start: BezierConfig, end: BezierConfig, t: number): BezierConfig {
-    return [lerp(start[0], end[0], t), lerp(start[1], end[1], t), lerp(start[2], end[2], t), lerp(start[3], end[3], t)];
+    return [lerp(start[0], end[0], t), lerp(start[1], end[1], t), lerp(start[2], end[2], t)];
 }
 
 function lerpBeziers(start: WaveConfig, end: WaveConfig, t: number): WaveConfig {
@@ -87,13 +88,13 @@ function drawWavePath(
     // Draw main wave
 
     const leftX = 0; // todo: config.left[0] * width;
-    const leftY = config.left[1] * height;
-    const leftXOffset = config.left[2] * width;
-    const leftYOffset = config.left[3] * height;
+    const leftY = config.left[0] * height;
+    const leftXOffset = config.left[1] * width;
+    const leftYOffset = config.left[2] * height;
     const rightX = width; // todo:  - config.right[0] * width;
-    const rightY = config.right[1] * height;
-    const rightXOffset = config.right[2] * width;
-    const rightYOffset = config.right[3] * height;
+    const rightY = config.right[0] * height;
+    const rightXOffset = config.right[1] * width;
+    const rightYOffset = config.right[2] * height;
 
     ctx.beginPath();
     ctx.moveTo(leftX, 0);
@@ -189,8 +190,8 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
         // Set styles for drawing.
         ctx.fillStyle = fillStyle;
-        ctx.strokeStyle = curveConfig.strokeStyle ?? 'white';
-        ctx.lineWidth = 0.4;
+        ctx.strokeStyle = curveConfig.strokeStyle ?? defaultCurveConfig.strokeStyle!;
+        ctx.lineWidth = curveConfig.strokeWidth ?? defaultCurveConfig.strokeWidth!;
         // ctx.setLineDash([4, 8]);
 
         drawWavePath(

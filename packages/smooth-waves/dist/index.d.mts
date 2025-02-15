@@ -9,14 +9,13 @@ type ProgressIntersection = [number, number];
 type Intersection = `${Edge} ${Edge}`;
 type ScrollOffset = Array<Edge | Intersection | ProgressIntersection>;
 /**
- * Bezier config is an tuple of 3 numbers
- * [y-coordinate, x-coordinate, x-offset, y-offset]
- * TODO: x-coordinate: The x coordinate of the source
+ * Bezier config is a tuple of 3 numbers
+ * [y-coordinate, x-offset, y-offset]
  * y-coordinate: The y coordinate of the source
  * x-offset: The horizontal shift of the control point from the source
  * y-offset: The vertical shift from the control point from the source
  */
-type BezierConfig = [number, number, number, number];
+type BezierConfig = [number, number, number];
 interface WaveConfig {
     left: BezierConfig;
     right: BezierConfig;
@@ -24,6 +23,7 @@ interface WaveConfig {
 interface WaveAnimation {
     featheredOut?: 'top' | 'bottom' | 'both';
     strokeStyle?: string;
+    strokeWidth?: number;
     fill: string;
     configs: WaveConfig[];
     scrollOffset?: ScrollOffset;

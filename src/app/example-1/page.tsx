@@ -9,54 +9,76 @@ export const dynamic = 'force-static';
 export default function Home() {
     return (
         <div className="relative min-h-screen bg-white-washed-dark max-w-full  overflow-x-hidden">
-            <div className=" relative z-10 py-16 px-24 mx-auto mt-[500px] mb-[500px] overflow-hidden rounded-3xl max-w-screen-xl flex flex-col justify-end border border-ui-border/20 bg-white-washed rounded-[48px] shadow-2xl shadow-ui-shadow/10">
+            <div className=" relative z-10 py-16 px-24 mx-auto mt-[500px] mb-[500px] overflow-hidden max-w-screen-xl flex flex-col justify-end border border-ui-border/20 bg-white-washed rounded-[48px] shadow-2xl shadow-ui-shadow/10">
                 {/* <div
                     className="absolute -left-1/2 -top-1/3 w-full h-full"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
+                        background: 'radia
+                        l-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
                 /> */}
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
-                            fill: 'hsl(160 10% 16%)',
-                            strokeStyle: 'rgba(255,255,255,.6)',
-                            curveAmount: 20,
+                            fill: 'transparent',
+                            strokeStyle: 'hsl(160 10% 16%)',
+                            curveAmount: 12,
                             offsetLeft: -32,
-                            offsetRight: -8,
+                            offsetRight: -62,
                             configs: [
                                 {
-                                    left: [0, 1, 0.3, -0.6],
-                                    right: [0, 0, 0.3, 0.6],
+                                    left: [1.8, 0.2, -1.6],
+                                    right: [1.4, 0.3, -1.9],
                                 },
                                 {
-                                    left: [0, 0, 0.3, 0.6],
-                                    right: [0, 1, 0.3, -0.6],
+                                    left: [2.6, 0.1, -0.4],
+                                    right: [1.4, 0.5, -0.8],
                                 },
                             ],
-                            scrollOffset: ['start start', '60% end'],
+                            scrollOffset: ['start 50%', 'start start'],
                         }}
                     />
                     <Wave
                         waveConfig={{
-                            fill: 'transparent',
+                            fill: 'hsl(160 10% 16%)',
                             strokeStyle: 'hsl(35 15% 62%)',
                             curveAmount: 12,
                             offsetLeft: -32,
                             offsetRight: -8,
                             configs: [
                                 {
-                                    left: [0.5, 0.8, -0.3, -0.6],
-                                    right: [0, 0.1, 0.3, 0.6],
+                                    left: [2.2, 0.3, -1.6],
+                                    right: [1.2, 0.1, -1.9],
                                 },
                                 {
-                                    left: [0.5, 0.1, -0.8, 0.6],
-                                    right: [0, 0.9, 0.3, -0.6],
+                                    left: [1.2, 0.3, -2.6],
+                                    right: [1.2, 0.1, -2.9],
+                                },
+                            ],
+                            scrollOffset: ['start 50%', 'start start'],
+                        }}
+                    />
+
+                    {/* <Wave
+                        waveConfig={{
+                            fill: 'transparent',
+                            strokeStyle: 'hsl(160 10% 16%)',
+                            curveAmount: 20,
+                            offsetLeft: -62,
+                            offsetRight: -80,
+                            configs: [
+                                {
+                                    left: [-2, 0.8, 2.6],
+                                    right: [1.2, 0.3, -1.6],
+                                },
+                                {
+                                    left: [-1.2, 0.8, 0.6],
+                                    right: [3, 0.5, -0.6],
                                 },
                             ],
                             scrollOffset: ['start start', '60% end'],
                         }}
-                    />
+                    /> */}
                 </div>
                 <MotionDiv className="grid grid-cols-8 gap-4 pb-1 pt-72">
                     <h1 className="relative z-20 text-lg leading-1 font-bold col-span-3 flex flex-col col-start-7 gap-6 text-black-washed">
@@ -72,7 +94,12 @@ export default function Home() {
                 </MotionDiv>
             </div>
 
-            <div className=" relative py-56  flex flex-col justify-center">
+            <div
+                className=" relative py-56  flex flex-col justify-center bg-3a-green"
+                style={{
+                    mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)',
+                }}
+            >
                 {/* <div
                     className="absolute -right-1/2 -top-1/4 w-full h-full opacity-30"
                     style={{
@@ -90,23 +117,24 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
-                            fill: 'hsl(155 85% 62%)',
-                            strokeStyle: 'rgba(0,0,0,1)',
+                            fill: 'hsl(150 86.5% 59.4%)',
+                            strokeStyle: 'hsl(165 5% 72%)',
+                            strokeWidth: 2,
                             curveAmount: 20,
                             offsetLeft: -8,
                             offsetRight: -24,
                             configs: [
                                 {
-                                    left: [0, 0, 0.7, 0],
-                                    right: [0, 0.5, 0.2, 0.6],
+                                    left: [0, 0.7, 0],
+                                    right: [0.5, 0.2, 0.6],
                                 },
                                 {
-                                    left: [0, 0, 0.6, 0],
-                                    right: [0, 0.5, 0.2, 0],
+                                    left: [0, 0.6, 0],
+                                    right: [0.5, 0.2, 0],
                                 },
                                 {
-                                    left: [0, 1, 0.3, -0.2],
-                                    right: [0, 1, 0.3, -0.2],
+                                    left: [1, 0.3, -0.2],
+                                    right: [1, 0.3, -0.2],
                                 },
                             ],
                             scrollOffset: ['start 70%', '100% 30%'],
@@ -133,24 +161,24 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
-                            featheredOut: 'top',
-                            fill: 'hsl(165 5% 72%)',
-                            strokeStyle: 'rgba(0,0,0,1)',
+                            fill: 'hsl(150 86.5% 59.4%)',
+                            strokeStyle: 'hsl(165 5% 72%)',
+                            strokeWidth: 2,
                             curveAmount: 4,
                             offsetLeft: -24,
                             offsetRight: -7,
                             configs: [
                                 {
-                                    left: [0, 0.3, 0.5, 0.2],
-                                    right: [0, 0.1, 0.6, 0.2],
+                                    left: [0.3, 0.5, 0.2],
+                                    right: [0.1, 0.6, 0.2],
                                 },
                                 {
-                                    left: [0, 0.4, 0.3, -0.4],
-                                    right: [0, 0.6, 0.2, -0.6],
+                                    left: [0.4, 0.3, -0.4],
+                                    right: [0.6, 0.2, -0.6],
                                 },
                                 {
-                                    left: [0, 1, 0.3, -0.3],
-                                    right: [0, 1, 0.2, -0.2],
+                                    left: [1, 0.3, -0.3],
+                                    right: [1, 0.2, -0.2],
                                 },
                             ],
                             scrollOffset: ['start 70%', '100% 30%'],
