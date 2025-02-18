@@ -35,7 +35,7 @@ export default function Home() {
                                     right: [1.4, 0.5, -0.8],
                                 },
                             ],
-                            scrollOffset: ['start 50%', 'start start'],
+                            scrollOffset: ['start 50%', 'start -10%'],
                         }}
                     />
                     <Wave
@@ -58,44 +58,23 @@ export default function Home() {
                             scrollOffset: ['start 50%', 'start start'],
                         }}
                     />
-
-                    {/* <Wave
-                        waveConfig={{
-                            fill: 'transparent',
-                            strokeStyle: 'hsl(160 10% 16%)',
-                            curveAmount: 20,
-                            offsetLeft: -62,
-                            offsetRight: -80,
-                            configs: [
-                                {
-                                    left: [-2, 0.8, 2.6],
-                                    right: [1.2, 0.3, -1.6],
-                                },
-                                {
-                                    left: [-1.2, 0.8, 0.6],
-                                    right: [3, 0.5, -0.6],
-                                },
-                            ],
-                            scrollOffset: ['start start', '60% end'],
-                        }}
-                    /> */}
                 </div>
                 <MotionDiv className="grid grid-cols-8 gap-4 pb-1 pt-72">
                     <h1 className="relative z-20 text-lg leading-1 font-bold col-span-3 flex flex-col col-start-7 gap-6 text-black-washed">
                         <span className="">
-                            ai empowered <br />
-                            enthusiasm
+                            fluid motion <br />
+                            in design
                         </span>
                         <span>
-                            leveraging
-                            <br /> your business
+                            waves that
+                            <br /> shape space
                         </span>
                     </h1>
                 </MotionDiv>
             </div>
 
             <div
-                className=" relative py-56  flex flex-col justify-center bg-3a-green"
+                className=" relative py-56  flex flex-col justify-center "
                 style={{
                     mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)',
                 }}
@@ -115,6 +94,33 @@ export default function Home() {
                 /> */}
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
+                        waveConfig={{
+                            // featheredOut: 'bottom',
+                            flip: true,
+                            fill: 'hsl(150 86.5% 59.4%)',
+                            strokeStyle: 'hsl(165 5% 72%)',
+                            strokeWidth: 2,
+                            curveAmount: 20,
+                            offsetLeft: 8,
+                            offsetRight: 24,
+                            configs: [
+                                {
+                                    left: [0, 0.7, 0],
+                                    right: [0.5, 0.2, 0.6],
+                                },
+                                {
+                                    left: [0, 0.6, 0],
+                                    right: [0.5, 0.2, 0],
+                                },
+                                {
+                                    left: [1, 0.3, -0.2],
+                                    right: [1, 0.3, -0.2],
+                                },
+                            ],
+                            scrollOffset: ['start 50%', 'start -10%'],
+                        }}
+                    />
+                    {/* <Wave
                         waveConfig={{
                             featheredOut: 'top',
                             fill: 'hsl(150 86.5% 59.4%)',
@@ -139,19 +145,19 @@ export default function Home() {
                             ],
                             scrollOffset: ['start 70%', '100% 30%'],
                         }}
-                    />
+                    /> */}
                 </div>
                 <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4 ">
                     <div className="relative col-start-3 col-span-2 flex flex-col gap-8 text-black-washed">
-                        <h2 className=" text-4xl leading-1 font-bold">change has come</h2>
+                        <h2 className=" text-4xl leading-1 font-bold">flow meets function</h2>
                         <p className="">
-                            We believe that the careful alignment of efficiency and standards can carve out space for
-                            genuine human expression, meaningful design, and enduring value. Our technology —
-                            particularly AI — streamlines processes lorem ipsum.
+                            Discover how organic wave animations can transform static layouts into dynamic experiences.
+                            Our wave components bring subtle motion and depth to your interfaces, creating a natural
+                            rhythm that guides the users&apos;s journey.
                         </p>
                         <p>
-                            By minimizing complexity that doesn&apos;t serve a real purpose, we create an environment
-                            where creativity, empathy, and intellectual depth can naturally unfold.
+                            By combining mathematical precision with visual fluidity, we create wave patterns that
+                            respond naturally to user interaction while maintaining performance and accessibility.
                         </p>
                     </div>
                 </MotionDiv>
@@ -161,6 +167,7 @@ export default function Home() {
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
+                            // featheredOut: 'top',
                             fill: 'hsl(150 86.5% 59.4%)',
                             strokeStyle: 'hsl(165 5% 72%)',
                             strokeWidth: 2,
@@ -169,19 +176,19 @@ export default function Home() {
                             offsetRight: -7,
                             configs: [
                                 {
-                                    left: [0.3, 0.5, 0.2],
-                                    right: [0.1, 0.6, 0.2],
+                                    left: [1, 0.3, -0.3],
+                                    right: [1, 0.2, -0.2],
                                 },
                                 {
                                     left: [0.4, 0.3, -0.4],
                                     right: [0.6, 0.2, -0.6],
                                 },
                                 {
-                                    left: [1, 0.3, -0.3],
-                                    right: [1, 0.2, -0.2],
+                                    left: [0.6, 0.5, -0.2],
+                                    right: [0.7, 0.6, -0.2],
                                 },
                             ],
-                            scrollOffset: ['start 70%', '100% 30%'],
+                            scrollOffset: ['start 50%', 'start -10%'],
                         }}
                     />
                 </div>

@@ -47,12 +47,12 @@ export default function Home() {
                 <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
                     <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
                         <span className="">
-                            ai empowered <br />
-                            enthusiasm
+                            dynamic waves <br />
+                            in motion
                         </span>
                         <span>
-                            leveraging
-                            <br /> your business
+                            shaping
+                            <br /> your interface
                         </span>
                     </h1>
                 </MotionDiv>
@@ -102,15 +102,16 @@ export default function Home() {
                 </div>
                 <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4">
                     <div className="relative col-start-3 col-span-2 flex flex-col gap-8">
-                        <h2 className=" text-4xl leading-1 font-bold">change has come</h2>
+                        <h2 className=" text-4xl leading-1 font-bold">design in motion</h2>
                         <p className="">
-                            We believe that the careful alignment of efficiency and standards can carve out space for
-                            genuine human expression, meaningful design, and enduring value. Our technology —
-                            particularly AI — streamlines processes lorem ipsum.
+                            We believe that the interplay of waves and motion can transform static interfaces into
+                            living, breathing experiences. Our wave components create natural rhythms that guide users
+                            through your content with elegance and purpose.
                         </p>
                         <p>
-                            By minimizing complexity that doesn&apos;t serve a real purpose, we create an environment
-                            where creativity, empathy, and intellectual depth can naturally unfold.
+                            By carefully orchestrating these fluid animations, we create spaces where visual harmony and
+                            functional design naturally converge, enhancing user engagement without sacrificing
+                            performance.
                         </p>
                     </div>
                 </MotionDiv>

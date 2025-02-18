@@ -36,6 +36,7 @@ export interface WaveAnimation {
     curveAmount?: number;
     offsetLeft?: number;
     offsetRight?: number;
+    flip?: boolean;
 }
 
 const defaultCurveConfig: WaveAnimation = {
@@ -84,21 +85,21 @@ function drawWavePath(
     lineOffsetRight = 0,
     width: number,
     height: number,
+    flip = false,
 ) {
     // Draw main wave
-
-    const leftX = 0; // todo: config.left[0] * width;
-    const leftY = config.left[0] * height;
+    const leftX = 0;
+    const leftY = flip ? height - config.left[0] * height : config.left[0] * height;
     const leftXOffset = config.left[1] * width;
     const leftYOffset = config.left[2] * height;
-    const rightX = width; // todo:  - config.right[0] * width;
-    const rightY = config.right[0] * height;
+    const rightX = width;
+    const rightY = flip ? height - config.right[0] * height : config.right[0] * height;
     const rightXOffset = config.right[1] * width;
     const rightYOffset = config.right[2] * height;
 
     ctx.beginPath();
-    ctx.moveTo(leftX, 0);
-    ctx.lineTo(rightX, 0);
+    ctx.moveTo(leftX, flip ? height : 0);
+    ctx.lineTo(rightX, flip ? height : 0);
     ctx.lineTo(rightX, rightY);
 
     // Main curve
@@ -202,6 +203,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             curveConfig.offsetRight ?? 0,
             canvas.width / dpr,
             canvas.height / dpr,
+            curveConfig.flip ?? false,
         );
     };
 

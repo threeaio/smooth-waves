@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-export function NavBar() {
+export function NavBarLight() {
     const pathname = usePathname();
 
     const links = [
@@ -14,7 +14,7 @@ export function NavBar() {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50">
-            <div className="  border-b  absolute top-0 inset-x-2 grid border border-ui-border  bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom/90  to-ui-gradient-top/100 backdrop-blur  rounded-b-[48px] ">
+            <div className="  ">
                 <div className="relative flex items-center justify-between px-16 py-8">
                     <Link href="/">
                         <Image src="/logo_triangle.svg" width={160} height={140} alt="logo" />
