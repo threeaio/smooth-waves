@@ -13,9 +13,9 @@ export function NavBarLight() {
     ];
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50">
+        <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
             <div className="  ">
-                <div className="relative flex items-center justify-between px-16 py-8">
+                <div className="relative flex items-center justify-between px-16 py-8 ">
                     <Link href="/">
                         <Image src="/logo_triangle.svg" width={160} height={140} alt="logo" />
                     </Link>
@@ -25,7 +25,7 @@ export function NavBarLight() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`text-white-washed-dark hover:text-white transition-colors text-xs uppercase p-2 ${
+                                className={` transition-colors text-xs uppercase p-2  ${
                                     pathname === link.href ? 'text-3a-green' : ''
                                 }`}
                             >

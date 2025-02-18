@@ -38,7 +38,7 @@ export default function Home() {
                                 },
                                 {
                                     left: [0.6, 0.3, 0],
-                                    right: [0.9, 0.6, 0],
+                                    right: [0.9, 0.6, 1],
                                 },
                             ],
                             scrollOffset: ['start start', 'end 50%'],
@@ -68,7 +68,7 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="relative z-10 pb-48 grid grid-cols-8 grid-rows-2 gap-12 text-xs">
+                <MotionDiv className="relative z-10 pb-48 grid grid-cols-8 grid-rows-2 gap-12 text-xs mix-blend-difference">
                     <div className="col-start-3 col-span-4">
                         machine
                         <br /> generated.
@@ -97,15 +97,15 @@ export default function Home() {
                             offsetRight: 24,
                             configs: [
                                 {
-                                    left: [0.55, 0.6, 0],
-                                    right: [0, 0.3, 0],
+                                    left: [0, 0.6, 0],
+                                    right: [0.3, 0.3, -0.2],
                                 },
                                 {
-                                    left: [0.5, 0.3, 0.6],
-                                    right: [0.6, 0.4, 0.4],
+                                    left: [0.9, 0.3, -0.6],
+                                    right: [0.94, 0.4, -0.8],
                                 },
                             ],
-                            scrollOffset: ['start start', 'end 50%'],
+                            scrollOffset: ['start end', 'end 50%'],
                         }}
                     />
                 </div>
