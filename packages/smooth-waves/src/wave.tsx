@@ -40,7 +40,6 @@ export interface WaveAnimation {
 }
 
 const defaultCurveConfig: WaveAnimation = {
-    featheredOut: 'top',
     strokeStyle: '#fff',
     strokeWidth: 0.4,
     fill: 'rgba(0,0,0,0.1)',
@@ -58,7 +57,7 @@ const defaultCurveConfig: WaveAnimation = {
             left: [0.7, 0.6, 0.3],
         },
     ],
-    scrollOffset: ['start 80%', 'end 90%'],
+    scrollOffset: ['end end', 'start start'],
 };
 
 function lerpBezier(start: BezierConfig, end: BezierConfig, t: number): BezierConfig {

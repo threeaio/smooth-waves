@@ -101,8 +101,8 @@ export default function Home() {
                                     right: [0.3, 0.3, -0.2],
                                 },
                                 {
-                                    left: [0.9, 0.3, -0.6],
-                                    right: [0.94, 0.4, -0.8],
+                                    left: [0.9, 0.3, -0.5],
+                                    right: [0.94, 0.4, -0.6],
                                 },
                             ],
                             scrollOffset: ['start end', 'end 50%'],
