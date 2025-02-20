@@ -1,7 +1,7 @@
 'use client';
 import { useAnimationFrame, useScroll, useSpring } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
-import { lerp, remap } from '@threeaio/utils/math';
+import { lerp, clamp } from '@threeaio/utils/math';
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
 type EdgeUnit = `${number}${SupportedEdgeUnit}`;
@@ -37,6 +37,7 @@ export interface WaveAnimation {
     offsetLeft?: number;
     offsetRight?: number;
     flip?: boolean;
+    debug?: boolean;
 }
 
 const defaultCurveConfig: WaveAnimation = {
@@ -59,6 +60,71 @@ const defaultCurveConfig: WaveAnimation = {
     ],
     scrollOffset: ['end end', 'start start'],
 };
+
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
+    const t2 = t * t;
+    const t3 = t2 * t;
+
+    return (
+        (-t3 + 2 * t2 - t) * p0 * 0.5 +
+        (3 * t3 - 5 * t2 + 2) * p1 * 0.5 +
+        (-3 * t3 + 4 * t2 + t) * p2 * 0.5 +
+        (t3 - t2) * p3 * 0.5
+    );
+}
+
+function interpolateSequence(points: number[], t: number): number {
+    if (points.length === 0) return 0;
+    if (points.length === 1) return points[0];
+
+    // Clamp t to [0, 1]
+    t = clamp(0, 1, t);
+
+    // For t = 1, return the last point
+    if (t === 1) return points[points.length - 1];
+
+    // Extend points array with better boundary handling
+    const extendedPoints = [
+        points[0], // First control point
+        ...points, // Original points
+        points[points.length - 1], // Last control point
+    ];
+
+    // Calculate segment index
+    const segments = points.length - 1;
+    const segmentT = t * segments;
+    const segment = Math.floor(segmentT);
+    const localT = segmentT - segment;
+
+    // Get the four points needed for interpolation
+    const p0 = extendedPoints[segment];
+    const p1 = extendedPoints[segment + 1];
+    const p2 = extendedPoints[segment + 2];
+    const p3 = extendedPoints[Math.min(segment + 3, extendedPoints.length - 1)];
+
+    return catmullRom(p0, p1, p2, p3, localT);
+}
+
+function interpolateBezierConfig(configs: BezierConfig[], t: number): BezierConfig {
+    // Extract individual components into separate arrays
+    const yCoords = configs.map((c) => c[0]);
+    const xOffsets = configs.map((c) => c[1]);
+    const yOffsets = configs.map((c) => c[2]);
+
+    // Interpolate each component separately
+    return [interpolateSequence(yCoords, t), interpolateSequence(xOffsets, t), interpolateSequence(yOffsets, t)];
+}
+
+function interpolateWaveConfig(configs: WaveConfig[], t: number): WaveConfig {
+    // Extract left and right configs separately
+    const leftConfigs = configs.map((c) => c.left);
+    const rightConfigs = configs.map((c) => c.right);
+
+    return {
+        left: interpolateBezierConfig(leftConfigs, t),
+        right: interpolateBezierConfig(rightConfigs, t),
+    };
+}
 
 function lerpBezier(start: BezierConfig, end: BezierConfig, t: number): BezierConfig {
     return [lerp(start[0], end[0], t), lerp(start[1], end[1], t), lerp(start[2], end[2], t)];
@@ -133,16 +199,13 @@ function drawWavePath(
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    // const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
-
-    // const easingFunction = easeOut;
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: curveConfig.scrollOffset,
     });
 
-    const smoothProgress = useSpring(scrollYProgress, { damping: 15, mass: 0.27, stiffness: 55 });
+    const smoothProgress = useSpring(scrollYProgress, { damping: 80, mass: 0.27, stiffness: 250 });
 
     const [dpr, setDpr] = useState(1);
 
@@ -206,42 +269,38 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         );
     };
 
+    const drawDebug = (canvas: HTMLCanvasElement, scrollProgress: number) => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.font = '12px monospace';
+        ctx.fillStyle = '#f00';
+        ctx.fillText(
+            scrollProgress.toFixed(3),
+            canvas.width / dpr - 50,
+            clamp(20, canvas.height / dpr, (scrollProgress * canvas.height) / dpr),
+        );
+    };
+
     // Modified animation frame handling
     useAnimationFrame(() => {
-        const sp = Math.max(0, Math.min(1, smoothProgress.get()));
+        const sp = clamp(0, 1, smoothProgress.get());
         const configCount = curveConfig.configs.length;
 
-        // If only one config is provided, use it directly without interpolation
-        const targetConfig =
-            configCount === 1
-                ? curveConfig.configs[0]
-                : (() => {
-                      if (configCount === 2) {
-                          // Special case: always interpolate between first and last
-                          return lerpBeziers(curveConfig.configs[0], curveConfig.configs[1], sp);
-                      }
+        const targetConfig = (() => {
+            // Handle special cases
+            if (configCount <= 1) return curveConfig.configs[0];
+            if (configCount === 2) return lerpBeziers(curveConfig.configs[0], curveConfig.configs[1], sp);
 
-                      // For 3+ configs:
-                      const segmentSize = 1 / (configCount - 1);
-                      const segmentIndex = Math.min(Math.floor(sp / segmentSize), configCount - 2);
-                      const segmentProgress = remap(
-                          segmentIndex * segmentSize,
-                          (segmentIndex + 1) * segmentSize,
-                          0,
-                          1,
-                          sp,
-                      );
-
-                      // Get the two configs to interpolate between
-                      //   console.log('segmentIndex', segmentIndex, configCount);
-                      const startConfig = curveConfig.configs[segmentIndex];
-                      const endConfig = curveConfig.configs[segmentIndex + 1];
-
-                      // Calculate target configuration
-                      return lerpBeziers(startConfig, endConfig, segmentProgress);
-                  })();
+            // Use Catmull-Rom interpolation for 3+ configs
+            return interpolateWaveConfig(curveConfig.configs, sp);
+        })();
 
         drawWave(canvasRef.current, targetConfig, curveConfig.fill ?? defaultCurveConfig.fill!);
+
+        // Draw debug info if enabled
+        if (curveConfig.debug && canvasRef.current) {
+            drawDebug(canvasRef.current, sp);
+        }
     });
 
     return (
