@@ -31,6 +31,7 @@ interface WaveAnimation {
     offsetLeft?: number;
     offsetRight?: number;
     flip?: boolean;
+    debug?: boolean;
 }
 declare function Wave({ waveConfig: curveConfig }: {
     waveConfig?: WaveAnimation;
