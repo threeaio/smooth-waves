@@ -9,7 +9,7 @@ export const dynamic = 'force-static';
 export default function Home() {
     return (
         <div className="relative min-h-screen bg-white-washed-dark max-w-full  overflow-x-hidden">
-            <div className=" relative pb-72 flex flex-col justify-center items-center ">
+            <div className=" relative pb-32 flex flex-col justify-center items-center ">
                 <Wave
                     waveConfig={{
                         fill: 'hsl(0 0% 85%)',
@@ -47,7 +47,7 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className=" relative z-10 py-16 px-24 w-9/12 overflow-hidden max-w-screen-xl flex flex-col justify-end border border-ui-border/20 bg-white-washed rounded-[32px] shadow-2xl shadow-ui-shadow/10">
+                {/* <div className=" relative z-10 py-16 px-24 w-9/12 overflow-hidden max-w-screen-xl flex flex-col justify-end border border-ui-border/20 bg-white-washed rounded-[32px] shadow-2xl shadow-ui-shadow/10">
                     <div className="absolute left-0 top-0 w-full h-full ">
                         <Wave
                             waveConfig={{
@@ -90,15 +90,62 @@ export default function Home() {
                             </span>
                         </h1>
                     </div>
-                </div>
+                </div> */}
             </div>
 
-            <div
-                className=" relative py-56  flex flex-col justify-center "
-                // style={{
-                //     mask: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)',
-                // }}
-            >
+            <div className="relative py-56 pb-[500px]">
+                <Wave
+                    waveConfig={{
+                        fill: 'rgba(20, 20, 55, 0.1)',
+                        featheredOut: 'top',
+                        debug: true,
+                        strokeStyle: 'hsl(35 15% 12%)',
+                        curveAmount: 3,
+                        strokeWidth: 0.4,
+                        offsetLeft: 24,
+                        offsetRight: 108,
+                        scrollOffset: ['start end', 'end 10%'],
+                        configs: [
+                            {
+                                left: [0.1, 0.3, 0.1],
+                                right: [0, 0.3, -0.2],
+                            },
+                            {
+                                left: [0.5, 0.3, 0.2],
+                                right: [0.2, 0.3, 0.2],
+                            },
+                        ],
+                    }}
+                />
+                {/* <div className="relative grid grid-cols-2 gap-px max-w-screen-xl mx-auto rounded-3xl overflow-hidden opacity-95">
+                    <div className="relative rounded-0 overflow-hidden aspect-square bg-black-washed">
+                        <Image
+                            className="object-cover opacity-50 filter saturate-0"
+                            src="/Solitude in Modern Architecture.jpeg"
+                            alt="Image 1"
+                            fill
+                        />
+                    </div>
+                    <div className="relative rounded-0 overflow-hidden aspect-square bg-black-washed">
+                        <Image
+                            className="object-cover opacity-50 filter saturate-0"
+                            src="/Serenity in Curvilinear Modernity.jpeg"
+                            alt="Image 1"
+                            fill
+                        />
+                    </div>
+                    <div className="relative col-span-2 rounded-0 overflow-hidden aspect-[2/1] bg-black-washed">
+                        <Image
+                            className="object-cover object-[center_75%] opacity-50 filter saturate-0"
+                            src="/Architectural Elegance with Human Element.jpeg"
+                            alt="Image 1"
+                            fill
+                        />
+                    </div>
+                </div> */}
+            </div>
+
+            <div className=" relative py-56  flex flex-col justify-center ">
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
