@@ -13,7 +13,7 @@ export default function Home() {
         <div className="relative min-h-screen bg-gray-darkest-washed max-w-full  overflow-x-hidden">
             <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-end ">
                 <div
-                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-40"
+                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-60"
                     style={{
                         background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
@@ -22,7 +22,7 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
-                            strokeStyle: 'rgba(255,255,255,0.1)',
+                            strokeStyle: 'rgba(255,255,255,0.2)',
                             strokeWidth: 1,
                             fill: 'hsl(160 10% 16%)',
                             curveAmount: 1,
@@ -51,10 +51,12 @@ export default function Home() {
                         <h1 className="text-5xl text-white leading-1 font-bold ">
                             <span className="">smooth waves</span>
                         </h1>
-                        <p>A simple motion based animation component for React to create smooth, natural animations.</p>
+                        <p className="text-balance">
+                            A simple motion based react-component to create smooth, scroll-based wave animations.
+                        </p>
                     </div>
                     <div className="col-span-3 col-start-5 flex flex-row gap-8 items-center">
-                        <ReactIcon className="size-10" />
+                        <ReactIcon className="size-10 text-white-washed" />
                         <MotionIcon className="size-16" />
                     </div>
                 </MotionDiv>
@@ -62,7 +64,7 @@ export default function Home() {
 
             <div className=" relative py-56  flex flex-col justify-center">
                 <div
-                    className="absolute -right-1/2 -top-1/3 rotate-12 w-[140%] h-full opacity-40"
+                    className="absolute -right-1/2 -top-1/3 rotate-12 w-[140%] h-full opacity-60"
                     style={{
                         background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
@@ -72,7 +74,7 @@ export default function Home() {
                         waveConfig={{
                             featheredOut: 'top',
                             fill: 'hsl(160 10% 16%)',
-                            strokeStyle: 'rgba(255,255,255,0.1)',
+                            strokeStyle: 'rgba(255,255,255,0.2)',
                             strokeWidth: 1,
                             curveAmount: 1,
                             offsetLeft: -42,
@@ -85,6 +87,33 @@ export default function Home() {
                                 {
                                     left: [0, 0.6, 0],
                                     right: [0.5, 0.2, 0],
+                                },
+                                {
+                                    left: [0.9, 0.3, -0.22],
+                                    right: [0.8, 0.3, -0.22],
+                                },
+                            ],
+                            scrollOffset: ['start 70%', '100% 30%'],
+                        }}
+                    />
+
+                    <Wave
+                        waveConfig={{
+                            featheredOut: 'bottom',
+                            fill: 'transparent',
+                            strokeStyle: 'rgba(255,255,255,0.2)',
+                            strokeWidth: 1,
+                            curveAmount: 1,
+                            offsetLeft: -42,
+                            offsetRight: -8,
+                            configs: [
+                                {
+                                    left: [0.1, 0.7, 0],
+                                    right: [0.6, 0.2, 0.6],
+                                },
+                                {
+                                    left: [0.3, 0.6, 0],
+                                    right: [0.6, 0.2, 0],
                                 },
                                 {
                                     left: [1, 0.3, -0.2],
@@ -102,7 +131,7 @@ export default function Home() {
 
             <div className=" relative  py-56 flex flex-col justify-center bg-gray-darkest-washed">
                 <div
-                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-40"
+                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-60"
                     style={{
                         background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
@@ -111,7 +140,7 @@ export default function Home() {
                     waveConfig={{
                         flip: true,
                         fill: 'hsl(165 5% 72%)',
-                        strokeStyle: 'rgba(255,255,255,.1)',
+                        strokeStyle: 'rgba(255,255,255,.2)',
                         strokeWidth: 1,
                         curveAmount: 0.4,
                         offsetLeft: -8,
