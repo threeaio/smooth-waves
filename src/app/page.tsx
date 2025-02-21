@@ -46,8 +46,8 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
-                    <div className="relative z-20 col-span-3 col-start-5 flex flex-col gap-6">
+                <MotionDiv className="relative z-20 grid xl:grid-cols-8 gap-4 pb-32">
+                    <div className=" xl:col-span-3 xl:col-start-5 flex flex-col gap-6">
                         <h1 className="text-5xl text-white leading-1 font-bold ">
                             <span className="">smooth waves</span>
                         </h1>
@@ -55,7 +55,7 @@ export default function Home() {
                             A simple motion based react-component to create smooth, scroll-based wave animations.
                         </p>
                     </div>
-                    <div className="col-span-3 col-start-5 flex flex-row gap-8 items-center">
+                    <div className="xl:col-span-3 xl:col-start-5 flex flex-row gap-8 items-center">
                         <ReactIcon className="size-10 text-white-washed" />
                         <MotionIcon className="size-16" />
                     </div>
@@ -124,8 +124,8 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="relative  z-10 p-4 md:p-12 xl:p-24 grid grid-cols-8 gap-4">
-                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto" />
+                <MotionDiv className="relative p-2 z-10 grid grid-cols-8 gap-4">
+                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-2xl " />
                 </MotionDiv>
             </div>
 

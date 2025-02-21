@@ -10,7 +10,7 @@ export const CardEmphased = ({ className, children }: CardEmphasedProps) => {
     return (
         <div
             className={cn(
-                'relative border border-ui-border px-5 py-4 md:p-8 xl:p-12 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom to-ui-gradient-top rounded-huge md:rounded-full shadow-xl shadow-ui-shadow/20 overflow-hidden',
+                'relative border border-ui-border px-5 py-8 md:p-8 xl:p-12 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom to-ui-gradient-top rounded-huge md:rounded-full shadow-2xl shadow-ui-shadow/80 overflow-hidden',
                 className,
             )}
         >

@@ -12,10 +12,10 @@ export const InstallationInfo = ({ className }: InstallationInfoProps) => {
         <CardEmphased className={className}>
             <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
                 <div className="flex items-baseline gap-4 flex-col sm:flex-row">
-                    <code className="font-mono text-white-washed py-2 px-4 rounded-full bg-black-washed border border-ui-border">
+                    <code className="font-mono text-white-washed py-2 px-4 rounded-full bg-black-washed/60 border border-ui-border">
                         npm install <span className="text-3a-green">@threeaio/smooth-waves</span>
                     </code>
-                    <div className="flex items-center gap-1">
+                    <div className="flex w-full sm:w-auto items-center gap-1 justify-center md:justify-start">
                         <Pill>v0.1.3</Pill>
                         <Pill variant="warning">alpha</Pill>
                     </div>
