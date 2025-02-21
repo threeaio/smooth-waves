@@ -13,12 +13,16 @@ export default {
         sans: ['var(--font-geist-sans)'],
         mono: ['var(--font-geist-mono)'],
       },
+      borderRadius: {
+        'huge': '4rem',
+      },
       fontWeight: {
         bold: '500',
         normal: '300',
       },
       colors: {
         '3a-green': 'hsl(var(--3a-green))',
+        '3a-red': 'hsl(var(--3a-red))',
         'black-washed': 'hsl(var(--black-washed))',
         'gray-darkest-washed': 'hsl(var(--gray-darkest-washed))',
         'white-washed': 'hsl(var(--white-washed))',

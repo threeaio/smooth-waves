@@ -1,8 +1,10 @@
 // 'use client';
-import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
 import { Wave } from '@/components/wave';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
+import { InstallationInfo } from '@/components/installation-info';
+import { ReactIcon } from '@/components/logos/react-icon';
+import { MotionIcon } from '@/components/logos/motion-icon';
 
 export const dynamic = 'force-static';
 
@@ -10,22 +12,22 @@ export default function Home() {
     return (
         <div className="relative min-h-screen bg-gray-darkest-washed max-w-full  overflow-x-hidden">
             <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-end ">
-                {/* <div
-                    className="absolute -left-1/2 -top-1/3 w-full h-full"
+                <div
+                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-40"
                     style={{
                         background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
-                /> */}
+                />
                 <div className="absolute left-0 top-0 w-full h-full ">
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
-                            strokeStyle: 'rgba(255,255,255,0.4)',
+                            strokeStyle: 'rgba(255,255,255,0.1)',
                             strokeWidth: 1,
                             fill: 'hsl(160 10% 16%)',
-                            curveAmount: 14,
-                            offsetLeft: -24,
-                            offsetRight: -8,
+                            curveAmount: 1,
+                            offsetLeft: -8,
+                            offsetRight: -42,
                             configs: [
                                 {
                                     left: [0.5, 0.2, 0.2],
@@ -45,43 +47,36 @@ export default function Home() {
                     />
                 </div>
                 <MotionDiv className="grid grid-cols-8 gap-4 pb-32">
-                    <h1 className="relative z-20 text-4xl leading-1 font-bold col-span-3 flex flex-col col-start-5 gap-6">
-                        <span className="">
-                            dynamic waves <br />
-                            in motion
-                        </span>
-                        <span>
-                            shaping
-                            <br /> your interface
-                        </span>
-                    </h1>
+                    <div className="relative z-20 col-span-3 col-start-5 flex flex-col gap-6">
+                        <h1 className="text-5xl text-white leading-1 font-bold ">
+                            <span className="">smooth waves</span>
+                        </h1>
+                        <p>A simple motion based animation component for React to create smooth, natural animations.</p>
+                    </div>
+                    <div className="col-span-3 col-start-5 flex flex-row gap-8 items-center">
+                        <ReactIcon className="size-10" />
+                        <MotionIcon className="size-16" />
+                    </div>
                 </MotionDiv>
             </div>
 
             <div className=" relative py-56  flex flex-col justify-center">
-                {/* <div
-                    className="absolute -right-1/2 -top-1/4 w-full h-full opacity-30"
+                <div
+                    className="absolute -right-1/2 -top-1/3 rotate-12 w-[140%] h-full opacity-40"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
+                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
-                /> */}
-                {/* <div
-                    className="absolute left-1/2 top-0 w-full h-1/2 opacity-70"
-                    style={{
-                        transform: 'translateX(-50%)',
-                        background: 'radial-gradient(ellipse at center, #322343 0%, transparent 70%)',
-                    }}
-                /> */}
+                />
                 <div className="absolute left-0 top-0 w-full h-full">
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
                             fill: 'hsl(160 10% 16%)',
-                            strokeStyle: 'rgba(255,255,255,0.4)',
+                            strokeStyle: 'rgba(255,255,255,0.1)',
                             strokeWidth: 1,
-                            curveAmount: 20,
-                            offsetLeft: -8,
-                            offsetRight: -24,
+                            curveAmount: 1,
+                            offsetLeft: -42,
+                            offsetRight: -8,
                             configs: [
                                 {
                                     left: [0, 0.7, 0],
@@ -100,77 +95,48 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="relative z-10 p-24 grid grid-cols-8 gap-4">
-                    <div className="relative col-start-3 col-span-2 flex flex-col gap-8">
-                        <h2 className=" text-4xl leading-1 font-bold">design in motion</h2>
-                        <p className="">
-                            We believe that the interplay of waves and motion can transform static interfaces into
-                            living, breathing experiences. Our wave components create natural rhythms that guide users
-                            through your content with elegance and purpose.
-                        </p>
-                        <p>
-                            By carefully orchestrating these fluid animations, we create spaces where visual harmony and
-                            functional design naturally converge, enhancing user engagement without sacrificing
-                            performance.
-                        </p>
-                    </div>
+                <MotionDiv className="relative  z-10 p-4 md:p-12 xl:p-24 grid grid-cols-8 gap-4">
+                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto" />
                 </MotionDiv>
             </div>
 
-            <div className=" relative  py-56 flex flex-col justify-center bg-white-washed-dark">
-                <div className="absolute left-0 top-0 w-full h-full">
-                    <Wave
-                        waveConfig={{
-                            fill: 'hsl(160 10% 16%)',
-                            strokeStyle: 'rgba(255,255,255,0.3)',
-                            strokeWidth: 1,
-                            curveAmount: 4,
-                            offsetLeft: -24,
-                            offsetRight: -7,
-                            configs: [
-                                {
-                                    left: [0.3, 0.5, 0.2],
-                                    right: [0.1, 0.6, 0.2],
-                                },
-                                {
-                                    left: [0.4, 0.3, -0.4],
-                                    right: [0.6, 0.2, -0.6],
-                                },
-                                {
-                                    left: [1, 0.3, -0.3],
-                                    right: [1, 0.2, -0.2],
-                                },
-                            ],
-                            scrollOffset: ['start 70%', '100% 30%'],
-                        }}
-                    />
-                </div>
-                {/* <div
-                    className="absolute z-10 -left-1/3 top-0 w-[200%] h-full rounded-full opacity-40"
+            <div className=" relative  py-56 flex flex-col justify-center bg-gray-darkest-washed">
+                <div
+                    className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-40"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #414795 0%, transparent 70%)',
+                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
-                /> */}
-                <MotionDiv className="relative  z-10 p-24 grid grid-cols-12 gap-12  ">
-                    <div className="relative col-span-8 col-start-3">
-                        {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
-                        {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
-                        <div className="relative grid grid-cols-8 border border-ui-border gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom  to-ui-gradient-top  rounded-full shadow-xl shadow-ui-shadow/20">
-                            <SkipBack className="size-4 mx-auto text-white-washed" />
-                            <Play className="size-4 mx-auto text-white-washed" />
-                            <SkipForward className="size-4 mx-auto text-white-washed" />
-                            <Volume2 className="size-4 mx-auto text-white-washed" />
-                            <Music2 className="size-4 mx-auto text-white-washed" />
-                            <Repeat className="size-4 mx-auto text-white-washed" />
-                            <Shuffle className="size-4 mx-auto text-white-washed" />
-                            <Settings className="size-4 mx-auto text-white-washed" />
-                        </div>
-                    </div>
-                </MotionDiv>
-            </div>
-            <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
-                <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
-                {/* <p className="text-center mt-6 text-lg font-mono text-[#1b191e]">solutions</p> */}
+                />
+                <Wave
+                    waveConfig={{
+                        flip: true,
+                        fill: 'hsl(165 5% 72%)',
+                        strokeStyle: 'rgba(255,255,255,.1)',
+                        strokeWidth: 1,
+                        curveAmount: 0.4,
+                        offsetLeft: -8,
+                        offsetRight: -64,
+                        configs: [
+                            {
+                                left: [0.8, 0.3, -0.3],
+                                right: [0.7, 0.2, -0.2],
+                            },
+                            {
+                                left: [0.6, 0.3, -0.5],
+                                right: [0.6, 0.3, -0.4],
+                            },
+                            {
+                                left: [0.4, 0.2, -0.3],
+                                right: [0.45, 0.3, -0.4],
+                            },
+                        ],
+                        scrollOffset: ['start 80%', 'end end'],
+                    }}
+                />
+                <div className="relative col-span-8 col-start-3 py-64">
+                    <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
+                    {/* <p className="text-center mt-6 text-lg font-mono text-[#1b191e]">solutions</p> */}
+                </div>
             </div>
         </div>
     );
