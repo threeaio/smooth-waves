@@ -16,7 +16,7 @@ export const InstallationInfo = ({ className }: InstallationInfoProps) => {
                         npm install <span className="text-3a-green">@threeaio/smooth-waves</span>
                     </code>
                     <div className="flex items-center gap-1">
-                        <Pill>v0.1.2</Pill>
+                        <Pill>v0.1.3</Pill>
                         <Pill variant="warning">alpha</Pill>
                     </div>
                 </div>

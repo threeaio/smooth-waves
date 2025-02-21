@@ -1,6 +1,6 @@
 # Smooth Waves
 
-A React component for creating beautiful, interactive wave animations that respond to scroll position. Perfect for creating engaging page transitions, section dividers, or decorative elements that respond to user scrolling.
+A React component for creating beautiful, interactive wave animations that respond to scroll position. Perfect for creating engaging section dividers, or decorative elements that respond to user scrolling.
 
 ## Installation
 
@@ -74,12 +74,12 @@ interface WaveAnimation {
 - `fill` (required): Background color of the wave (supports any valid CSS color)
 - `strokeStyle`: Color of the wave lines (default: '#fff')
 - `strokeWidth`: Width of the wave lines (default: 0.4)
-- `featheredOut`: Adds a gradient fade effect ('top', 'bottom', or 'both')
+- `featheredOut`: Adds a fade-out effect ('top', 'bottom', or 'both')
 
 #### Wave Behavior
 
 - `configs`: Array of wave configurations defining the shape and movement
-- `curveAmount`: Number of decorative curves to draw (default: 1)
+- `curveAmount`: Number of decorative additional curve-lines to draw (default: 1)
 - `offsetLeft`: Left side offset for decorative curves
 - `offsetRight`: Right side offset for decorative curves
 - `flip`: Flips the wave vertically when true
@@ -87,7 +87,7 @@ interface WaveAnimation {
 
 #### Scroll Configuration
 
-- `scrollOffset`: Controls when the animation starts and ends relative to scroll position
+- `scrollOffset`: Controls when the animation starts and ends relative to scroll position (see motions [offset](https://motion.dev/docs/scroll#offset) to get the syntax)
 
 ### Wave Configuration Structure
 
@@ -107,6 +107,8 @@ The `BezierConfig` tuple controls the wave shape:
 1. y-coordinate: Vertical position (0-1)
 2. x-offset: Horizontal control point offset
 3. y-offset: Vertical control point offset
+
+The range 0-1 basically desribes percent values, so 0.1 for y-coordinate basically says 10% from the top (currently 100% is the height of the next positioned (non-static) parent-element).
 
 ## Examples
 
@@ -156,7 +158,7 @@ const animatedConfig: WaveAnimation = {
 
 ## Tips and Best Practices
 
-1. Always wrap the Wave component in a container with relative positioning and explicit height
+1. Always wrap the Wave component in a container with relative positioning
 2. Use the `scrollOffset` parameter to fine-tune when the animation starts and ends
 3. Experiment with different `curveAmount` values for varied visual effects
 4. Enable `debug` mode during development to visualize scroll progress
