@@ -11,7 +11,7 @@ export const dynamic = 'force-static';
 export default function Home() {
     return (
         <div className="relative min-h-screen bg-gray-darkest-washed max-w-full  overflow-x-hidden">
-            <div className=" relative z-10 py-16 px-24 min-h-screen flex flex-col justify-end ">
+            <div className=" relative z-10 py-16 px-4 md:px-24 min-h-screen flex flex-col justify-end ">
                 <div
                     className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-60"
                     style={{
@@ -30,8 +30,8 @@ export default function Home() {
                             offsetRight: -42,
                             configs: [
                                 {
-                                    left: [0.5, 0.2, 0.2],
-                                    right: [0.05, 0.7, -0.2],
+                                    left: [0.3, 0.2, 0.2],
+                                    right: [0.2, 0.4, -0.1],
                                 },
                                 {
                                     left: [0.6, 0.2, 0.4],
@@ -125,7 +125,7 @@ export default function Home() {
                     />
                 </div>
                 <MotionDiv className="relative p-2 z-10 grid grid-cols-8 gap-4">
-                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-2xl " />
+                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-xl " />
                 </MotionDiv>
             </div>
 
@@ -147,8 +147,8 @@ export default function Home() {
                         offsetRight: -64,
                         configs: [
                             {
-                                left: [0.8, 0.3, -0.3],
-                                right: [0.7, 0.2, -0.2],
+                                left: [0.8, 0.3, -0.2],
+                                right: [0.7, 0.2, -0.1],
                             },
                             {
                                 left: [0.6, 0.3, -0.5],
@@ -162,9 +162,14 @@ export default function Home() {
                         scrollOffset: ['start 80%', 'end end'],
                     }}
                 />
-                <div className="relative col-span-8 col-start-3 py-64">
-                    <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
-                    {/* <p className="text-center mt-6 text-lg font-mono text-[#1b191e]">solutions</p> */}
+                <div className="relative col-span-8 col-start-3 pt-24 pb-12 md:py-64 px-12">
+                    <Image
+                        className="mx-auto relative top-12 md:top-40"
+                        src="logo_triangle_dark.svg"
+                        width={180}
+                        height={40}
+                        alt="logo"
+                    />
                 </div>
             </div>
         </div>

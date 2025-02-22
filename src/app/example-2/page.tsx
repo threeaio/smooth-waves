@@ -1,8 +1,8 @@
 // 'use client';
-import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Music2, Settings } from 'lucide-react';
 import { Wave } from '@/components/wave';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
+import { InstallationInfo } from '@/components/installation-info';
 
 export const dynamic = 'force-static';
 
@@ -69,15 +69,15 @@ export default function Home() {
                     />
                 </div>
                 <MotionDiv className="relative z-10 pb-48 grid grid-cols-8 grid-rows-2 gap-12 text-xs mix-blend-difference">
-                    <div className="col-start-3 col-span-4">
+                    <div className="col-start-3 col-span-6">
                         machine
                         <br /> generated.
                     </div>
-                    <div className="col-start-3 col-span-1">
+                    <div className="!col-start-3 col-span-2 md:col-span-1">
                         delivered
                         <br /> with soul.
                     </div>
-                    <div className="col-span-1">
+                    <div className="col-span-2 md:col-span-1">
                         change
                         <br /> has come.
                     </div>
@@ -109,26 +109,12 @@ export default function Home() {
                         }}
                     />
                 </div>
-                <MotionDiv className="relative  z-10 p-24 grid grid-cols-12 gap-12  ">
-                    <div className="relative col-span-8 col-start-3">
-                        {/* <div className="absolute rounded-full inset-0 bg-[#332964] blur-[200px]"></div> */}
-                        {/* <div className="absolute rounded-full top-0 bottom-0 left-4 right-4 translate-y-2 bg-[#43475c] bg-blend-color-dodge blur-[30px]"></div> */}
-                        <div className="relative grid grid-cols-8 border border-ui-border gap-12 p-8 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom  to-ui-gradient-top  rounded-full shadow-xl shadow-ui-shadow/20">
-                            <SkipBack className="size-4 mx-auto text-white-washed" />
-                            <Play className="size-4 mx-auto text-white-washed" />
-                            <SkipForward className="size-4 mx-auto text-white-washed" />
-                            <Volume2 className="size-4 mx-auto text-white-washed" />
-                            <Music2 className="size-4 mx-auto text-white-washed" />
-                            <Repeat className="size-4 mx-auto text-white-washed" />
-                            <Shuffle className="size-4 mx-auto text-white-washed" />
-                            <Settings className="size-4 mx-auto text-white-washed" />
-                        </div>
-                    </div>
+                <MotionDiv className="relative p-2 z-10 grid grid-cols-8 gap-4">
+                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-xl " />
                 </MotionDiv>
             </div>
-            <div className="relative col-span-8 col-start-3 pt-32 pb-96 ">
-                <Image className="mx-auto " src="logo_triangle_dark.svg" width={320} height={200} alt="logo" />
-                {/* <p className="text-center mt-6 text-lg font-mono text-[#1b191e]">solutions</p> */}
+            <div className="relative col-span-8 col-start-3 pt-12 pb-96 px-12">
+                <Image className="mx-auto relative" src="logo_triangle_dark.svg" width={180} height={40} alt="logo" />
             </div>
         </div>
     );

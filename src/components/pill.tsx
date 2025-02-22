@@ -17,7 +17,7 @@ const variantStyles: Record<PillVariant, string> = {
 
 export const Pill = ({ variant = 'neutral', children, className }: PillProps) => {
     return (
-        <span className={cn('px-2 bg-black-washed py-0.5 text-xs rounded-full', variantStyles[variant], className)}>
+        <span className={cn('px-2  py-0.5 text-xs rounded-full', variantStyles[variant], className)}>
             {children}
         </span>
     );
