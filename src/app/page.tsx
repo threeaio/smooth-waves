@@ -125,7 +125,7 @@ export default function Home() {
                     />
                 </div>
                 <MotionDiv className="relative p-2 z-10 grid grid-cols-8 gap-4">
-                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-xl " />
+                    <InstallationInfo className="col-span-8 w-full max-w-[1200px] mx-auto shadow-2xl " />
                 </MotionDiv>
             </div>
 
