@@ -304,7 +304,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
     });
 
     return (
-        <div className="absolute inset-0" ref={containerRef}>
+        <div className="absolute inset-0 overflow-hidden" ref={containerRef}>
             <div
                 className="absolute inset-0"
                 style={{
