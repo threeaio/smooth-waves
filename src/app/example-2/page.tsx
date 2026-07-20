@@ -114,7 +114,7 @@ export default function Home() {
                 </MotionDiv>
             </div>
             <div className="relative col-span-8 col-start-3 pt-12 pb-96 px-12">
-                <NsLogo className="mx-auto relative w-52 h-auto text-black-washed" />
+                <NsLogo centered className="mx-auto relative w-36 h-auto text-black-washed opacity-80" />
             </div>
         </div>
     );

@@ -162,7 +162,7 @@ export default function Home() {
                     }}
                 />
                 <div className="relative col-span-8 col-start-3 pt-24 pb-12 md:py-64 px-12">
-                    <NsLogo className="mx-auto relative top-12 md:top-40 w-52 h-auto text-black-washed" />
+                    <NsLogo centered className="mx-auto relative top-12 md:top-40 w-36 h-auto text-black-washed opacity-80" />
                 </div>
             </div>
         </div>

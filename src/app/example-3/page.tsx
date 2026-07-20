@@ -110,7 +110,7 @@ export default function Home() {
                 /> */}
             </div>
             <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
-                <NsLogo className="mx-auto relative w-52 h-auto text-black-washed" />
+                <NsLogo centered className="mx-auto relative w-36 h-auto text-black-washed" />
             </div>
         </div>
     );

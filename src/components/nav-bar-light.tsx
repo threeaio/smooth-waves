@@ -12,17 +12,22 @@ export function NavBarLight() {
         { href: '/example-1', label: 'E.1' },
         { href: '/example-2', label: 'E.2' },
         { href: '/example-4', label: 'E.3' },
+        { href: '/playground', label: 'LAB' },
     ];
 
     // On some pages the nav blends against the background (its color inverts as
     // you scroll). On the bright E.3 page that reads as noise, so keep it solid white.
-    const solidWhite = pathname === '/example-4';
+    const white = pathname === '/' || pathname === '/example-4' || pathname === '/playground';
+    const dark = pathname === '/example-1';
+    const needsContrast = pathname === '/example-2';
 
     return (
         <nav
             className={cn(
                 'fixed top-0 left-0 right-0 z-50 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom/90 to-ui-gradient-top/100 backdrop-blur-sm md:backdrop-blur-none md:bg-none overflow-hidden',
-                solidWhite ? 'text-white' : 'md:mix-blend-difference',
+                needsContrast && 'md:mix-blend-difference md:opacity-80'  ,
+                white && 'md:text-white-washed',
+                dark && 'md:text-black-washed md:opacity-80',
             )}
         >
             {/* bg-linear-gradient bg-gradient-to-t from-black-washed/70  to-black-washed/100 */}
@@ -44,7 +49,7 @@ export function NavBarLight() {
                                 key={link.href}
                                 href={link.href}
                                 className={` transition-colors text-xs uppercase p-2  ${
-                                    pathname === link.href ? 'text-3a-green' : ''
+                                    pathname === link.href ? 'font-bold' : ''
                                 }`}
                             >
                                 {link.label}
