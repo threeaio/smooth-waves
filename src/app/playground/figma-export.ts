@@ -59,7 +59,12 @@ function parsePoint(token: string, length: number): number | null {
  * motion offset semantics: "A B" = the scrollY at which section point A meets
  * viewport point B. A single token means "A A".
  */
-function offsetToScrollY(offset: string, sectionTop: number, sectionHeight: number, viewportHeight: number): number | null {
+function offsetToScrollY(
+    offset: string,
+    sectionTop: number,
+    sectionHeight: number,
+    viewportHeight: number,
+): number | null {
     const tokens = offset.trim().split(/\s+/);
     const a = parsePoint(tokens[0] ?? '', sectionHeight);
     const b = parsePoint(tokens[1] ?? tokens[0] ?? '', viewportHeight);
@@ -79,7 +84,9 @@ export function layerProgress(
     let y0 = offsetToScrollY(scrollStart, sectionTop, sectionHeight, viewportHeight);
     let y1 = offsetToScrollY(scrollEnd, sectionTop, sectionHeight, viewportHeight);
     if (y0 === null || y1 === null) {
-        console.warn(`[playground] cannot parse scroll offsets "${scrollStart}" / "${scrollEnd}" — exporting a full pass instead`);
+        console.warn(
+            `[playground] cannot parse scroll offsets "${scrollStart}" / "${scrollEnd}" — exporting a full pass instead`,
+        );
         y0 = offsetToScrollY('start end', sectionTop, sectionHeight, viewportHeight)!;
         y1 = offsetToScrollY('end start', sectionTop, sectionHeight, viewportHeight)!;
     }
@@ -208,16 +215,21 @@ export function buildFigmaSvg(
     width: number,
     height: number,
     progressFor: (layer: ExportLayer) => number,
+    background?: string,
 ): string {
+    const bgRect = background
+        ? `\n  <rect id="background" width="${r(width)}" height="${r(height)}" ${fillAttrs(background)} />`
+        : '';
     const groups = layers.map(
-        (layer) => `  <g id="${escapeAttr(layer.name)}">\n${
-            layer.mode === 'wave'
-                ? waveGroup(layer, width, height, progressFor(layer))
-                : bandGroup(layer, width, height, progressFor(layer))
-        }\n  </g>`,
+        (layer) =>
+            `  <g id="${escapeAttr(layer.name)}">\n${
+                layer.mode === 'wave'
+                    ? waveGroup(layer, width, height, progressFor(layer))
+                    : bandGroup(layer, width, height, progressFor(layer))
+            }\n  </g>`,
     );
     const note = layers.some((l) => l.featheredOut !== 'none')
         ? '\n  <!-- featheredOut is a CSS mask and not part of this export -->'
         : '';
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${r(width)}" height="${r(height)}" viewBox="0 0 ${r(width)} ${r(height)}" fill="none">${note}\n${groups.join('\n')}\n</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${r(width)}" height="${r(height)}" viewBox="0 0 ${r(width)} ${r(height)}" fill="none">${note}${bgRect}\n${groups.join('\n')}\n</svg>`;
 }

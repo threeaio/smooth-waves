@@ -7,6 +7,10 @@ import { cn } from '@/lib/utils';
 export function NavBarLight() {
     const pathname = usePathname();
 
+    // The playground is a full editor with its own chrome — the site nav would
+    // pollute the page preview there (it has its own exit link instead).
+    if (pathname === '/playground') return null;
+
     const links = [
         { href: '/', label: 'H' },
         { href: '/example-1', label: 'E.1' },
@@ -25,7 +29,7 @@ export function NavBarLight() {
         <nav
             className={cn(
                 'fixed top-0 left-0 right-0 z-50 bg-linear-gradient bg-gradient-to-t from-ui-gradient-bottom/90 to-ui-gradient-top/100 backdrop-blur-sm md:backdrop-blur-none md:bg-none overflow-hidden',
-                needsContrast && 'md:mix-blend-difference md:opacity-80'  ,
+                needsContrast && 'md:mix-blend-difference md:opacity-80',
                 white && 'md:text-white-washed',
                 dark && 'md:text-black-washed md:opacity-80',
             )}
