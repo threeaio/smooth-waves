@@ -225,7 +225,7 @@ export function CurveOverlay({
                     <button
                         type="button"
                         onClick={() => onSelect(null)}
-                        className="uppercase text-3a-green transition-opacity hover:opacity-80"
+                        className="text-3a-green transition-opacity hover:opacity-80"
                     >
                         done
                     </button>

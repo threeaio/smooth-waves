@@ -242,20 +242,27 @@ function Section({
     children: React.ReactNode;
 }) {
     return (
-        <section className="border-b border-ui-border/40">
-            {/* triggers must read as buttons, not labels — hover feedback + green active state */}
+        // boxed like the layer rows so the main sections instantly read as buttons
+        <section
+            className={cn(
+                'mx-3 my-1.5 overflow-hidden rounded-lg border transition-colors',
+                open
+                    ? 'border-3a-green/60 bg-3a-green/5'
+                    : 'border-ui-border/60 bg-white-washed/[0.03] hover:border-white-washed/40',
+            )}
+        >
             <button
                 type="button"
                 onClick={onToggle}
                 className={cn(
-                    'flex w-full items-center justify-between px-5 py-3.5 text-[11px] uppercase tracking-[0.2em] transition-colors',
-                    open ? 'bg-3a-green/10 text-3a-green' : 'opacity-75 hover:bg-white-washed/5 hover:opacity-100',
+                    'flex w-full items-center justify-between px-4 py-3 text-xs font-medium transition-colors',
+                    open && 'text-3a-green',
                 )}
             >
                 <span>{title}</span>
-                <span className={cn('text-xs transition-transform', open ? 'rotate-90' : 'opacity-50')}>▸</span>
+                <span className={cn('text-xs transition-transform', open ? 'rotate-90' : 'opacity-60')}>▸</span>
             </button>
-            {open && <div className="flex flex-col gap-3 px-5 py-5">{children}</div>}
+            {open && <div className="flex flex-col gap-3 px-4 pb-4">{children}</div>}
         </section>
     );
 }
@@ -367,7 +374,7 @@ function Segmented<T extends string>({
                         type="button"
                         onClick={() => onChange(option)}
                         className={cn(
-                            'px-2 py-1.5 text-xs uppercase transition-colors',
+                            'px-2 py-1.5 text-xs transition-colors',
                             option === value ? 'bg-3a-green/20 text-3a-green' : 'bg-black-washed opacity-75',
                         )}
                     >
@@ -423,7 +430,7 @@ function LayerRow({
                 <span className="truncate font-mono">{layer.name}</span>
                 <span
                     className={cn(
-                        'rounded-sm border px-1 text-[9px] uppercase tracking-wider',
+                        'rounded-sm border px-1 font-mono text-[10px]',
                         isActive ? 'border-3a-green/50 text-3a-green' : 'border-ui-border/60 opacity-60',
                     )}
                 >
@@ -489,7 +496,7 @@ function FigmaExportButtons({ build }: { build: () => { svg: string; t: number }
                 onClick={copy}
                 title="copies an SVG snapshot at the current scroll position — paste directly into Figma (⌘V)"
                 className={cn(
-                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono uppercase transition-colors',
+                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono transition-colors',
                     feedback
                         ? 'border-3a-green/70 text-3a-green'
                         : 'border-ui-border/60 opacity-85 hover:border-3a-green/60 hover:text-3a-green hover:opacity-100',
@@ -654,7 +661,7 @@ function SelectedKeyframe({
                 <button
                     type="button"
                     onClick={onDuplicate}
-                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] uppercase opacity-85 transition-opacity hover:opacity-100"
+                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] opacity-85 transition-opacity hover:opacity-100"
                 >
                     duplicate
                 </button>
@@ -662,7 +669,7 @@ function SelectedKeyframe({
                     type="button"
                     disabled={count <= 1}
                     onClick={onRemove}
-                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] uppercase text-3a-red opacity-85 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
+                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] text-3a-red opacity-85 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
                 >
                     remove
                 </button>
@@ -928,7 +935,7 @@ export default function Playground() {
                 <div ref={sectionRef} className="relative" style={{ height: `${sectionPx}px` }}>
                     {!fullscreen && (
                         <div className="absolute inset-x-0 top-0 z-10 border-t border-dashed border-white-washed/20 px-4 md:px-16">
-                            <span className="font-mono text-[11px] uppercase opacity-60">wave section — start</span>
+                            <span className="font-mono text-[11px] opacity-60">wave section — start</span>
                         </div>
                     )}
                     {previewLayers}
@@ -943,7 +950,7 @@ export default function Playground() {
                     )}
                     {!fullscreen && (
                         <div className="absolute inset-x-0 bottom-0 z-10 border-b border-dashed border-white-washed/20 px-4 md:px-16">
-                            <span className="font-mono text-[11px] uppercase opacity-60">wave section — end</span>
+                            <span className="font-mono text-[11px] opacity-60">wave section — end</span>
                         </div>
                     )}
                 </div>
@@ -956,7 +963,7 @@ export default function Playground() {
                 <button
                     type="button"
                     onClick={() => setFullscreen(false)}
-                    className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-ui-border/60 bg-black-washed/90 px-4 py-2 font-mono text-xs uppercase opacity-70 backdrop-blur transition-opacity hover:opacity-100"
+                    className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-ui-border/60 bg-black-washed/90 px-4 py-2 font-mono text-xs opacity-70 backdrop-blur transition-opacity hover:opacity-100"
                 >
                     <span>⛶</span>
                     <span>controls</span>
@@ -974,7 +981,7 @@ export default function Playground() {
                 )}
             >
                 <div className="flex items-center justify-between border-b border-ui-border/40 px-5 py-4">
-                    <span className="font-mono text-xs uppercase tracking-[0.25em]">wave composer</span>
+                    <span className="font-mono text-sm">wave composer</span>
                     <div className="flex items-center gap-1">
                         <button
                             type="button"
@@ -1021,14 +1028,14 @@ export default function Playground() {
                                 <button
                                     type="button"
                                     onClick={() => addLayer('wave')}
-                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs uppercase opacity-70 transition-opacity hover:opacity-100"
+                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs opacity-70 transition-opacity hover:opacity-100"
                                 >
                                     + wave
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => addLayer('band')}
-                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs uppercase opacity-70 transition-opacity hover:opacity-100"
+                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs opacity-70 transition-opacity hover:opacity-100"
                                 >
                                     + band
                                 </button>
@@ -1080,7 +1087,7 @@ export default function Playground() {
                                 type="button"
                                 onClick={() => setSelection(null)}
                                 className={cn(
-                                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono text-xs uppercase transition-colors',
+                                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono text-xs transition-colors',
                                     selection
                                         ? 'border-ui-border/60 opacity-85 hover:border-3a-green/60 hover:text-3a-green hover:opacity-100'
                                         : 'border-3a-green bg-3a-green/20 text-3a-green',
