@@ -7,7 +7,7 @@ import { NavBarLight } from '@/components/nav-bar-light';
 const geistSans = Geist({
     variable: '--font-geist-sans',
     subsets: ['latin'],
-    weight: ['300', '500'],
+    weight: ['300', '500', '800'],
     style: 'normal',
     display: 'swap',
 });

@@ -10,7 +10,7 @@ export function NavBarLight() {
         { href: '/', label: 'H' },
         { href: '/example-1', label: 'E.1' },
         { href: '/example-2', label: 'E.2' },
-        // { href: '/example-3', label: 'E.3' },
+        { href: '/example-4', label: 'E.3' },
     ];
 
     return (
@@ -24,7 +24,7 @@ export function NavBarLight() {
             />
             <div className="  ">
                 <div className="relative flex items-center justify-between px-4 md:px-16 py-6 md:py-8 ">
-                    <Link href="/">
+                    <Link href="/" className={pathname === '/example-4' ? 'invisible' : ''}>
                         <Image src="/logo_triangle.svg" width={160} height={30} alt="logo" />
                     </Link>
 
