@@ -157,6 +157,67 @@ const animatedConfig: WaveAnimation = {
 <Wave waveConfig={animatedConfig} />;
 ```
 
+## WaveBand
+
+`Wave` always fills from a canvas edge down (or up) to its single curve — a color field with ONE designed edge. `WaveBand` is a ribbon with a designed curve on BOTH edges: it fills the closed path between a top and a bottom curve and is transparent outside itself, so it can float over any background (gradients, images, other waves). Both edges are driven by the same scroll progress and spring, so they move coherently.
+
+```tsx
+import { WaveBand } from '@threeaio/smooth-waves';
+
+<WaveBand
+    waveConfig={{
+        fill: '#ff5e2f',
+        scrollOffset: ['start 80%', 'end end'],
+        top: {
+            configs: [
+                { left: [0.3, 0.25, 0.5], right: [0.4, 0.2, -0.3] },
+                { left: [0.5, 0.4, -0.2], right: [0.45, 0.5, -0.3] },
+            ],
+            strokeStyle: '#231112',
+            strokeWidth: 0.4,
+            curveAmount: 6,
+            offsetLeft: -10,
+            offsetRight: -36,
+        },
+        bottom: {
+            configs: [
+                { left: [0.6, 0.4, -0.2], right: [0.7, 0.3, 0.1] },
+                { left: [0.8, 0.3, 0.2], right: [0.75, 0.4, -0.1] },
+            ],
+        },
+    }}
+/>;
+```
+
+### WaveBand Configuration
+
+```typescript
+interface WaveBandAnimation {
+    fill: string;
+    top: WaveBandEdge;
+    bottom: WaveBandEdge;
+    scrollOffset?: ScrollOffset;
+    featheredOut?: 'top' | 'bottom' | 'both';
+    debug?: boolean;
+}
+
+interface WaveBandEdge {
+    configs: WaveConfig[]; // same keyframe semantics as Wave
+    strokeStyle?: string; // default '#fff'
+    strokeWidth?: number; // default 0.4
+    curveAmount?: number; // decorative stroke lines fanning off this edge (default 0)
+    offsetLeft?: number; // per-line fan offset in px — negative fans up, positive down
+    offsetRight?: number;
+}
+```
+
+Notes:
+
+- There is no `flip` — both edges are explicit, and y-values are always fractions from the top.
+- `curveAmount` defaults to `0` here (unlike Wave's `1`), so no stroke appears unless you ask for one.
+- Decorative fans need `curveAmount × offset` px of room inside the canvas before they get clipped.
+- If the top curve crosses below the bottom curve the path self-intersects and canvas fills the twist (nonzero winding). Usable as an effect, but watch the Catmull-Rom overshoot with 3+ keyframes.
+
 ## Tips and Best Practices
 
 1. Always wrap the Wave component in a container with relative positioning

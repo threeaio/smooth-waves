@@ -21,36 +21,19 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  Wave: () => Wave
+  Wave: () => Wave,
+  WaveBand: () => WaveBand,
+  sampleConfig: () => sampleConfig
 });
 module.exports = __toCommonJS(index_exports);
 
 // src/wave.tsx
 var import_react = require("motion/react");
 var import_react2 = require("react");
-var import_jsx_runtime = require("react/jsx-runtime");
+
+// src/core.ts
 var lerp = (a, b, t) => a + (b - a) * t;
 var clamp = (min, max, value) => Math.min(max, Math.max(min, value));
-var defaultCurveConfig = {
-  strokeStyle: "#fff",
-  strokeWidth: 0.4,
-  fill: "rgba(0,0,0,0.1)",
-  configs: [
-    {
-      right: [0.2, 0.9, -0.8],
-      left: [0.7, 0.6, 0.9]
-    },
-    {
-      right: [0.2, 0.9, -0.5],
-      left: [0.7, 0.6, 0.6]
-    },
-    {
-      right: [0.2, 0.9, -0.2],
-      left: [0.7, 0.6, 0.3]
-    }
-  ],
-  scrollOffset: ["end end", "start start"]
-};
 function catmullRom(p0, p1, p2, p3, t) {
   const t2 = t * t;
   const t3 = t2 * t;
@@ -94,6 +77,60 @@ function lerpInto(target, start, end, t) {
     target.right[i] = lerp(start.right[i], end.right[i], t);
   }
 }
+function resolveConfig(configs, channels, scratch, t) {
+  if (configs.length === 1) return configs[0];
+  if (configs.length === 2) {
+    lerpInto(scratch, configs[0], configs[1], t);
+    return scratch;
+  }
+  interpolateInto(scratch, channels, t);
+  return scratch;
+}
+function sampleConfig(configs, t) {
+  const scratch = { left: [0, 0, 0], right: [0, 0, 0] };
+  const resolved = resolveConfig(configs, extractChannels(configs), scratch, clamp(0, 1, t));
+  return { left: [...resolved.left], right: [...resolved.right] };
+}
+function drawDebug(ctx, width, height, scrollProgress) {
+  ctx.font = "12px monospace";
+  ctx.fillStyle = "#f00";
+  ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
+}
+function featherMask(featheredOut) {
+  switch (featheredOut) {
+    case "top":
+      return "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)";
+    case "bottom":
+      return "linear-gradient(rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%)";
+    case "both":
+      return "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%)";
+    default:
+      return void 0;
+  }
+}
+
+// src/wave.tsx
+var import_jsx_runtime = require("react/jsx-runtime");
+var defaultCurveConfig = {
+  strokeStyle: "#fff",
+  strokeWidth: 0.4,
+  fill: "rgba(0,0,0,0.1)",
+  configs: [
+    {
+      right: [0.2, 0.9, -0.8],
+      left: [0.7, 0.6, 0.9]
+    },
+    {
+      right: [0.2, 0.9, -0.5],
+      left: [0.7, 0.6, 0.6]
+    },
+    {
+      right: [0.2, 0.9, -0.2],
+      left: [0.7, 0.6, 0.3]
+    }
+  ],
+  scrollOffset: ["end end", "start start"]
+};
 function drawWavePath(ctx, config, curveAmount = 1, lineOffsetLeft = 0, lineOffsetRight = 0, width, height, flip = false) {
   const leftX = 0;
   const leftY = flip ? height - config.left[0] * height : config.left[0] * height;
@@ -131,11 +168,6 @@ function drawWavePath(ctx, config, curveAmount = 1, lineOffsetLeft = 0, lineOffs
     );
     ctx.stroke();
   }
-}
-function drawDebug(ctx, width, height, scrollProgress) {
-  ctx.font = "12px monospace";
-  ctx.fillStyle = "#f00";
-  ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
 }
 function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
   const containerRef = (0, import_react2.useRef)(null);
@@ -199,16 +231,7 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
     if (!canvas || !ctx || configs.length === 0) return;
     needsRedrawRef.current = false;
     const sp = reducedMotionRef.current ? 0.5 : clamp(0, 1, smoothProgress.get());
-    let targetConfig;
-    if (configs.length === 1) {
-      targetConfig = configs[0];
-    } else if (configs.length === 2) {
-      lerpInto(scratchRef.current, configs[0], configs[1], sp);
-      targetConfig = scratchRef.current;
-    } else {
-      interpolateInto(scratchRef.current, channels, sp);
-      targetConfig = scratchRef.current;
-    }
+    const targetConfig = resolveConfig(configs, channels, scratchRef.current, sp);
     const { width, height, dpr } = sizeRef.current;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -234,15 +257,152 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
     "div",
     {
       className: "absolute inset-0",
-      style: {
-        mask: curveConfig.featheredOut === "top" ? "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)" : curveConfig.featheredOut === "bottom" ? "linear-gradient(rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%)" : curveConfig.featheredOut === "both" ? "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%)" : void 0
-      },
+      style: { mask: featherMask(curveConfig.featheredOut) },
       children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", { ref: canvasRef, className: "size-full" })
+    }
+  ) });
+}
+
+// src/wave-band.tsx
+var import_react3 = require("motion/react");
+var import_react4 = require("react");
+var import_jsx_runtime2 = require("react/jsx-runtime");
+function edgeGeometry(config, width, height) {
+  const leftY = config.left[0] * height;
+  const rightY = config.right[0] * height;
+  return {
+    leftY,
+    leftCx: config.left[1] * width,
+    leftCy: leftY + config.left[2] * height,
+    rightY,
+    rightCx: width - config.right[1] * width,
+    rightCy: rightY + config.right[2] * height
+  };
+}
+function drawBandPath(ctx, top, bottom, width) {
+  ctx.beginPath();
+  ctx.moveTo(0, top.leftY);
+  ctx.bezierCurveTo(top.leftCx, top.leftCy, top.rightCx, top.rightCy, width, top.rightY);
+  ctx.lineTo(width, bottom.rightY);
+  ctx.bezierCurveTo(bottom.rightCx, bottom.rightCy, bottom.leftCx, bottom.leftCy, 0, bottom.leftY);
+  ctx.closePath();
+  ctx.fill();
+}
+function strokeEdgeFan(ctx, geometry, edge, width) {
+  var _a, _b, _c, _d, _e;
+  const curveAmount = (_a = edge.curveAmount) != null ? _a : 0;
+  if (curveAmount <= 0) return;
+  ctx.strokeStyle = (_b = edge.strokeStyle) != null ? _b : "#fff";
+  ctx.lineWidth = (_c = edge.strokeWidth) != null ? _c : 0.4;
+  const offsetLeft = (_d = edge.offsetLeft) != null ? _d : 0;
+  const offsetRight = (_e = edge.offsetRight) != null ? _e : 0;
+  for (let i = 0; i < curveAmount; i++) {
+    const offset = i + 1;
+    ctx.beginPath();
+    ctx.moveTo(0, geometry.leftY + offsetLeft * offset);
+    ctx.bezierCurveTo(
+      geometry.leftCx,
+      geometry.leftCy + offsetLeft * offset,
+      geometry.rightCx,
+      geometry.rightCy + offsetRight * offset,
+      width,
+      geometry.rightY + offsetRight * offset
+    );
+    ctx.stroke();
+  }
+}
+function WaveBand({ waveConfig }) {
+  const containerRef = (0, import_react4.useRef)(null);
+  const canvasRef = (0, import_react4.useRef)(null);
+  const ctxRef = (0, import_react4.useRef)(null);
+  const sizeRef = (0, import_react4.useRef)({ width: 0, height: 0, dpr: 1 });
+  const needsRedrawRef = (0, import_react4.useRef)(true);
+  const reducedMotionRef = (0, import_react4.useRef)(false);
+  const topScratchRef = (0, import_react4.useRef)({ left: [0, 0, 0], right: [0, 0, 0] });
+  const bottomScratchRef = (0, import_react4.useRef)({ left: [0, 0, 0], right: [0, 0, 0] });
+  const { scrollYProgress } = (0, import_react3.useScroll)({
+    target: containerRef,
+    offset: waveConfig.scrollOffset
+  });
+  const smoothProgress = (0, import_react3.useSpring)(scrollYProgress, { damping: 80, mass: 0.27, stiffness: 250 });
+  const topChannels = (0, import_react4.useMemo)(() => extractChannels(waveConfig.top.configs), [waveConfig.top.configs]);
+  const bottomChannels = (0, import_react4.useMemo)(() => extractChannels(waveConfig.bottom.configs), [waveConfig.bottom.configs]);
+  (0, import_react4.useEffect)(() => {
+    needsRedrawRef.current = true;
+  }, [waveConfig, topChannels, bottomChannels]);
+  (0, import_react4.useEffect)(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      reducedMotionRef.current = mediaQuery.matches;
+      needsRedrawRef.current = true;
+    };
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+  (0, import_react4.useEffect)(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
+    ctxRef.current = canvas.getContext("2d");
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      sizeRef.current = { width, height, dpr };
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      needsRedrawRef.current = true;
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+  (0, import_react3.useMotionValueEvent)(smoothProgress, "change", () => {
+    if (!reducedMotionRef.current) {
+      needsRedrawRef.current = true;
+    }
+  });
+  (0, import_react3.useAnimationFrame)(() => {
+    if (!needsRedrawRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    const { top, bottom } = waveConfig;
+    if (!canvas || !ctx || top.configs.length === 0 || bottom.configs.length === 0) return;
+    needsRedrawRef.current = false;
+    const sp = reducedMotionRef.current ? 0.5 : clamp(0, 1, smoothProgress.get());
+    const topConfig = resolveConfig(top.configs, topChannels, topScratchRef.current, sp);
+    const bottomConfig = resolveConfig(bottom.configs, bottomChannels, bottomScratchRef.current, sp);
+    const { width, height, dpr } = sizeRef.current;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
+    const topGeometry = edgeGeometry(topConfig, width, height);
+    const bottomGeometry = edgeGeometry(bottomConfig, width, height);
+    ctx.fillStyle = waveConfig.fill;
+    drawBandPath(ctx, topGeometry, bottomGeometry, width);
+    strokeEdgeFan(ctx, topGeometry, top, width);
+    strokeEdgeFan(ctx, bottomGeometry, bottom, width);
+    if (waveConfig.debug) {
+      drawDebug(ctx, width, height, sp);
+    }
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "absolute inset-0 overflow-hidden", ref: containerRef, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    "div",
+    {
+      className: "absolute inset-0",
+      style: { mask: featherMask(waveConfig.featheredOut) },
+      children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("canvas", { ref: canvasRef, className: "size-full" })
     }
   ) });
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  Wave
+  Wave,
+  WaveBand,
+  sampleConfig
 });
 //# sourceMappingURL=index.js.map

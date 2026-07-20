@@ -11,6 +11,8 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // build artifacts of the published package (dist is committed for npm)
+  { ignores: ["packages/smooth-waves/dist/**"] },
 ];
 
 export default eslintConfig;
