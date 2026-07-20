@@ -214,7 +214,7 @@ function toBandSnippet(s: LayerState): string {
 }
 
 /** The whole visible stack as one section snippet, in paint order. */
-function toStackSnippet(layers: LayerState[], sectionVh: number): string {
+function toStackSnippet(layers: LayerState[], sectionPx: number): string {
     const parts = layers
         .filter((l) => l.visible)
         .map((l) => {
@@ -225,7 +225,7 @@ function toStackSnippet(layers: LayerState[], sectionVh: number): string {
                 .join('\n');
             return `    {/* ${l.name} */}\n${indented}`;
         });
-    return `<div className="relative h-[${sectionVh}vh]">\n${parts.join('\n')}\n</div>`;
+    return `<div className="relative h-[${sectionPx}px]">\n${parts.join('\n')}\n</div>`;
 }
 
 /* --------------------------------- control atoms --------------------------------- */
@@ -243,15 +243,19 @@ function Section({
 }) {
     return (
         <section className="border-b border-ui-border/40">
+            {/* triggers must read as buttons, not labels — hover feedback + green active state */}
             <button
                 type="button"
                 onClick={onToggle}
-                className="flex w-full items-center justify-between px-5 py-4 text-[11px] uppercase tracking-[0.2em]"
+                className={cn(
+                    'flex w-full items-center justify-between px-5 py-3.5 text-[11px] uppercase tracking-[0.2em] transition-colors',
+                    open ? 'bg-3a-green/10 text-3a-green' : 'opacity-75 hover:bg-white-washed/5 hover:opacity-100',
+                )}
             >
-                <span className={open ? 'opacity-90' : 'opacity-60'}>{title}</span>
-                <span className={cn('text-xs opacity-50 transition-transform', open && 'rotate-90')}>▸</span>
+                <span>{title}</span>
+                <span className={cn('text-xs transition-transform', open ? 'rotate-90' : 'opacity-50')}>▸</span>
             </button>
-            {open && <div className="flex flex-col gap-3 px-5 pb-5">{children}</div>}
+            {open && <div className="flex flex-col gap-3 px-5 py-5">{children}</div>}
         </section>
     );
 }
@@ -511,11 +515,13 @@ function NumberField({
     value,
     min,
     max,
+    step = 0.01,
     onChange,
 }: {
     value: number;
     min: number;
     max: number;
+    step?: number;
     onChange: (value: number) => void;
 }) {
     return (
@@ -524,7 +530,7 @@ function NumberField({
             value={value}
             min={min}
             max={max}
-            step={0.01}
+            step={step}
             onChange={(e) => {
                 const v = e.target.valueAsNumber;
                 if (!Number.isNaN(v)) onChange(round(clamp(min, max, v)));
@@ -667,7 +673,7 @@ function SelectedKeyframe({
 
 /* ------------------------------------- page --------------------------------------- */
 
-type SectionId = 'scroll' | 'appearance' | 'curves' | 'top' | 'bottom' | 'keyframes' | 'config';
+type SectionId = 'page' | 'scroll' | 'appearance' | 'curves' | 'top' | 'bottom' | 'keyframes' | 'config';
 
 export default function Playground() {
     const [layers, setLayers] = useState<LayerState[]>(initialLayers);
@@ -681,8 +687,8 @@ export default function Playground() {
     // pages may start or end with the waves themselves — the surrounding scroll room is optional
     const [spaceBefore, setSpaceBefore] = useState(true);
     const [spaceAfter, setSpaceAfter] = useState(true);
-    // the wave section's height in vh — the main driver of the page's total height
-    const [sectionVh, setSectionVh] = useState(150);
+    // the wave section's height in px — the main driver of the page's total height
+    const [sectionPx, setSectionPx] = useState(1500);
     const [openSection, setOpenSection] = useState<SectionId>('keyframes');
     const scrubberRef = useRef<HTMLInputElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -741,7 +747,7 @@ export default function Playground() {
             .map((layer) => {
                 const pinned = layer.id === activeLayerId && selection ? selection : null;
                 // spacer/height changes shift the section in the document — remount so useScroll re-anchors
-                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${spaceBefore}|${spaceAfter}|${sectionVh}|${
+                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${spaceBefore}|${spaceAfter}|${sectionPx}|${
                     pinned ? `pin-${pinned.edge}-${pinned.index}` : 'live'
                 }`;
                 const featheredOut = layer.featheredOut === 'none' ? undefined : layer.featheredOut;
@@ -777,9 +783,9 @@ export default function Playground() {
                 };
                 return <WaveBand key={key} waveConfig={config} />;
             });
-    }, [layers, activeLayerId, selection, spaceBefore, spaceAfter, sectionVh]);
+    }, [layers, activeLayerId, selection, spaceBefore, spaceAfter, sectionPx]);
 
-    const code = useMemo(() => toStackSnippet(layers, sectionVh), [layers, sectionVh]);
+    const code = useMemo(() => toStackSnippet(layers, sectionPx), [layers, sectionPx]);
 
     // ghosts + handles only for the active layer — all layers at once would be chaos
     const overlayEdges = useMemo<OverlayEdge[]>(() => {
@@ -919,7 +925,7 @@ export default function Playground() {
             <main className={cn(!fullscreen && 'lg:pr-[360px]')}>
                 {spaceBefore && <div className="h-[80vh]" />}
 
-                <div ref={sectionRef} className="relative" style={{ height: `${sectionVh}vh` }}>
+                <div ref={sectionRef} className="relative" style={{ height: `${sectionPx}px` }}>
                     {!fullscreen && (
                         <div className="absolute inset-x-0 top-0 z-10 border-t border-dashed border-white-washed/20 px-4 md:px-16">
                             <span className="font-mono text-[11px] uppercase opacity-60">wave section — start</span>
@@ -1028,17 +1034,6 @@ export default function Playground() {
                                 </button>
                             </div>
                         </div>
-                        <ColorRow label="page bg" value={pageBg} onChange={setPageBg} />
-                        <Toggle label="space before waves" checked={spaceBefore} onChange={setSpaceBefore} />
-                        <Toggle label="space after waves" checked={spaceAfter} onChange={setSpaceAfter} />
-                        <SliderRow
-                            label="section vh"
-                            value={sectionVh}
-                            min={50}
-                            max={400}
-                            step={10}
-                            onChange={setSectionVh}
-                        />
                         <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
                             <span className="opacity-80">progress</span>
                             <input
@@ -1055,6 +1050,26 @@ export default function Playground() {
                         <FigmaExportButtons build={buildExport} />
                         <Toggle label="onion skin (all keyframes)" checked={onion} onChange={setOnion} />
                     </div>
+
+                    {section(
+                        'page',
+                        'Page',
+                        <>
+                            <ColorRow label="page bg" value={pageBg} onChange={setPageBg} />
+                            <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
+                                <span className="opacity-80">section px</span>
+                                <NumberField
+                                    value={sectionPx}
+                                    min={200}
+                                    max={20000}
+                                    step={10}
+                                    onChange={setSectionPx}
+                                />
+                            </label>
+                            <Toggle label="space before waves" checked={spaceBefore} onChange={setSpaceBefore} />
+                            <Toggle label="space after waves" checked={spaceAfter} onChange={setSpaceAfter} />
+                        </>,
+                    )}
 
                     {section(
                         'keyframes',
