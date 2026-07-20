@@ -1,12 +1,12 @@
-import { Wave, type WaveAnimation } from '@threeaio/smooth-waves';
+import { Wave, WaveBand, type WaveAnimation } from '@threeaio/smooth-waves';
 import { NsLogo } from '@/components/logos/ns-logo';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-static';
 
 const ink = '#231112';
-const magenta = '#ff015e';
-const amber = '#ffbb00';
+const magenta = '#FF015E';
+const amber = '#FFBB00';
 // not part of the palette — the mood's orange is the magenta/orange blend zone
 const orange = '#ff5e2f';
 
@@ -66,7 +66,7 @@ function Field({ blur = 0, waveConfig }: { blur?: number; waveConfig: WaveAnimat
     return (
         <div
             aria-hidden
-            className="absolute -inset-x-[4%] inset-y-0 pointer-events-none"
+            className="absolute -inset-x-[14%] inset-y-0 pointer-events-none"
             style={{ filter: blur ? `blur(${blur}px)` : undefined }}
         >
             <Wave waveConfig={waveConfig} />
@@ -83,8 +83,54 @@ export default function Home() {
                 through flat amber, so the seam between the scenes is invisible. */}
             <section className="relative " style={{ backgroundColor: amber }}>
                 <div className="absolute inset-0" aria-hidden>
-                    {/* orange band: visible between its own curve and the ink curve above it */}
-            
+                    {/* orange blend band (WaveBand: curved top AND bottom edge, transparent
+                        outside itself). Painted before the ink field, so ink covers its top
+                        edge — only the sliver between ink curve and the band's bottom curve
+                        stays visible as the orange→amber blend zone. */}
+                    <div
+                        aria-hidden
+                        className="absolute -inset-x-[14%] inset-y-0 z-0 pointer-events-none opacity-90"
+                    >
+                        <WaveBand
+                            waveConfig={{
+                                fill: magenta,
+                                top: {
+                                    strokeStyle: magenta,
+                                    strokeWidth: .4,
+                                    // fan needs curveAmount × offsetRight px of room BELOW the curve —
+                                    // 16 × 28 = 448px, which fits inside the scene incl. the bottom spacer
+                                    offsetLeft: -8,
+                                    offsetRight: -28,
+                                    curveAmount: 16,
+                                    // tracks just above the ink curve so no amber gap opens up
+                                    configs: [
+                                        {
+                                            left: [0.49, 0.25, 0.5],
+                                            right: [0.64, 0.2, -0.3],
+                                        },
+                                        {
+                                            left: [0.84, 0.4, -0.55],
+                                            right: [0.54, 0.5, -0.38],
+                                        },
+                                    ],
+                                },
+                                bottom: {
+                                    configs: [
+                                        {
+                                            left: [0.64, 0.35, 0.35],
+                                            right: [0.9, 0.3, -0.2],
+                                        },
+                                        {
+                                            left: [0.97, 0.45, -0.55],
+                                            right: [0.64, 0.55, -0.25],
+                                        },
+                                    ],
+                                },
+                                scrollOffset: ['start start', 'end 25%'],
+                            }}
+                        />
+                    </div>
+
                     {/* ink field: the dark hero area the headline sits on */}
                     <Field
                         blur={60}
@@ -163,6 +209,7 @@ export default function Home() {
                             // curveAmount defaults to 1 (not 0) with a white default stroke —
                             // without this you get a white hairline along the curve
                             curveAmount: 0,
+                            featheredOut: 'bottom',
                             configs: [
                                 {
                                     left: [0.5, 0.3, 0.5],
