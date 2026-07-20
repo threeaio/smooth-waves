@@ -1,5 +1,4 @@
-// 'use client';
-import { Wave } from '@/components/wave';
+import { Wave } from '@threeaio/smooth-waves';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
 import { InstallationInfo } from '@/components/installation-info';
@@ -18,7 +17,7 @@ export default function Home() {
                         background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
                     }}
                 />
-                <div className="absolute left-0 top-0 w-full h-full ">
+                <div className="absolute inset-0 ">
                     <Wave
                         waveConfig={{
                             featheredOut: 'top',
@@ -165,7 +164,7 @@ export default function Home() {
                 <div className="relative col-span-8 col-start-3 pt-24 pb-12 md:py-64 px-12">
                     <Image
                         className="mx-auto relative top-12 md:top-40"
-                        src="logo_triangle_dark.svg"
+                        src="/logo_triangle_dark.svg"
                         width={180}
                         height={40}
                         alt="logo"

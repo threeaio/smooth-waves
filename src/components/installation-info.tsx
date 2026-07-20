@@ -3,6 +3,7 @@ import { NpmIcon } from './logos/npm-icon';
 import { CardEmphased } from './card-emphased';
 import { Pill } from './pill';
 import { CopyButton } from './copy-button';
+import pkg from '@threeaio/smooth-waves/package.json';
 
 interface InstallationInfoProps {
     className?: string;
@@ -25,7 +26,7 @@ export const InstallationInfo = ({ className }: InstallationInfoProps) => {
                         />
                     </div>
                     <div className="flex w-full sm:w-auto items-center gap-1 justify-center md:justify-start">
-                        <Pill>v0.1.3</Pill>
+                        <Pill>v{pkg.version}</Pill>
                         <Pill variant="warning">alpha</Pill>
                     </div>
                 </div>

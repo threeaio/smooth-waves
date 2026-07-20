@@ -1,5 +1,5 @@
 // 'use client';
-import { Wave } from '@/components/wave';
+import { Wave } from '@threeaio/smooth-waves';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/motion-div';
 import { InstallationInfo } from '@/components/installation-info';
