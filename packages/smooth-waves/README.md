@@ -17,14 +17,15 @@ pnpm add @threeaio/smooth-waves
 
 ## Requirements
 
-- React 18+
-- Motion (from `motion/react`)
-- `@threeaio/utils` (for math utilities)
+Peer dependencies (installed alongside the package):
+
+- `react` 18+
+- `motion` 12+
 
 ## Basic Usage
 
 ```tsx
-import Wave from '@threeaio/smooth-waves';
+import { Wave } from '@threeaio/smooth-waves';
 
 function MyComponent() {
     return (

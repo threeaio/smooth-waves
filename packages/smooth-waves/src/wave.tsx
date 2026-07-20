@@ -1,7 +1,9 @@
 'use client';
-import { useAnimationFrame, useScroll, useSpring } from 'motion/react';
-import { useRef, useState, useEffect } from 'react';
-import { lerp, clamp } from '@threeaio/utils/math';
+import { useAnimationFrame, useMotionValueEvent, useScroll, useSpring } from 'motion/react';
+import { useEffect, useMemo, useRef } from 'react';
+
+const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
+const clamp = (min: number, max: number, value: number): number => Math.min(max, Math.max(min, value));
 
 type SupportedEdgeUnit = 'px' | 'vw' | 'vh' | '%';
 type EdgeUnit = `${number}${SupportedEdgeUnit}`;
@@ -73,72 +75,61 @@ function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): 
     );
 }
 
-function interpolateSequence(points: number[], t: number): number {
-    if (points.length === 0) return 0;
-    if (points.length === 1) return points[0];
+// One interpolation channel per bezier component, pre-extended with duplicated
+// boundary points ([first, ...points, last]) so the hot path allocates nothing.
+type BezierChannels = [number[], number[], number[]];
 
-    // Clamp t to [0, 1]
+interface WaveChannels {
+    left: BezierChannels;
+    right: BezierChannels;
+}
+
+function extendPoints(points: number[]): number[] {
+    return [points[0], ...points, points[points.length - 1]];
+}
+
+function extractChannels(configs: WaveConfig[]): WaveChannels {
+    const channel = (side: keyof WaveConfig, component: number) =>
+        extendPoints(configs.map((c) => c[side][component]));
+
+    return {
+        left: [channel('left', 0), channel('left', 1), channel('left', 2)],
+        right: [channel('right', 0), channel('right', 1), channel('right', 2)],
+    };
+}
+
+function interpolateExtended(extended: number[], t: number): number {
+    const count = extended.length - 2; // number of original points
+    if (count <= 0) return 0;
+    if (count === 1) return extended[1];
+
     t = clamp(0, 1, t);
+    if (t === 1) return extended[count];
 
-    // For t = 1, return the last point
-    if (t === 1) return points[points.length - 1];
-
-    // Extend points array with better boundary handling
-    const extendedPoints = [
-        points[0], // First control point
-        ...points, // Original points
-        points[points.length - 1], // Last control point
-    ];
-
-    // Calculate segment index
-    const segments = points.length - 1;
+    const segments = count - 1;
     const segmentT = t * segments;
     const segment = Math.floor(segmentT);
     const localT = segmentT - segment;
 
-    // Get the four points needed for interpolation
-    const p0 = extendedPoints[segment];
-    const p1 = extendedPoints[segment + 1];
-    const p2 = extendedPoints[segment + 2];
-    const p3 = extendedPoints[Math.min(segment + 3, extendedPoints.length - 1)];
+    const p0 = extended[segment];
+    const p1 = extended[segment + 1];
+    const p2 = extended[segment + 2];
+    const p3 = extended[Math.min(segment + 3, extended.length - 1)];
 
     return catmullRom(p0, p1, p2, p3, localT);
 }
 
-function interpolateBezierConfig(configs: BezierConfig[], t: number): BezierConfig {
-    // Extract individual components into separate arrays
-    const yCoords = configs.map((c) => c[0]);
-    const xOffsets = configs.map((c) => c[1]);
-    const yOffsets = configs.map((c) => c[2]);
-
-    // Interpolate each component separately
-    return [interpolateSequence(yCoords, t), interpolateSequence(xOffsets, t), interpolateSequence(yOffsets, t)];
+function interpolateInto(target: WaveConfig, channels: WaveChannels, t: number): void {
+    for (let i = 0; i < 3; i++) {
+        target.left[i] = interpolateExtended(channels.left[i], t);
+        target.right[i] = interpolateExtended(channels.right[i], t);
+    }
 }
 
-function interpolateWaveConfig(configs: WaveConfig[], t: number): WaveConfig {
-    // Extract left and right configs separately
-    const leftConfigs = configs.map((c) => c.left);
-    const rightConfigs = configs.map((c) => c.right);
-
-    return {
-        left: interpolateBezierConfig(leftConfigs, t),
-        right: interpolateBezierConfig(rightConfigs, t),
-    };
-}
-
-function lerpBezier(start: BezierConfig, end: BezierConfig, t: number): BezierConfig {
-    return [lerp(start[0], end[0], t), lerp(start[1], end[1], t), lerp(start[2], end[2], t)];
-}
-
-function lerpBeziers(start: WaveConfig, end: WaveConfig, t: number): WaveConfig {
-    try {
-        return {
-            left: lerpBezier(start.left, end.left, t),
-            right: lerpBezier(start.right, end.right, t),
-        };
-    } catch (error) {
-        console.error(error, start, end, t);
-        return start;
+function lerpInto(target: WaveConfig, start: WaveConfig, end: WaveConfig, t: number): void {
+    for (let i = 0; i < 3; i++) {
+        target.left[i] = lerp(start.left[i], end.left[i], t);
+        target.right[i] = lerp(start.right[i], end.right[i], t);
     }
 }
 
@@ -196,9 +187,20 @@ function drawWavePath(
     }
 }
 
+function drawDebug(ctx: CanvasRenderingContext2D, width: number, height: number, scrollProgress: number) {
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#f00';
+    ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
+}
+
 export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: { waveConfig?: WaveAnimation }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+    const sizeRef = useRef({ width: 0, height: 0, dpr: 1 });
+    const needsRedrawRef = useRef(true);
+    const reducedMotionRef = useRef(false);
+    const scratchRef = useRef<WaveConfig>({ left: [0, 0, 0], right: [0, 0, 0] });
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -207,99 +209,107 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
 
     const smoothProgress = useSpring(scrollYProgress, { damping: 80, mass: 0.27, stiffness: 250 });
 
-    const [dpr, setDpr] = useState(1);
+    const channels = useMemo(() => extractChannels(curveConfig.configs), [curveConfig.configs]);
+
+    // Redraw when the config itself changes (fill, stroke, configs, ...).
+    useEffect(() => {
+        needsRedrawRef.current = true;
+    }, [curveConfig, channels]);
 
     useEffect(() => {
-        setDpr(window.devicePixelRatio || 1);
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const update = () => {
+            reducedMotionRef.current = mediaQuery.matches;
+            needsRedrawRef.current = true;
+        };
+        update();
+        mediaQuery.addEventListener('change', update);
+        return () => mediaQuery.removeEventListener('change', update);
     }, []);
 
     useEffect(() => {
-        const handleResize = () => {
-            const canvas = canvasRef.current;
-            // const overlayCanvas = overlayCanvasRef.current;
-            const container = containerRef.current;
-            if (!canvas || !container) return;
+        const container = containerRef.current;
+        const canvas = canvasRef.current;
+        if (!container || !canvas) return;
 
+        ctxRef.current = canvas.getContext('2d');
+
+        const resize = () => {
+            const dpr = window.devicePixelRatio || 1;
             const width = container.clientWidth;
             const height = container.clientHeight;
+            sizeRef.current = { width, height, dpr };
 
-            // Set display size
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-
-            // Set actual size in memory
+            // Setting width/height resets the canvas, so this must stay out of the draw loop.
             canvas.width = width * dpr;
             canvas.height = height * dpr;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            needsRedrawRef.current = true;
         };
 
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [dpr]);
+        resize();
+        const observer = new ResizeObserver(resize);
+        observer.observe(container);
+        return () => observer.disconnect();
+    }, []);
 
-    const drawWave = (canvas: HTMLCanvasElement | null, config: WaveConfig, fillStyle: string) => {
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+    useMotionValueEvent(smoothProgress, 'change', () => {
+        if (!reducedMotionRef.current) {
+            needsRedrawRef.current = true;
+        }
+    });
+
+    useAnimationFrame(() => {
+        if (!needsRedrawRef.current) return;
+
+        const canvas = canvasRef.current;
+        const ctx = ctxRef.current;
+        const configs = curveConfig.configs;
+        if (!canvas || !ctx || configs.length === 0) return;
+
+        needsRedrawRef.current = false;
+
+        const sp = reducedMotionRef.current ? 0.5 : clamp(0, 1, smoothProgress.get());
+
+        let targetConfig: WaveConfig;
+        if (configs.length === 1) {
+            targetConfig = configs[0];
+        } else if (configs.length === 2) {
+            lerpInto(scratchRef.current, configs[0], configs[1], sp);
+            targetConfig = scratchRef.current;
+        } else {
+            // Catmull-Rom interpolation for 3+ configs
+            interpolateInto(scratchRef.current, channels, sp);
+            targetConfig = scratchRef.current;
+        }
+
+        const { width, height, dpr } = sizeRef.current;
 
         // Reset transformation to ensure no accumulation from previous frames.
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        // Clear the entire canvas using its full size in device pixels.
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Apply scaling for HiDPI rendering.
         ctx.scale(dpr, dpr);
 
-        // Set styles for drawing.
-        ctx.fillStyle = fillStyle;
+        ctx.fillStyle = curveConfig.fill ?? defaultCurveConfig.fill;
         ctx.strokeStyle = curveConfig.strokeStyle ?? defaultCurveConfig.strokeStyle!;
         ctx.lineWidth = curveConfig.strokeWidth ?? defaultCurveConfig.strokeWidth!;
-        // ctx.setLineDash([4, 8]);
 
         drawWavePath(
             ctx,
-            config,
+            targetConfig,
             curveConfig.curveAmount ?? 1,
             curveConfig.offsetLeft ?? 0,
             curveConfig.offsetRight ?? 0,
-            canvas.width / dpr,
-            canvas.height / dpr,
+            width,
+            height,
             curveConfig.flip ?? false,
         );
-    };
 
-    const drawDebug = (canvas: HTMLCanvasElement, scrollProgress: number) => {
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.font = '12px monospace';
-        ctx.fillStyle = '#f00';
-        ctx.fillText(
-            scrollProgress.toFixed(3),
-            canvas.width / dpr - 50,
-            clamp(20, canvas.height / dpr, (scrollProgress * canvas.height) / dpr),
-        );
-    };
-
-    // Modified animation frame handling
-    useAnimationFrame(() => {
-        const sp = clamp(0, 1, smoothProgress.get());
-        const configCount = curveConfig.configs.length;
-
-        const targetConfig = (() => {
-            // Handle special cases
-            if (configCount <= 1) return curveConfig.configs[0];
-            if (configCount === 2) return lerpBeziers(curveConfig.configs[0], curveConfig.configs[1], sp);
-
-            // Use Catmull-Rom interpolation for 3+ configs
-            return interpolateWaveConfig(curveConfig.configs, sp);
-        })();
-
-        drawWave(canvasRef.current, targetConfig, curveConfig.fill ?? defaultCurveConfig.fill!);
-
-        // Draw debug info if enabled
-        if (curveConfig.debug && canvasRef.current) {
-            drawDebug(canvasRef.current, sp);
+        if (curveConfig.debug) {
+            drawDebug(ctx, width, height, sp);
         }
     });
 

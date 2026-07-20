@@ -1,2 +1,248 @@
-'use strict';var react=require('react'),math=require('@threeaio/utils/math'),jsxRuntime=require('react/jsx-runtime');var Hr=Object.defineProperty,$r=Object.defineProperties;var Ur=Object.getOwnPropertyDescriptors;var ue=Object.getOwnPropertySymbols;var Tt=Object.prototype.hasOwnProperty,St=Object.prototype.propertyIsEnumerable;var bt=(e,t,r)=>t in e?Hr(e,t,{enumerable:true,configurable:true,writable:true,value:r}):e[t]=r,x=(e,t)=>{for(var r in t||(t={}))Tt.call(t,r)&&bt(e,r,t[r]);if(ue)for(var r of ue(t))St.call(t,r)&&bt(e,r,t[r]);return e},E=(e,t)=>$r(e,Ur(t));var k=(e,t)=>{var r={};for(var o in e)Tt.call(e,o)&&t.indexOf(o)<0&&(r[o]=e[o]);if(e!=null&&ue)for(var o of ue(e))t.indexOf(o)<0&&St.call(e,o)&&(r[o]=e[o]);return r};function X(e){let t=react.useRef(null);return t.current===null&&(t.current=e()),t.current}var J=react.createContext({transformPagePoint:e=>e,isStatic:false,reducedMotion:"never"});var wt=typeof window!="undefined";var pe=wt?react.useLayoutEffect:react.useEffect;var A=e=>e;var R=A,L=A;process.env.NODE_ENV!=="production"&&(R=(e,t)=>{!e&&typeof console!="undefined"&&console.warn(t);},L=(e,t)=>{if(!e)throw new Error(t)});var ne={useManualTiming:false};var se=["read","resolveKeyframes","update","preRender","render","postRender"];function Et(e,t){let r=new Set,o=new Set,n=false,s=false,i=new WeakSet,a={delta:0,timestamp:0,isProcessing:false};function l(f){i.has(f)&&(c.schedule(f),e()),f(a);}let c={schedule:(f,u=false,p=false)=>{let v=p&&n?r:o;return u&&i.add(f),v.has(f)||v.add(f),f},cancel:f=>{o.delete(f),i.delete(f);},process:f=>{if(a=f,n){s=true;return}n=true,[r,o]=[o,r],r.forEach(l),r.clear(),n=false,s&&(s=false,c.process(f));}};return c}var Zr=40;function Mt(e,t){let r=false,o=true,n={delta:0,timestamp:0,isProcessing:false},s=()=>r=true,i=se.reduce((d,S)=>(d[S]=Et(s),d),{}),{read:a,resolveKeyframes:m,update:l,preRender:c,render:f,postRender:u}=i,p=()=>{let d=performance.now();r=false,(n.delta=o?1e3/60:Math.max(Math.min(d-n.timestamp,Zr),1)),n.timestamp=d,n.isProcessing=true,a.process(n),m.process(n),l.process(n),c.process(n),f.process(n),u.process(n),n.isProcessing=false,r&&t&&(o=false,e(p));},y=()=>{r=true,o=true,n.isProcessing||e(p);};return {schedule:se.reduce((d,S)=>{let P=i[S];return d[S]=(D,h=false,w=false)=>(r||y(),P.schedule(D,h,w)),d},{}),cancel:d=>{for(let S=0;S<se.length;S++)i[se[S]].cancel(d);},state:n,steps:i}}var{schedule:M,cancel:B,state:N}=Mt(typeof requestAnimationFrame!="undefined"?requestAnimationFrame:A,true);var At=new Set;function de(e,t,r){e||At.has(t)||(console.warn(t),At.add(t));}var Jr=e=>t=>typeof t=="string"&&t.startsWith(e);var Qr=Jr("var(--"),Ct=e=>Qr(e)?eo.test(e.split("/*")[0].trim()):false,eo=/var\(--(?:[\w-]+\s*|[\w-]+\s*,(?:\s*[^)(\s]|\s*\((?:[^)(]|\([^)(]*\))*\))+\s*)\)$/iu;var Ue=["transformPerspective","x","y","z","translateX","translateY","translateZ","scale","scaleX","scaleY","rotate","rotateX","rotateY","rotateZ","skew","skewX","skewY"];new Set(Ue);var Xe=e=>!!(e&&e.getVelocity);var C=(e,t,r)=>r>t?t:r<e?e:r;var he={test:e=>typeof e=="number",parse:parseFloat,transform:e=>e},ge=E(x({},he),{transform:e=>C(0,1,e)});E(x({},he),{default:1});var to=e=>({test:t=>typeof t=="string"&&t.endsWith(e)&&t.split(" ").length===1,parse:parseFloat,transform:t=>`${t}${e}`});var Q=to("%");E(x({},Q),{parse:e=>Q.parse(e)/100,transform:e=>Q.transform(e*100)});var xe;function ro(){xe=void 0;}var I={now:()=>(xe===void 0&&I.set(N.isProcessing||ne.useManualTiming?N.timestamp:performance.now()),xe),set:e=>{xe=e,queueMicrotask(ro);}};function Ot(e,t){e.indexOf(t)===-1&&e.push(t);}function Pt(e,t){let r=e.indexOf(t);r>-1&&e.splice(r,1);}var ve=class{constructor(){this.subscriptions=[];}add(t){return Ot(this.subscriptions,t),()=>Pt(this.subscriptions,t)}notify(t,r,o){let n=this.subscriptions.length;if(n)if(n===1)this.subscriptions[0](t,r,o);else for(let s=0;s<n;s++){let i=this.subscriptions[s];i&&i(t,r,o);}}getSize(){return this.subscriptions.length}clear(){this.subscriptions.length=0;}};function ee(e,t){return t?e*(1e3/t):0}var Dt=30,oo=e=>!isNaN(parseFloat(e)),qe=class{constructor(t,r={}){this.version="12.4.1",this.canTrackVelocity=null,this.events={},this.updateAndNotify=(o,n=true)=>{let s=I.now();this.updatedAt!==s&&this.setPrevFrameValue(),this.prev=this.current,this.setCurrent(o),this.current!==this.prev&&this.events.change&&this.events.change.notify(this.current),n&&this.events.renderRequest&&this.events.renderRequest.notify(this.current);},this.hasAnimated=false,this.setCurrent(t),this.owner=r.owner;}setCurrent(t){this.current=t,this.updatedAt=I.now(),this.canTrackVelocity===null&&t!==void 0&&(this.canTrackVelocity=oo(this.current));}setPrevFrameValue(t=this.current){this.prevFrameValue=t,this.prevUpdatedAt=this.updatedAt;}onChange(t){return process.env.NODE_ENV!=="production"&&de(false,'value.onChange(callback) is deprecated. Switch to value.on("change", callback).'),this.on("change",t)}on(t,r){this.events[t]||(this.events[t]=new ve);let o=this.events[t].add(r);return t==="change"?()=>{o(),M.read(()=>{this.events.change.getSize()||this.stop();});}:o}clearListeners(){for(let t in this.events)this.events[t].clear();}attach(t,r){this.passiveEffect=t,this.stopPassiveEffect=r;}set(t,r=true){!r||!this.passiveEffect?this.updateAndNotify(t,r):this.passiveEffect(t,this.updateAndNotify);}setWithVelocity(t,r,o){this.set(r),this.prev=void 0,this.prevFrameValue=t,this.prevUpdatedAt=this.updatedAt-o;}jump(t,r=true){this.updateAndNotify(t),this.prev=t,this.prevUpdatedAt=this.prevFrameValue=void 0,r&&this.stop(),this.stopPassiveEffect&&this.stopPassiveEffect();}get(){return this.current}getPrevious(){return this.prev}getVelocity(){let t=I.now();if(!this.canTrackVelocity||this.prevFrameValue===void 0||t-this.updatedAt>Dt)return 0;let r=Math.min(this.updatedAt-this.prevUpdatedAt,Dt);return ee(parseFloat(this.current)-parseFloat(this.prevFrameValue),r)}start(t){return this.stop(),new Promise(r=>{this.hasAnimated=true,this.animation=t(r),this.events.animationStart&&this.events.animationStart.notify();}).then(()=>{this.events.animationComplete&&this.events.animationComplete.notify(),this.clearAnimation();})}stop(){this.animation&&(this.animation.stop(),this.events.animationCancel&&this.events.animationCancel.notify()),this.clearAnimation();}isAnimating(){return !!this.animation}clearAnimation(){delete this.animation;}destroy(){this.clearListeners(),this.stop(),this.stopPassiveEffect&&this.stopPassiveEffect();}};function q(e,t){return new qe(e,t)}function Rt(e){let t;return ()=>(t===void 0&&(t=e()),t)}var It=Rt(()=>window.ScrollTimeline!==void 0);var Y=e=>e*1e3,W=e=>e/1e3;function ye(e){return typeof e=="function"}var zt=e=>Array.isArray(e)&&typeof e[0]=="number";var K=(e,t,r)=>{let o=t-e;return o===0?1:(r-e)/o};var Wt=(e,t,r=10)=>{let o="",n=Math.max(Math.round(t/r),2);for(let s=0;s<n;s++)o+=e(K(0,n-1,s))+", ";return `linear(${o.substring(0,o.length-2)})`};var kt=(e,t,r)=>(((1-3*r+3*t)*e+(3*r-6*t))*e+3*t)*e,no=1e-7,so=12;function io(e,t,r,o,n){let s,i,a=0;do i=t+(r-t)/2,s=kt(i,o,n)-e,s>0?r=i:t=i;while(Math.abs(s)>no&&++a<so);return i}function _(e,t,r,o){if(e===t&&r===o)return A;let n=s=>io(s,0,1,e,r);return s=>s===0||s===1?s:kt(n(s),t,o)}var be=e=>t=>t<=.5?e(2*t)/2:(2-e(2*(1-t)))/2;var Te=e=>t=>1-e(1-t);var Ye=_(.33,1.53,.69,.99),ie=Te(Ye),Lt=be(ie);var Bt=e=>(e*=2)<1?.5*ie(e):.5*(2-Math.pow(2,-10*(e-1)));var Se=e=>1-Math.sin(Math.acos(e)),Nt=Te(Se),Kt=be(Se);var G=e=>Math.round(e*1e5)/1e5;var we=/-?(?:\d+(?:\.\d+)?|\.\d+)/gu;function _t(e){return e==null}var Gt=/^(?:#[\da-f]{3,8}|(?:rgb|hsl)a?\((?:-?[\d.]+%?[,\s]+){2}-?[\d.]+%?\s*(?:[,/]\s*)?(?:\b\d+(?:\.\d+)?|\.\d+)?%?\))$/iu;var te=(e,t)=>r=>!!(typeof r=="string"&&Gt.test(r)&&r.startsWith(e)||t&&!_t(r)&&Object.prototype.hasOwnProperty.call(r,t)),Ee=(e,t,r)=>o=>{if(typeof o!="string")return o;let[n,s,i,a]=o.match(we);return {[e]:parseFloat(n),[t]:parseFloat(s),[r]:parseFloat(i),alpha:a!==void 0?parseFloat(a):1}};var ao=e=>C(0,255,e),je=E(x({},he),{transform:e=>Math.round(ao(e))}),V={test:te("rgb","red"),parse:Ee("red","green","blue"),transform:({red:e,green:t,blue:r,alpha:o=1})=>"rgba("+je.transform(e)+", "+je.transform(t)+", "+je.transform(r)+", "+G(ge.transform(o))+")"};function lo(e){let t="",r="",o="",n="";return e.length>5?(t=e.substring(1,3),r=e.substring(3,5),o=e.substring(5,7),n=e.substring(7,9)):(t=e.substring(1,2),r=e.substring(2,3),o=e.substring(3,4),n=e.substring(4,5),t+=t,r+=r,o+=o,n+=n),{red:parseInt(t,16),green:parseInt(r,16),blue:parseInt(o,16),alpha:n?parseInt(n,16)/255:1}}var ae={test:te("#"),parse:lo,transform:V.transform};var H={test:te("hsl","hue"),parse:Ee("hue","saturation","lightness"),transform:({hue:e,saturation:t,lightness:r,alpha:o=1})=>"hsla("+Math.round(e)+", "+Q.transform(G(t))+", "+Q.transform(G(r))+", "+G(ge.transform(o))+")"};var j={test:e=>V.test(e)||ae.test(e)||H.test(e),parse:e=>V.test(e)?V.parse(e):H.test(e)?H.parse(e):ae.parse(e),transform:e=>typeof e=="string"?e:e.hasOwnProperty("red")?V.transform(e):H.transform(e)};var Ht=/(?:#[\da-f]{3,8}|(?:rgb|hsl)a?\((?:-?[\d.]+%?[,\s]+){2}-?[\d.]+%?\s*(?:[,/]\s*)?(?:\b\d+(?:\.\d+)?|\.\d+)?%?\))/giu;function fo(e){var t,r;return isNaN(e)&&typeof e=="string"&&(((t=e.match(we))===null||t===void 0?void 0:t.length)||0)+(((r=e.match(Ht))===null||r===void 0?void 0:r.length)||0)>0}var Ut="number",Xt="color",co="var",mo="var(",$t="${}",uo=/var\s*\(\s*--(?:[\w-]+\s*|[\w-]+\s*,(?:\s*[^)(\s]|\s*\((?:[^)(]|\([^)(]*\))*\))+\s*)\)|#[\da-f]{3,8}|(?:rgb|hsl)a?\((?:-?[\d.]+%?[,\s]+){2}-?[\d.]+%?\s*(?:[,/]\s*)?(?:\b\d+(?:\.\d+)?|\.\d+)?%?\)|-?(?:\d+(?:\.\d+)?|\.\d+)/giu;function le(e){let t=e.toString(),r=[],o={color:[],number:[],var:[]},n=[],s=0,a=t.replace(uo,m=>(j.test(m)?(o.color.push(s),n.push(Xt),r.push(j.parse(m))):m.startsWith(mo)?(o.var.push(s),n.push(co),r.push(m)):(o.number.push(s),n.push(Ut),r.push(parseFloat(m))),++s,$t)).split($t);return {values:r,split:a,indexes:o,types:n}}function qt(e){return le(e).values}function Yt(e){let{split:t,types:r}=le(e),o=t.length;return n=>{let s="";for(let i=0;i<o;i++)if(s+=t[i],n[i]!==void 0){let a=r[i];a===Ut?s+=G(n[i]):a===Xt?s+=j.transform(n[i]):s+=n[i];}return s}}var po=e=>typeof e=="number"?0:e;function ho(e){let t=qt(e);return Yt(e)(t.map(po))}var Me={test:fo,parse:qt,createTransformer:Yt,getAnimatableNone:ho};var go=new Set(["x","y","z"]),xo=Ue.filter(e=>!go.has(e));function Jt(e){let t=[];return xo.forEach(r=>{let o=e.getValue(r);o!==void 0&&(t.push([r,o.get()]),o.set(r.startsWith("scale")?1:0));}),t}var Z=new Set,Ze=false,Je=false;function Qt(){if(Je){let e=Array.from(Z).filter(o=>o.needsMeasurement),t=new Set(e.map(o=>o.element)),r=new Map;t.forEach(o=>{let n=Jt(o);n.length&&(r.set(o,n),o.render());}),e.forEach(o=>o.measureInitialState()),t.forEach(o=>{o.render();let n=r.get(o);n&&n.forEach(([s,i])=>{var a;(a=o.getValue(s))===null||a===void 0||a.set(i);});}),e.forEach(o=>o.measureEndState()),e.forEach(o=>{o.suspendedScrollY!==void 0&&window.scrollTo(0,o.suspendedScrollY);});}Je=false,Ze=false,Z.forEach(e=>e.complete()),Z.clear();}function er(){Z.forEach(e=>{e.readKeyframes(),e.needsMeasurement&&(Je=true);});}function tr(){er(),Qt();}var Ce=class{constructor(t,r,o,n,s,i=false){this.isComplete=false,this.isAsync=false,this.needsMeasurement=false,this.isScheduled=false,this.unresolvedKeyframes=[...t],this.onComplete=r,this.name=o,this.motionValue=n,this.element=s,this.isAsync=i;}scheduleResolve(){this.isScheduled=true,this.isAsync?(Z.add(this),Ze||(Ze=true,M.read(er),M.resolveKeyframes(Qt))):(this.readKeyframes(),this.complete());}readKeyframes(){let{unresolvedKeyframes:t,name:r,element:o,motionValue:n}=this;for(let s=0;s<t.length;s++)if(t[s]===null)if(s===0){let i=n==null?void 0:n.get(),a=t[t.length-1];if(i!==void 0)t[0]=i;else if(o&&r){let m=o.readValue(r,a);m!=null&&(t[0]=m);}t[0]===void 0&&(t[0]=a),n&&i===void 0&&n.set(t[0]);}else t[s]=t[s-1];}setFinalKeyframe(){}measureInitialState(){}renderEndStyles(){}measureEndState(){}complete(){this.isComplete=true,this.onComplete(this.unresolvedKeyframes,this.finalKeyframe),Z.delete(this);}cancel(){this.isComplete||(this.isScheduled=false,Z.delete(this));}resume(){this.isComplete||this.scheduleResolve();}};var Qe=(e,t)=>t==="zIndex"?false:!!(typeof e=="number"||Array.isArray(e)||typeof e=="string"&&(Me.test(e)||e==="0")&&!e.startsWith("url("));function vo(e){let t=e[0];if(e.length===1)return  true;for(let r=0;r<e.length;r++)if(e[r]!==t)return  true}function rr(e,t,r,o){let n=e[0];if(n===null)return  false;if(t==="display"||t==="visibility")return  true;let s=e[e.length-1],i=Qe(n,t),a=Qe(s,t);return R(i===a,`You are trying to animate ${t} from "${n}" to "${s}". ${n} is not an animatable value - to enable this animation set ${n} to a value animatable to ${s} via the \`style\` property.`),!i||!a?false:vo(e)||(r==="spring"||ye(r))&&o}var yo=e=>e!==null;function Oe(e,{repeat:t,repeatType:r="loop"},o){let n=e.filter(yo),s=t&&r!=="loop"&&t%2===1?0:n.length-1;return !s||o===void 0?n[s]:o}var bo=40,Pe=class{constructor(m){var l=m,{autoplay:t=true,delay:r=0,type:o="keyframes",repeat:n=0,repeatDelay:s=0,repeatType:i="loop"}=l,a=k(l,["autoplay","delay","type","repeat","repeatDelay","repeatType"]);this.isStopped=false,this.hasAttemptedResolve=false,this.createdAt=I.now(),this.options=x({autoplay:t,delay:r,type:o,repeat:n,repeatDelay:s,repeatType:i},a),this.updateFinishedPromise();}calcStartTime(){return this.resolvedAt?this.resolvedAt-this.createdAt>bo?this.resolvedAt:this.createdAt:this.createdAt}get resolved(){return !this._resolved&&!this.hasAttemptedResolve&&tr(),this._resolved}onKeyframesResolved(t,r){this.resolvedAt=I.now(),this.hasAttemptedResolve=true;let{name:o,type:n,velocity:s,delay:i,onComplete:a,onUpdate:m,isGenerator:l}=this.options;if(!l&&!rr(t,o,n,s))if(!i){m&&m(Oe(t,this.options,r)),a&&a(),this.resolveFinishedPromise();return}else this.options.duration=0;let c=this.initPlayback(t,r);c!==false&&(this._resolved=x({keyframes:t,finalKeyframe:r},c),this.onPostResolved());}onPostResolved(){}then(t,r){return this.currentFinishedPromise.then(t,r)}flatten(){this.options.type="keyframes",this.options.ease="linear";}updateFinishedPromise(){this.currentFinishedPromise=new Promise(t=>{this.resolveFinishedPromise=t;});}};function De(e){let t=0,r=50,o=e.next(t);for(;!o.done&&t<2e4;)t+=r,o=e.next(t);return t>=2e4?1/0:t}var $=(e,t,r)=>e+(t-e)*r;function tt(e,t,r){return r<0&&(r+=1),r>1&&(r-=1),r<1/6?e+(t-e)*6*r:r<1/2?t:r<2/3?e+(t-e)*(2/3-r)*6:e}function or({hue:e,saturation:t,lightness:r,alpha:o}){e/=360,t/=100,r/=100;let n=0,s=0,i=0;if(!t)n=s=i=r;else {let a=r<.5?r*(1+t):r+t-r*t,m=2*r-a;n=tt(m,a,e+1/3),s=tt(m,a,e),i=tt(m,a,e-1/3);}return {red:Math.round(n*255),green:Math.round(s*255),blue:Math.round(i*255),alpha:o}}function re(e,t){return r=>r>0?t:e}var rt=(e,t,r)=>{let o=e*e,n=r*(t*t-o)+o;return n<0?0:Math.sqrt(n)},To=[ae,V,H],So=e=>To.find(t=>t.test(e));function nr(e){let t=So(e);if(R(!!t,`'${e}' is not an animatable color. Use the equivalent color code instead.`),!t)return  false;let r=t.parse(e);return t===H&&(r=or(r)),r}var ot=(e,t)=>{let r=nr(e),o=nr(t);if(!r||!o)return re(e,t);let n=x({},r);return s=>(n.red=rt(r.red,o.red,s),n.green=rt(r.green,o.green,s),n.blue=rt(r.blue,o.blue,s),n.alpha=$(r.alpha,o.alpha,s),V.transform(n))};var wo=(e,t)=>r=>t(e(r)),oe=(...e)=>e.reduce(wo);var Fe=new Set(["none","hidden"]);function sr(e,t){return Fe.has(e)?r=>r<=0?e:t:r=>r>=1?t:e}function Eo(e,t){return r=>$(e,t,r)}function Re(e){return typeof e=="number"?Eo:typeof e=="string"?Ct(e)?re:j.test(e)?ot:Co:Array.isArray(e)?ir:typeof e=="object"?j.test(e)?ot:Mo:re}function ir(e,t){let r=[...e],o=r.length,n=e.map((s,i)=>Re(s)(s,t[i]));return s=>{for(let i=0;i<o;i++)r[i]=n[i](s);return r}}function Mo(e,t){let r=x(x({},e),t),o={};for(let n in r)e[n]!==void 0&&t[n]!==void 0&&(o[n]=Re(e[n])(e[n],t[n]));return n=>{for(let s in o)r[s]=o[s](n);return r}}function Ao(e,t){var r;let o=[],n={color:0,var:0,number:0};for(let s=0;s<t.values.length;s++){let i=t.types[s],a=e.indexes[i][n[i]],m=(r=e.values[a])!==null&&r!==void 0?r:0;o[s]=m,n[i]++;}return o}var Co=(e,t)=>{let r=Me.createTransformer(t),o=le(e),n=le(t);return o.indexes.var.length===n.indexes.var.length&&o.indexes.color.length===n.indexes.color.length&&o.indexes.number.length>=n.indexes.number.length?Fe.has(e)&&!n.values.length||Fe.has(t)&&!o.values.length?sr(e,t):oe(ir(Ao(o,n),n.values),r):(R(true,`Complex values '${e}' and '${t}' too different to mix. Ensure all colors are of the same type, and that each contains the same quantity of number and color values. Falling back to instant transition.`),re(e,t))};function Ie(e,t,r){return typeof e=="number"&&typeof t=="number"&&typeof r=="number"?$(e,t,r):Re(e)(e,t)}var Oo=5;function Ve(e,t,r){let o=Math.max(t-Oo,0);return ee(r-e(o),t-o)}var b={stiffness:100,damping:10,mass:1,velocity:0,duration:800,bounce:.3,visualDuration:.3,restSpeed:{granular:.01,default:2},restDelta:{granular:.005,default:.5},minDuration:.01,maxDuration:10,minDamping:.05,maxDamping:1};var nt=.001;function ar({duration:e=b.duration,bounce:t=b.bounce,velocity:r=b.velocity,mass:o=b.mass}){let n,s;R(e<=Y(b.maxDuration),"Spring duration must be 10 seconds or less");let i=1-t;i=C(b.minDamping,b.maxDamping,i),e=C(b.minDuration,b.maxDuration,W(e)),i<1?(n=l=>{let c=l*i,f=c*e,u=c-r,p=ze(l,i),y=Math.exp(-f);return nt-u/p*y},s=l=>{let f=l*i*e,u=f*r+r,p=Math.pow(i,2)*Math.pow(l,2)*e,y=Math.exp(-f),v=ze(Math.pow(l,2),i);return (-n(l)+nt>0?-1:1)*((u-p)*y)/v}):(n=l=>{let c=Math.exp(-l*e),f=(l-r)*e+1;return  -1e-3+c*f},s=l=>{let c=Math.exp(-l*e),f=(r-l)*(e*e);return c*f});let a=5/e,m=Do(n,s,a);if(e=Y(e),isNaN(m))return {stiffness:b.stiffness,damping:b.damping,duration:e};{let l=Math.pow(m,2)*o;return {stiffness:l,damping:i*2*Math.sqrt(o*l),duration:e}}}var Po=12;function Do(e,t,r){let o=r;for(let n=1;n<Po;n++)o=o-e(o)/t(o);return o}function ze(e,t){return e*Math.sqrt(1-t*t)}var Ro=["duration","bounce"],Io=["stiffness","damping","mass"];function lr(e,t){return t.some(r=>e[r]!==void 0)}function Vo(e){let t=x({velocity:b.velocity,stiffness:b.stiffness,damping:b.damping,mass:b.mass,isResolvedFromDuration:false},e);if(!lr(e,Io)&&lr(e,Ro))if(e.visualDuration){let r=e.visualDuration,o=2*Math.PI/(r*1.2),n=o*o,s=2*C(.05,1,1-(e.bounce||0))*Math.sqrt(n);t=E(x({},t),{mass:b.mass,stiffness:n,damping:s});}else {let r=ar(e);t=E(x(x({},t),r),{mass:b.mass}),t.isResolvedFromDuration=true;}return t}function We(e=b.visualDuration,t=b.bounce){let r=typeof e!="object"?{visualDuration:e,keyframes:[0,1],bounce:t}:e,{restSpeed:o,restDelta:n}=r,s=r.keyframes[0],i=r.keyframes[r.keyframes.length-1],a={done:false,value:s},{stiffness:m,damping:l,mass:c,duration:f,velocity:u,isResolvedFromDuration:p}=Vo(E(x({},r),{velocity:-W(r.velocity||0)})),y=u||0,v=l/(2*Math.sqrt(m*c)),T=i-s,d=W(Math.sqrt(m/c)),S=Math.abs(T)<5;o||(o=S?b.restSpeed.granular:b.restSpeed.default),n||(n=S?b.restDelta.granular:b.restDelta.default);let P;if(v<1){let h=ze(d,v);P=w=>{let O=Math.exp(-v*d*w);return i-O*((y+v*d*T)/h*Math.sin(h*w)+T*Math.cos(h*w))};}else if(v===1)P=h=>i-Math.exp(-d*h)*(T+(y+d*T)*h);else {let h=d*Math.sqrt(v*v-1);P=w=>{let O=Math.exp(-v*d*w),g=Math.min(h*w,300);return i-O*((y+v*d*T)*Math.sinh(g)+h*T*Math.cosh(g))/h};}let D={calculatedDuration:p&&f||null,next:h=>{let w=P(h);if(p)a.done=h>=f;else {let O=0;v<1&&(O=h===0?Y(y):Ve(P,h,w));let g=Math.abs(O)<=o,F=Math.abs(i-w)<=n;a.done=g&&F;}return a.value=a.done?i:w,a},toString:()=>{let h=Math.min(De(D),2e4),w=Wt(O=>D.next(h*O).value,h,30);return h+"ms "+w}};return D}function st({keyframes:e,velocity:t=0,power:r=.8,timeConstant:o=325,bounceDamping:n=10,bounceStiffness:s=500,modifyTarget:i,min:a,max:m,restDelta:l=.5,restSpeed:c}){let f=e[0],u={done:false,value:f},p=g=>a!==void 0&&g<a||m!==void 0&&g>m,y=g=>a===void 0?m:m===void 0||Math.abs(a-g)<Math.abs(m-g)?a:m,v=r*t,T=f+v,d=i===void 0?T:i(T);d!==T&&(v=d-f);let S=g=>-v*Math.exp(-g/o),P=g=>d+S(g),D=g=>{let F=S(g),z=P(g);u.done=Math.abs(F)<=l,u.value=u.done?d:z;},h,w,O=g=>{p(u.value)&&(h=g,w=We({keyframes:[u.value,y(u.value)],velocity:Ve(P,g,u.value),damping:n,stiffness:s,restDelta:l,restSpeed:c}));};return O(0),{calculatedDuration:null,next:g=>{let F=false;return !w&&h===void 0&&(F=true,D(g),O(g)),h!==void 0&&g>=h?w.next(g-h):(!F&&D(g),u)}}}var fr=_(.42,0,1,1),cr=_(0,0,.58,1),ke=_(.42,0,.58,1);var mr=e=>Array.isArray(e)&&typeof e[0]!="number";var ur={linear:A,easeIn:fr,easeInOut:ke,easeOut:cr,circIn:Se,circInOut:Kt,circOut:Nt,backIn:ie,backInOut:Lt,backOut:Ye,anticipate:Bt},it=e=>{if(zt(e)){L(e.length===4,"Cubic bezier arrays must contain four numerical values.");let[t,r,o,n]=e;return _(t,r,o,n)}else if(typeof e=="string")return L(ur[e]!==void 0,`Invalid easing type '${e}'`),ur[e];return e};function zo(e,t,r){let o=[],n=r||Ie,s=e.length-1;for(let i=0;i<s;i++){let a=n(e[i],e[i+1]);if(t){let m=Array.isArray(t)?t[i]||A:t;a=oe(m,a);}o.push(a);}return o}function Le(e,t,{clamp:r=true,ease:o,mixer:n}={}){let s=e.length;if(L(s===t.length,"Both input and output ranges must be the same length"),s===1)return ()=>t[0];if(s===2&&t[0]===t[1])return ()=>t[1];let i=e[0]===e[1];e[0]>e[s-1]&&(e=[...e].reverse(),t=[...t].reverse());let a=zo(t,o,n),m=a.length,l=c=>{if(i&&c<e[0])return t[0];let f=0;if(m>1)for(;f<e.length-2&&!(c<e[f+1]);f++);let u=K(e[f],e[f+1],c);return a[f](u)};return r?c=>l(C(e[0],e[s-1],c)):l}function pr(e,t){let r=e[e.length-1];for(let o=1;o<=t;o++){let n=K(0,t,o);e.push($(r,1,n));}}function Be(e){let t=[0];return pr(t,e.length-1),t}function dr(e,t){return e.map(r=>r*t)}function Wo(e,t){return e.map(()=>t||ke).splice(0,e.length-1)}function fe({duration:e=300,keyframes:t,times:r,ease:o="easeInOut"}){let n=mr(o)?o.map(it):it(o),s={done:false,value:t[0]},i=dr(r&&r.length===t.length?r:Be(t),e),a=Le(i,t,{ease:Array.isArray(n)?n:Wo(t,n)});return {calculatedDuration:e,next:m=>(s.value=a(m),s.done=m>=e,s)}}var hr=e=>{let t=({timestamp:r})=>e(r);return {start:()=>M.update(t,true),stop:()=>B(t),now:()=>N.isProcessing?N.timestamp:I.now()}};var ko={decay:st,inertia:st,tween:fe,keyframes:fe,spring:We},Lo=e=>e/100,at=class extends Pe{constructor(t){super(t),this.holdTime=null,this.cancelTime=null,this.currentTime=0,this.playbackSpeed=1,this.pendingPlayState="running",this.startTime=null,this.state="idle",this.stop=()=>{if(this.resolver.cancel(),this.isStopped=true,this.state==="idle")return;this.teardown();let{onStop:m}=this.options;m&&m();};let{name:r,motionValue:o,element:n,keyframes:s}=this.options,i=(n==null?void 0:n.KeyframeResolver)||Ce,a=(m,l)=>this.onKeyframesResolved(m,l);this.resolver=new i(s,a,r,o,n),this.resolver.scheduleResolve();}flatten(){super.flatten(),this._resolved&&Object.assign(this._resolved,this.initPlayback(this._resolved.keyframes));}initPlayback(t){let{type:r="keyframes",repeat:o=0,repeatDelay:n=0,repeatType:s,velocity:i=0}=this.options,a=ye(r)?r:ko[r]||fe,m,l;a!==fe&&typeof t[0]!="number"&&(process.env.NODE_ENV!=="production"&&L(t.length===2,`Only two keyframes currently supported with spring and inertia animations. Trying to animate ${t}`),m=oe(Lo,Ie(t[0],t[1])),t=[0,100]);let c=a(E(x({},this.options),{keyframes:t}));s==="mirror"&&(l=a(E(x({},this.options),{keyframes:[...t].reverse(),velocity:-i}))),c.calculatedDuration===null&&(c.calculatedDuration=De(c));let{calculatedDuration:f}=c,u=f+n,p=u*(o+1)-n;return {generator:c,mirroredGenerator:l,mapPercentToKeyframes:m,calculatedDuration:f,resolvedDuration:u,totalDuration:p}}onPostResolved(){let{autoplay:t=true}=this.options;this.play(),this.pendingPlayState==="paused"||!t?this.pause():this.state=this.pendingPlayState;}tick(t,r=false){let{resolved:o}=this;if(!o){let{keyframes:g}=this.options;return {done:true,value:g[g.length-1]}}let{finalKeyframe:n,generator:s,mirroredGenerator:i,mapPercentToKeyframes:a,keyframes:m,calculatedDuration:l,totalDuration:c,resolvedDuration:f}=o;if(this.startTime===null)return s.next(0);let{delay:u,repeat:p,repeatType:y,repeatDelay:v,onUpdate:T}=this.options;this.speed>0?this.startTime=Math.min(this.startTime,t):this.speed<0&&(this.startTime=Math.min(t-c/this.speed,this.startTime)),r?this.currentTime=t:this.holdTime!==null?this.currentTime=this.holdTime:this.currentTime=Math.round(t-this.startTime)*this.speed;let d=this.currentTime-u*(this.speed>=0?1:-1),S=this.speed>=0?d<0:d>c;this.currentTime=Math.max(d,0),this.state==="finished"&&this.holdTime===null&&(this.currentTime=c);let P=this.currentTime,D=s;if(p){let g=Math.min(this.currentTime,c)/f,F=Math.floor(g),z=g%1;!z&&g>=1&&(z=1),z===1&&F--,F=Math.min(F,p+1),!!(F%2)&&(y==="reverse"?(z=1-z,v&&(z-=v/f)):y==="mirror"&&(D=i)),P=C(0,1,z)*f;}let h=S?{done:false,value:m[0]}:D.next(P);a&&(h.value=a(h.value));let{done:w}=h;!S&&l!==null&&(w=this.speed>=0?this.currentTime>=c:this.currentTime<=0);let O=this.holdTime===null&&(this.state==="finished"||this.state==="running"&&w);return O&&n!==void 0&&(h.value=Oe(m,this.options,n)),T&&T(h.value),O&&this.finish(),h}get duration(){let{resolved:t}=this;return t?W(t.calculatedDuration):0}get time(){return W(this.currentTime)}set time(t){t=Y(t),this.currentTime=t,this.holdTime!==null||this.speed===0?this.holdTime=t:this.driver&&(this.startTime=this.driver.now()-t/this.speed);}get speed(){return this.playbackSpeed}set speed(t){let r=this.playbackSpeed!==t;this.playbackSpeed=t,r&&(this.time=W(this.currentTime));}play(){if(this.resolver.isScheduled||this.resolver.resume(),!this._resolved){this.pendingPlayState="running";return}if(this.isStopped)return;let{driver:t=hr,onPlay:r,startTime:o}=this.options;this.driver||(this.driver=t(s=>this.tick(s))),r&&r();let n=this.driver.now();this.holdTime!==null?this.startTime=n-this.holdTime:this.startTime?this.state==="finished"&&(this.startTime=n):this.startTime=o!=null?o:this.calcStartTime(),this.state==="finished"&&this.updateFinishedPromise(),this.cancelTime=this.startTime,this.holdTime=null,this.state="running",this.driver.start();}pause(){var t;if(!this._resolved){this.pendingPlayState="paused";return}this.state="paused",this.holdTime=(t=this.currentTime)!==null&&t!==void 0?t:0;}complete(){this.state!=="running"&&this.play(),this.pendingPlayState=this.state="finished",this.holdTime=null;}finish(){this.teardown(),this.state="finished";let{onComplete:t}=this.options;t&&t();}cancel(){this.cancelTime!==null&&this.tick(this.cancelTime),this.teardown(),this.updateFinishedPromise();}teardown(){this.state="idle",this.stopDriver(),this.resolveFinishedPromise(),this.updateFinishedPromise(),this.startTime=this.cancelTime=null,this.resolver.cancel();}stopDriver(){this.driver&&(this.driver.stop(),this.driver=void 0);}sample(t){return this.startTime=0,this.tick(t,true)}};function gr(e){return new at(e)}function xr(e,t,r){var o;if(e instanceof Element)return [e];if(typeof e=="string"){let n=document;let s=(o=void 0)!==null&&o!==void 0?o:n.querySelectorAll(e);return s?Array.from(s):[]}return Array.from(e)}function lt(e,t){let r,o=()=>{let{currentTime:n}=t,i=(n===null?0:n.value)/100;r!==i&&e(i),r=i;};return M.update(o,true),()=>B(o)}var Ne=new WeakMap,U;function Bo(e,t){if(t){let{inlineSize:r,blockSize:o}=t[0];return {width:r,height:o}}else return e instanceof SVGElement&&"getBBox"in e?e.getBBox():{width:e.offsetWidth,height:e.offsetHeight}}function No({target:e,contentRect:t,borderBoxSize:r}){var o;(o=Ne.get(e))===null||o===void 0||o.forEach(n=>{n({target:e,contentSize:t,get size(){return Bo(e,r)}});});}function Ko(e){e.forEach(No);}function _o(){typeof ResizeObserver!="undefined"&&(U=new ResizeObserver(Ko));}function vr(e,t){U||_o();let r=xr(e);return r.forEach(o=>{let n=Ne.get(o);n||(n=new Set,Ne.set(o,n)),n.add(t),U==null||U.observe(o);}),()=>{r.forEach(o=>{let n=Ne.get(o);n==null||n.delete(t),n!=null&&n.size||U==null||U.unobserve(o);});}}var Ke=new Set,ce;function Go(){ce=()=>{let e={width:window.innerWidth,height:window.innerHeight},t={target:window,size:e,contentSize:e};Ke.forEach(r=>r(t));},window.addEventListener("resize",ce);}function yr(e){return Ke.add(e),ce||Go(),()=>{Ke.delete(e),!Ke.size&&ce&&(ce=void 0);}}function br(e,t){return typeof e=="function"?yr(e):vr(e,t)}var Ho=50,Tr=()=>({current:0,offset:[],progress:0,scrollLength:0,targetOffset:0,targetLength:0,containerLength:0,velocity:0}),wr=()=>({time:0,x:Tr(),y:Tr()}),$o={x:{length:"Width",position:"Left"},y:{length:"Height",position:"Top"}};function Sr(e,t,r,o){let n=r[t],{length:s,position:i}=$o[t],a=n.current,m=r.time;n.current=e[`scroll${i}`],n.scrollLength=e[`scroll${s}`]-e[`client${s}`],n.offset.length=0,n.offset[0]=0,n.offset[1]=n.scrollLength,n.progress=K(0,n.scrollLength,n.current);let l=o-m;n.velocity=l>Ho?0:ee(n.current-a,l);}function Er(e,t,r){Sr(e,"x",t,r),Sr(e,"y",t,r),t.time=r;}function Mr(e,t){let r={x:0,y:0},o=e;for(;o&&o!==t;)if(o instanceof HTMLElement)r.x+=o.offsetLeft,r.y+=o.offsetTop,o=o.offsetParent;else if(o.tagName==="svg"){let n=o.getBoundingClientRect();o=o.parentElement;let s=o.getBoundingClientRect();r.x+=n.left-s.left,r.y+=n.top-s.top;}else if(o instanceof SVGGraphicsElement){let{x:n,y:s}=o.getBBox();r.x+=n,r.y+=s;let i=null,a=o.parentNode;for(;!i;)a.tagName==="svg"&&(i=a),a=o.parentNode;o=i;}else break;return r}var _e={start:0,center:.5,end:1};function ft(e,t,r=0){let o=0;if(e in _e&&(e=_e[e]),typeof e=="string"){let n=parseFloat(e);e.endsWith("px")?o=n:e.endsWith("%")?e=n/100:e.endsWith("vw")?o=n/100*document.documentElement.clientWidth:e.endsWith("vh")?o=n/100*document.documentElement.clientHeight:e=n;}return typeof e=="number"&&(o=t*e),r+o}var Uo=[0,0];function Ar(e,t,r,o){let n=Array.isArray(e)?e:Uo,s=0,i=0;return typeof e=="number"?n=[e,e]:typeof e=="string"&&(e=e.trim(),e.includes(" ")?n=e.split(" "):n=[e,_e[e]?e:"0"]),s=ft(n[0],r,o),i=ft(n[1],t),s-i}var Cr={All:[[0,0],[1,1]]};var Xo={x:0,y:0};function qo(e){return "getBBox"in e&&e.tagName!=="svg"?e.getBBox():{width:e.clientWidth,height:e.clientHeight}}function Or(e,t,r){let{offset:o=Cr.All}=r,{target:n=e,axis:s="y"}=r,i=s==="y"?"height":"width",a=n!==e?Mr(n,e):Xo,m=n===e?{width:e.scrollWidth,height:e.scrollHeight}:qo(n),l={width:e.clientWidth,height:e.clientHeight};t[s].offset.length=0;let c=!t[s].interpolate,f=o.length;for(let u=0;u<f;u++){let p=Ar(o[u],l[i],m[i],a[s]);!c&&p!==t[s].interpolatorOffsets[u]&&(c=true),t[s].offset[u]=p;}c&&(t[s].interpolate=Le(t[s].offset,Be(o),{clamp:false}),t[s].interpolatorOffsets=[...t[s].offset]),t[s].progress=C(0,1,t[s].interpolate(t[s].current));}function Yo(e,t=e,r){if(r.x.targetOffset=0,r.y.targetOffset=0,t!==e){let o=t;for(;o&&o!==e;)r.x.targetOffset+=o.offsetLeft,r.y.targetOffset+=o.offsetTop,o=o.offsetParent;}r.x.targetLength=t===e?t.scrollWidth:t.clientWidth,r.y.targetLength=t===e?t.scrollHeight:t.clientHeight,r.x.containerLength=e.clientWidth,r.y.containerLength=e.clientHeight,process.env.NODE_ENV!=="production"&&e&&t&&t!==e&&de(getComputedStyle(e).position!=="static","Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly.");}function Pr(e,t,r,o={}){return {measure:()=>Yo(e,o.target,r),update:n=>{Er(e,r,n),(o.offset||o.target)&&Or(e,r,o);},notify:()=>t(r)}}var me=new WeakMap,Dr=new WeakMap,ct=new WeakMap,Fr=e=>e===document.documentElement?window:e;function Ge(e,o={}){var n=o,{container:t=document.documentElement}=n,r=k(n,["container"]);let s=ct.get(t);s||(s=new Set,ct.set(t,s));let i=wr(),a=Pr(t,e,i,r);if(s.add(a),!me.has(t)){let l=()=>{for(let y of s)y.measure();},c=()=>{for(let y of s)y.update(N.timestamp);},f=()=>{for(let y of s)y.notify();},u=()=>{M.read(l,false,true),M.read(c,false,true),M.update(f,false,true);};me.set(t,u);let p=Fr(t);window.addEventListener("resize",u,{passive:true}),t!==document.documentElement&&Dr.set(t,br(t,u)),p.addEventListener("scroll",u,{passive:true});}let m=me.get(t);return M.read(m,false,true),()=>{var l;B(m);let c=ct.get(t);if(!c||(c.delete(a),c.size))return;let f=me.get(t);me.delete(t),f&&(Fr(t).removeEventListener("scroll",f),(l=Dr.get(t))===null||l===void 0||l(),window.removeEventListener("resize",f));}}function jo({source:e,container:t,axis:r="y"}){e&&(t=e);let o={value:0},n=Ge(s=>{o.value=s[r].progress*100;},{container:t,axis:r});return {currentTime:o,cancel:n}}var mt=new Map;function Rr({source:e,container:t=document.documentElement,axis:r="y"}={}){e&&(t=e),mt.has(t)||mt.set(t,{});let o=mt.get(t);return o[r]||(o[r]=It()?new ScrollTimeline({source:t,axis:r}):jo({source:t,axis:r})),o[r]}function Zo(e){return e.length===2}function Ir(e){return e&&(e.target||e.offset)}function Jo(e,t){return Zo(e)||Ir(t)?Ge(r=>{e(r[t.axis].progress,r);},t):lt(e,Rr(t))}function Qo(e,t){if(e.flatten(),Ir(t))return e.pause(),Ge(r=>{e.time=e.duration*r[t.axis].progress;},t);{let r=Rr(t);return e.attachTimeline?e.attachTimeline(r,o=>(o.pause(),lt(n=>{o.time=o.duration*n;},r))):A}}function Vr(e,o={}){var n=o,{axis:t="y"}=n,r=k(n,["axis"]);let s=x({axis:t},r);return typeof e=="function"?Jo(e,s):Qo(e,s)}function zr(e,t){R(!!(!t||t.current),`You have defined a ${e} options but the provided ref is not yet hydrated, probably because it's defined higher up the tree. Try calling useScroll() in the same component as the ref, or setting its \`layoutEffect: false\` option.`);}var tn=()=>({scrollX:q(0),scrollY:q(0),scrollXProgress:q(0),scrollYProgress:q(0)});function ut(n={}){var s=n,{container:e,target:t,layoutEffect:r=true}=s,o=k(s,["container","target","layoutEffect"]);let i=X(tn);return (r?pe:react.useEffect)(()=>(zr("target",t),zr("container",e),Vr((m,{x:l,y:c})=>{i.scrollX.set(l.current),i.scrollXProgress.set(l.progress),i.scrollY.set(c.current),i.scrollYProgress.set(c.progress);},E(x({},o),{container:(e==null?void 0:e.current)||void 0,target:(t==null?void 0:t.current)||void 0}))),[e,t,JSON.stringify(o.offset)]),i}function Wr(e){let t=X(()=>q(e)),{isStatic:r}=react.useContext(J);if(r){let[,o]=react.useState(e);react.useEffect(()=>t.on("change",o),[]);}return t}function dt(e,t={}){let{isStatic:r}=react.useContext(J),o=react.useRef(null),n=X(()=>Xe(e)?e.get():e),s=X(()=>typeof n=="string"?n.replace(/[\d.-]/g,""):void 0),i=Wr(n),a=react.useRef(n),m=react.useRef(A),l=()=>{c(),o.current=gr(E(x({keyframes:[Lr(i.get()),Lr(a.current)],velocity:i.getVelocity(),type:"spring",restDelta:.001,restSpeed:.01},t),{onUpdate:m.current}));},c=()=>{o.current&&o.current.stop();};return react.useInsertionEffect(()=>i.attach((f,u)=>r?u(f):(a.current=f,m.current=p=>u(kr(p,s)),M.postRender(l),i.get()),c),[JSON.stringify(t)]),pe(()=>{if(Xe(e))return e.on("change",f=>i.set(kr(f,s)))},[i,s]),i}function kr(e,t){return t?e+t:e}function Lr(e){return typeof e=="number"?e:parseFloat(e)}function ht(e){let t=react.useRef(0),{isStatic:r}=react.useContext(J);react.useEffect(()=>{if(r)return;let o=({timestamp:n,delta:s})=>{t.current||(t.current=n),e(n-t.current,s);};return M.update(o,true),()=>B(o)},[e]);}var He={strokeStyle:"#fff",strokeWidth:.4,fill:"rgba(0,0,0,0.1)",configs:[{right:[.2,.9,-0.8],left:[.7,.6,.9]},{right:[.2,.9,-0.5],left:[.7,.6,.6]},{right:[.2,.9,-0.2],left:[.7,.6,.3]}],scrollOffset:["end end","start start"]};function un(e,t,r,o,n){let s=n*n,i=s*n;return (-i+2*s-n)*e*.5+(3*i-5*s+2)*t*.5+(-3*i+4*s+n)*r*.5+(i-s)*o*.5}function xt(e,t){if(e.length===0)return 0;if(e.length===1)return e[0];if(t=math.clamp(0,1,t),t===1)return e[e.length-1];let r=[e[0],...e,e[e.length-1]],o=e.length-1,n=t*o,s=Math.floor(n),i=n-s,a=r[s],m=r[s+1],l=r[s+2],c=r[Math.min(s+3,r.length-1)];return un(a,m,l,c,i)}function Kr(e,t){let r=e.map(s=>s[0]),o=e.map(s=>s[1]),n=e.map(s=>s[2]);return [xt(r,t),xt(o,t),xt(n,t)]}function pn(e,t){let r=e.map(n=>n.left),o=e.map(n=>n.right);return {left:Kr(r,t),right:Kr(o,t)}}function _r(e,t,r){return [math.lerp(e[0],t[0],r),math.lerp(e[1],t[1],r),math.lerp(e[2],t[2],r)]}function dn(e,t,r){try{return {left:_r(e.left,t.left,r),right:_r(e.right,t.right,r)}}catch(o){return console.error(o,e,t,r),e}}function hn(e,t,r=1,o=0,n=0,s,i,a=false){let l=a?i-t.left[0]*i:t.left[0]*i,c=t.left[1]*s,f=t.left[2]*i,u=s,p=a?i-t.right[0]*i:t.right[0]*i,y=t.right[1]*s,v=t.right[2]*i;e.beginPath(),e.moveTo(0,a?i:0),e.lineTo(u,a?i:0),e.lineTo(u,p),e.bezierCurveTo(u-y,p+v,0+c,l+f,0,l),e.closePath(),e.fill();for(let T=0;T<r;T++){let d=T+1;e.beginPath(),e.moveTo(u,p+n*d),e.bezierCurveTo(u-y,p+v+n*d,0+c,l+f+o*d,0,l+o*d),e.stroke();}}function Gr({waveConfig:e=He}){let t=react.useRef(null),r=react.useRef(null),{scrollYProgress:o}=ut({target:t,offset:e.scrollOffset}),n=dt(o,{damping:80,mass:.27,stiffness:250}),[s,i]=react.useState(1);react.useEffect(()=>{i(window.devicePixelRatio||1);},[]),react.useEffect(()=>{let l=()=>{let c=r.current,f=t.current;if(!c||!f)return;let u=f.clientWidth,p=f.clientHeight;c.style.width=`${u}px`,c.style.height=`${p}px`,c.width=u*s,c.height=p*s;};return l(),window.addEventListener("resize",l),()=>window.removeEventListener("resize",l)},[s]);let a=(l,c,f)=>{var p,y,v,T,d,S;if(!l)return;let u=l.getContext("2d");u&&(u.setTransform(1,0,0,1,0,0),u.clearRect(0,0,l.width,l.height),u.scale(s,s),u.fillStyle=f,u.strokeStyle=(p=e.strokeStyle)!=null?p:He.strokeStyle,u.lineWidth=(y=e.strokeWidth)!=null?y:He.strokeWidth,hn(u,c,(v=e.curveAmount)!=null?v:1,(T=e.offsetLeft)!=null?T:0,(d=e.offsetRight)!=null?d:0,l.width/s,l.height/s,(S=e.flip)!=null?S:false));},m=(l,c)=>{let f=l.getContext("2d");f&&(f.font="12px monospace",f.fillStyle="#f00",f.fillText(c.toFixed(3),l.width/s-50,math.clamp(20,l.height/s,c*l.height/s)));};return ht(()=>{var u;let l=math.clamp(0,1,n.get()),c=e.configs.length,f=c<=1?e.configs[0]:c===2?dn(e.configs[0],e.configs[1],l):pn(e.configs,l);a(r.current,f,(u=e.fill)!=null?u:He.fill),e.debug&&r.current&&m(r.current,l);}),jsxRuntime.jsx("div",{className:"absolute inset-0",ref:t,children:jsxRuntime.jsx("div",{className:"absolute inset-0",style:{mask:e.featheredOut==="top"?"linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)":e.featheredOut==="bottom"?"linear-gradient(rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%)":e.featheredOut==="both"?"linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%)":void 0},children:jsxRuntime.jsx("canvas",{ref:r,className:"size-full"})})})}exports.Wave=Gr;//# sourceMappingURL=index.js.map
+'use client';
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/index.ts
+var index_exports = {};
+__export(index_exports, {
+  Wave: () => Wave
+});
+module.exports = __toCommonJS(index_exports);
+
+// src/wave.tsx
+var import_react = require("motion/react");
+var import_react2 = require("react");
+var import_jsx_runtime = require("react/jsx-runtime");
+var lerp = (a, b, t) => a + (b - a) * t;
+var clamp = (min, max, value) => Math.min(max, Math.max(min, value));
+var defaultCurveConfig = {
+  strokeStyle: "#fff",
+  strokeWidth: 0.4,
+  fill: "rgba(0,0,0,0.1)",
+  configs: [
+    {
+      right: [0.2, 0.9, -0.8],
+      left: [0.7, 0.6, 0.9]
+    },
+    {
+      right: [0.2, 0.9, -0.5],
+      left: [0.7, 0.6, 0.6]
+    },
+    {
+      right: [0.2, 0.9, -0.2],
+      left: [0.7, 0.6, 0.3]
+    }
+  ],
+  scrollOffset: ["end end", "start start"]
+};
+function catmullRom(p0, p1, p2, p3, t) {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return (-t3 + 2 * t2 - t) * p0 * 0.5 + (3 * t3 - 5 * t2 + 2) * p1 * 0.5 + (-3 * t3 + 4 * t2 + t) * p2 * 0.5 + (t3 - t2) * p3 * 0.5;
+}
+function extendPoints(points) {
+  return [points[0], ...points, points[points.length - 1]];
+}
+function extractChannels(configs) {
+  const channel = (side, component) => extendPoints(configs.map((c) => c[side][component]));
+  return {
+    left: [channel("left", 0), channel("left", 1), channel("left", 2)],
+    right: [channel("right", 0), channel("right", 1), channel("right", 2)]
+  };
+}
+function interpolateExtended(extended, t) {
+  const count = extended.length - 2;
+  if (count <= 0) return 0;
+  if (count === 1) return extended[1];
+  t = clamp(0, 1, t);
+  if (t === 1) return extended[count];
+  const segments = count - 1;
+  const segmentT = t * segments;
+  const segment = Math.floor(segmentT);
+  const localT = segmentT - segment;
+  const p0 = extended[segment];
+  const p1 = extended[segment + 1];
+  const p2 = extended[segment + 2];
+  const p3 = extended[Math.min(segment + 3, extended.length - 1)];
+  return catmullRom(p0, p1, p2, p3, localT);
+}
+function interpolateInto(target, channels, t) {
+  for (let i = 0; i < 3; i++) {
+    target.left[i] = interpolateExtended(channels.left[i], t);
+    target.right[i] = interpolateExtended(channels.right[i], t);
+  }
+}
+function lerpInto(target, start, end, t) {
+  for (let i = 0; i < 3; i++) {
+    target.left[i] = lerp(start.left[i], end.left[i], t);
+    target.right[i] = lerp(start.right[i], end.right[i], t);
+  }
+}
+function drawWavePath(ctx, config, curveAmount = 1, lineOffsetLeft = 0, lineOffsetRight = 0, width, height, flip = false) {
+  const leftX = 0;
+  const leftY = flip ? height - config.left[0] * height : config.left[0] * height;
+  const leftXOffset = config.left[1] * width;
+  const leftYOffset = config.left[2] * height;
+  const rightX = width;
+  const rightY = flip ? height - config.right[0] * height : config.right[0] * height;
+  const rightXOffset = config.right[1] * width;
+  const rightYOffset = config.right[2] * height;
+  ctx.beginPath();
+  ctx.moveTo(leftX, flip ? height : 0);
+  ctx.lineTo(rightX, flip ? height : 0);
+  ctx.lineTo(rightX, rightY);
+  ctx.bezierCurveTo(
+    rightX - rightXOffset,
+    rightY + rightYOffset,
+    leftX + leftXOffset,
+    leftY + leftYOffset,
+    leftX,
+    leftY
+  );
+  ctx.closePath();
+  ctx.fill();
+  for (let i = 0; i < curveAmount; i++) {
+    const offset = i + 1;
+    ctx.beginPath();
+    ctx.moveTo(rightX, rightY + lineOffsetRight * offset);
+    ctx.bezierCurveTo(
+      rightX - rightXOffset,
+      rightY + rightYOffset + lineOffsetRight * offset,
+      leftX + leftXOffset,
+      leftY + leftYOffset + lineOffsetLeft * offset,
+      leftX,
+      leftY + lineOffsetLeft * offset
+    );
+    ctx.stroke();
+  }
+}
+function drawDebug(ctx, width, height, scrollProgress) {
+  ctx.font = "12px monospace";
+  ctx.fillStyle = "#f00";
+  ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
+}
+function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
+  const containerRef = (0, import_react2.useRef)(null);
+  const canvasRef = (0, import_react2.useRef)(null);
+  const ctxRef = (0, import_react2.useRef)(null);
+  const sizeRef = (0, import_react2.useRef)({ width: 0, height: 0, dpr: 1 });
+  const needsRedrawRef = (0, import_react2.useRef)(true);
+  const reducedMotionRef = (0, import_react2.useRef)(false);
+  const scratchRef = (0, import_react2.useRef)({ left: [0, 0, 0], right: [0, 0, 0] });
+  const { scrollYProgress } = (0, import_react.useScroll)({
+    target: containerRef,
+    offset: curveConfig.scrollOffset
+  });
+  const smoothProgress = (0, import_react.useSpring)(scrollYProgress, { damping: 80, mass: 0.27, stiffness: 250 });
+  const channels = (0, import_react2.useMemo)(() => extractChannels(curveConfig.configs), [curveConfig.configs]);
+  (0, import_react2.useEffect)(() => {
+    needsRedrawRef.current = true;
+  }, [curveConfig, channels]);
+  (0, import_react2.useEffect)(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      reducedMotionRef.current = mediaQuery.matches;
+      needsRedrawRef.current = true;
+    };
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+  (0, import_react2.useEffect)(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
+    ctxRef.current = canvas.getContext("2d");
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      sizeRef.current = { width, height, dpr };
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      needsRedrawRef.current = true;
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+  (0, import_react.useMotionValueEvent)(smoothProgress, "change", () => {
+    if (!reducedMotionRef.current) {
+      needsRedrawRef.current = true;
+    }
+  });
+  (0, import_react.useAnimationFrame)(() => {
+    var _a, _b, _c, _d, _e, _f, _g;
+    if (!needsRedrawRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    const configs = curveConfig.configs;
+    if (!canvas || !ctx || configs.length === 0) return;
+    needsRedrawRef.current = false;
+    const sp = reducedMotionRef.current ? 0.5 : clamp(0, 1, smoothProgress.get());
+    let targetConfig;
+    if (configs.length === 1) {
+      targetConfig = configs[0];
+    } else if (configs.length === 2) {
+      lerpInto(scratchRef.current, configs[0], configs[1], sp);
+      targetConfig = scratchRef.current;
+    } else {
+      interpolateInto(scratchRef.current, channels, sp);
+      targetConfig = scratchRef.current;
+    }
+    const { width, height, dpr } = sizeRef.current;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = (_a = curveConfig.fill) != null ? _a : defaultCurveConfig.fill;
+    ctx.strokeStyle = (_b = curveConfig.strokeStyle) != null ? _b : defaultCurveConfig.strokeStyle;
+    ctx.lineWidth = (_c = curveConfig.strokeWidth) != null ? _c : defaultCurveConfig.strokeWidth;
+    drawWavePath(
+      ctx,
+      targetConfig,
+      (_d = curveConfig.curveAmount) != null ? _d : 1,
+      (_e = curveConfig.offsetLeft) != null ? _e : 0,
+      (_f = curveConfig.offsetRight) != null ? _f : 0,
+      width,
+      height,
+      (_g = curveConfig.flip) != null ? _g : false
+    );
+    if (curveConfig.debug) {
+      drawDebug(ctx, width, height, sp);
+    }
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 overflow-hidden", ref: containerRef, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    "div",
+    {
+      className: "absolute inset-0",
+      style: {
+        mask: curveConfig.featheredOut === "top" ? "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%)" : curveConfig.featheredOut === "bottom" ? "linear-gradient(rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%)" : curveConfig.featheredOut === "both" ? "linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%)" : void 0
+      },
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", { ref: canvasRef, className: "size-full" })
+    }
+  ) });
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  Wave
+});
 //# sourceMappingURL=index.js.map
