@@ -1,6 +1,6 @@
 // 'use client';
 import { Wave } from '@threeaio/smooth-waves';
-import Image from 'next/image';
+import { NsLogo } from '@/components/logos/ns-logo';
 import { MotionDiv } from '@/components/motion-div';
 import { InstallationInfo } from '@/components/installation-info';
 
@@ -114,7 +114,7 @@ export default function Home() {
                 </MotionDiv>
             </div>
             <div className="relative col-span-8 col-start-3 pt-12 pb-96 px-12">
-                <Image className="mx-auto relative" src="logo_triangle_dark.svg" width={180} height={40} alt="logo" />
+                <NsLogo className="mx-auto relative w-52 h-auto text-black-washed" />
             </div>
         </div>
     );

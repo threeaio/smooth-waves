@@ -1,5 +1,6 @@
 import { Wave, type WaveAnimation } from '@threeaio/smooth-waves';
-import Image from 'next/image';
+import { NsLogo } from '@/components/logos/ns-logo';
+import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-static';
 
@@ -30,6 +31,26 @@ function Grain() {
 }
 
 /**
+ * Shared content column: an 8-col grid whose inner block sits offset from the
+ * left, so every text block on the page lines up at the same width and position.
+ */
+function Container({
+    children,
+    className,
+    style,
+}: {
+    children: React.ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
+}) {
+    return (
+        <div className="relative z-20 px-4 md:px-24 grid xl:grid-cols-8 gap-4" style={style}>
+            <div className={cn('xl:col-span-4 xl:col-start-2 flex flex-col gap-6', className)}>{children}</div>
+        </div>
+    );
+}
+
+/**
  * A blurred, overscanned wave: the canvas extends past the section on all
  * sides so the blur never fades at a visible edge and neighboring fields
  * flow into each other across section boundaries.
@@ -52,7 +73,7 @@ export default function Home() {
             <Grain />
 
             {/* Hero — magenta glow from the top, orange + amber flowing up from below */}
-            <div className="relative z-10 min-h-screen flex flex-col justify-center py-16 px-4 md:px-24">
+            <div className="relative z-10 min-h-screen flex flex-col justify-center py-16">
                 <SoftWave
                     blur={40}
                     waveConfig={{
@@ -114,13 +135,11 @@ export default function Home() {
                     }}
                 />
 
-                <div className="absolute top-24 md:top-28 left-4 md:left-24 z-20">
-                    <Image src="/logo-ns.svg" width={150} height={52} alt="nikolaj sokolowski logo" />
-                </div>
-
-                <h1 className="relative z-20 max-w-3xl -mt-24 text-5xl md:text-7xl font-[800] uppercase leading-[0.95] tracking-tight">
-                    KI so nutzen, dass sie funktioniert
-                </h1>
+                <Container className="-mt-24">
+                    <h1 className="text-5xl md:text-7xl font-[800] uppercase leading-[0.95] tracking-tight">
+                        KI so nutzen, dass sie funktioniert
+                    </h1>
+                </Container>
             </div>
 
             {/* Amber field carries on from the hero (the overscanned canvases overlap
@@ -163,17 +182,15 @@ export default function Home() {
                         scrollOffset: ['start 80%', 'end 30%'],
                     }}
                 />
-                <div className="relative z-10 px-4 md:px-24 pt-32 pb-80 grid xl:grid-cols-8 gap-4" style={{ color: ink }}>
-                    <div className="xl:col-span-4 xl:col-start-2 flex flex-col gap-6">
-                        <h2 className="text-4xl md:text-6xl font-[800] uppercase leading-[0.95] tracking-tight">
-                            Farbe kommt beim Scrollen
-                        </h2>
-                        <p className="max-w-md text-balance font-mono text-sm">
-                            Jede Farbfläche ist eine eigene Wave — Magenta, Orange, Amber laufen auf einer
-                            Spring-Animation übereinander. Das Korn liegt als Overlay darüber.
-                        </p>
-                    </div>
-                </div>
+                <Container className="pt-32 pb-80" style={{ color: ink }}>
+                    <h2 className="text-4xl md:text-6xl font-[800] uppercase leading-[0.95] tracking-tight">
+                        Farbe kommt beim Scrollen
+                    </h2>
+                    <p className="max-w-md text-balance font-mono text-sm">
+                        Jede Farbfläche ist eine eigene Wave — Magenta, Orange, Amber laufen auf einer Spring-Animation
+                        übereinander. Das Korn liegt als Overlay darüber.
+                    </p>
+                </Container>
             </div>
 
             {/* Footer — the magenta dissolves into the dark, the logo sits below. */}
@@ -197,7 +214,7 @@ export default function Home() {
                     }}
                 />
                 <div className="relative z-10 flex justify-center pt-40 pb-8">
-                    <Image src="/logo-ns.svg" width={120} height={42} alt="nikolaj sokolowski logo" />
+                    <NsLogo className="w-52 h-auto text-white" />
                 </div>
             </div>
         </div>

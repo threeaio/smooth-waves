@@ -1,5 +1,5 @@
 import { Wave } from '@threeaio/smooth-waves';
-import Image from 'next/image';
+import { NsLogo } from '@/components/logos/ns-logo';
 import { MotionDiv } from '@/components/motion-div';
 import { InstallationInfo } from '@/components/installation-info';
 import { ReactIcon } from '@/components/logos/react-icon';
@@ -162,13 +162,7 @@ export default function Home() {
                     }}
                 />
                 <div className="relative col-span-8 col-start-3 pt-24 pb-12 md:py-64 px-12">
-                    <Image
-                        className="mx-auto relative top-12 md:top-40"
-                        src="/logo_triangle_dark.svg"
-                        width={180}
-                        height={40}
-                        alt="logo"
-                    />
+                    <NsLogo className="mx-auto relative top-12 md:top-40 w-52 h-auto text-black-washed" />
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 // 'use client';
 import { Wave } from '@threeaio/smooth-waves';
-import Image from 'next/image';
+import { NsLogo } from '@/components/logos/ns-logo';
 
 export const dynamic = 'force-static';
 
@@ -110,7 +110,7 @@ export default function Home() {
                 /> */}
             </div>
             <div className="relative col-span-8 col-start-3 pt-32 pb-96 bg-white-washed-dark">
-                <Image className="mx-auto relative" src="logo_triangle_dark.svg" width={180} height={40} alt="logo" />
+                <NsLogo className="mx-auto relative w-52 h-auto text-black-washed" />
             </div>
         </div>
     );
