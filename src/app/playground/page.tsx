@@ -214,7 +214,7 @@ function toBandSnippet(s: LayerState): string {
 }
 
 /** The whole visible stack as one section snippet, in paint order. */
-function toStackSnippet(layers: LayerState[]): string {
+function toStackSnippet(layers: LayerState[], sectionVh: number): string {
     const parts = layers
         .filter((l) => l.visible)
         .map((l) => {
@@ -225,7 +225,7 @@ function toStackSnippet(layers: LayerState[]): string {
                 .join('\n');
             return `    {/* ${l.name} */}\n${indented}`;
         });
-    return `<div className="relative h-[150vh]">\n${parts.join('\n')}\n</div>`;
+    return `<div className="relative h-[${sectionVh}vh]">\n${parts.join('\n')}\n</div>`;
 }
 
 /* --------------------------------- control atoms --------------------------------- */
@@ -678,6 +678,11 @@ export default function Playground() {
     const [pageBg, setPageBg] = useState('hsl(160 10% 16%)');
     // fullscreen preview: hides all editor chrome (sidebar, markers, overlay)
     const [fullscreen, setFullscreen] = useState(false);
+    // pages may start or end with the waves themselves — the surrounding scroll room is optional
+    const [spaceBefore, setSpaceBefore] = useState(true);
+    const [spaceAfter, setSpaceAfter] = useState(true);
+    // the wave section's height in vh — the main driver of the page's total height
+    const [sectionVh, setSectionVh] = useState(150);
     const [openSection, setOpenSection] = useState<SectionId>('keyframes');
     const scrubberRef = useRef<HTMLInputElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -735,7 +740,8 @@ export default function Playground() {
             .filter((l) => l.visible)
             .map((layer) => {
                 const pinned = layer.id === activeLayerId && selection ? selection : null;
-                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${
+                // spacer/height changes shift the section in the document — remount so useScroll re-anchors
+                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${spaceBefore}|${spaceAfter}|${sectionVh}|${
                     pinned ? `pin-${pinned.edge}-${pinned.index}` : 'live'
                 }`;
                 const featheredOut = layer.featheredOut === 'none' ? undefined : layer.featheredOut;
@@ -771,9 +777,9 @@ export default function Playground() {
                 };
                 return <WaveBand key={key} waveConfig={config} />;
             });
-    }, [layers, activeLayerId, selection]);
+    }, [layers, activeLayerId, selection, spaceBefore, spaceAfter, sectionVh]);
 
-    const code = useMemo(() => toStackSnippet(layers), [layers]);
+    const code = useMemo(() => toStackSnippet(layers, sectionVh), [layers, sectionVh]);
 
     // ghosts + handles only for the active layer — all layers at once would be chaos
     const overlayEdges = useMemo<OverlayEdge[]>(() => {
@@ -911,9 +917,9 @@ export default function Playground() {
         >
             {/* --------------- preview: bare page impression, no lab copy --------------- */}
             <main className={cn(!fullscreen && 'lg:pr-[360px]')}>
-                <div className="h-[80vh]" />
+                {spaceBefore && <div className="h-[80vh]" />}
 
-                <div ref={sectionRef} className="relative h-[150vh]">
+                <div ref={sectionRef} className="relative" style={{ height: `${sectionVh}vh` }}>
                     {!fullscreen && (
                         <div className="absolute inset-x-0 top-0 z-10 border-t border-dashed border-white-washed/20 px-4 md:px-16">
                             <span className="font-mono text-[11px] uppercase opacity-60">wave section — start</span>
@@ -936,7 +942,7 @@ export default function Playground() {
                     )}
                 </div>
 
-                <div className="h-[80vh]" />
+                {spaceAfter && <div className="h-[80vh]" />}
             </main>
 
             {/* fullscreen preview: a single quiet affordance to get the chrome back */}
@@ -1023,6 +1029,16 @@ export default function Playground() {
                             </div>
                         </div>
                         <ColorRow label="page bg" value={pageBg} onChange={setPageBg} />
+                        <Toggle label="space before waves" checked={spaceBefore} onChange={setSpaceBefore} />
+                        <Toggle label="space after waves" checked={spaceAfter} onChange={setSpaceAfter} />
+                        <SliderRow
+                            label="section vh"
+                            value={sectionVh}
+                            min={50}
+                            max={400}
+                            step={10}
+                            onChange={setSectionVh}
+                        />
                         <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
                             <span className="opacity-80">progress</span>
                             <input
