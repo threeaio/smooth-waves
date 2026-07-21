@@ -21,6 +21,10 @@ export interface ExportLayer {
     mode: 'wave' | 'band';
     fill: string;
     featheredOut: 'none' | 'top' | 'bottom' | 'both';
+    /** CSS wrapper blur in px — not expressible in Figma-pasteable SVG, noted as a comment. */
+    blur: number;
+    /** Grainy-dissolve displacement in px — an SVG filter, not exportable; noted as a comment. */
+    dissolve: number;
     scrollStart: string;
     scrollEnd: string;
     // wave
@@ -38,6 +42,11 @@ export interface ExportLayer {
 
 const r = (n: number): number => Math.round(n * 100) / 100;
 const clamp01 = (n: number): number => Math.min(1, Math.max(0, n));
+
+/** Decorative strokes are invisible under heavy blur — above this radius they are skipped as waste. */
+export const BLUR_HIDES_STROKES = 4;
+export const effectiveCurveAmount = (blur: number, curveAmount: number): number =>
+    blur > BLUR_HIDES_STROKES ? 0 : curveAmount;
 
 /* ------------------------------- scroll progress ------------------------------- */
 
@@ -165,7 +174,7 @@ function waveGroup(layer: ExportLayer, w: number, h: number, t: number): string 
         `M 0 ${r(base)} L ${r(w)} ${r(base)} L ${r(w)} ${r(g.rightY)} ` +
         `C ${r(g.rightCx)} ${r(g.rightCy)}, ${r(g.leftCx)} ${r(g.leftCy)}, 0 ${r(g.leftY)} Z`;
     const paths = [`    <path d="${fill}" ${fillAttrs(layer.fill)} />`];
-    for (let i = 0; i < layer.curveAmount; i++) {
+    for (let i = 0; i < effectiveCurveAmount(layer.blur, layer.curveAmount); i++) {
         const k = i + 1;
         const oL = layer.offsetLeft * k;
         const oR = layer.offsetRight * k;
@@ -177,9 +186,9 @@ function waveGroup(layer: ExportLayer, w: number, h: number, t: number): string 
     return paths.join('\n');
 }
 
-function edgeFan(g: EdgeGeometry, edge: ExportEdge, w: number): string[] {
+function edgeFan(g: EdgeGeometry, edge: ExportEdge, w: number, blur: number): string[] {
     const paths: string[] = [];
-    for (let i = 0; i < edge.curveAmount; i++) {
+    for (let i = 0; i < effectiveCurveAmount(blur, edge.curveAmount); i++) {
         const k = i + 1;
         const oL = edge.offsetLeft * k;
         const oR = edge.offsetRight * k;
@@ -201,35 +210,47 @@ function bandGroup(layer: ExportLayer, w: number, h: number, t: number): string 
         `C ${r(bottom.rightCx)} ${r(bottom.rightCy)}, ${r(bottom.leftCx)} ${r(bottom.leftCy)}, 0 ${r(bottom.leftY)} Z`;
     return [
         `    <path d="${fill}" ${fillAttrs(layer.fill)} />`,
-        ...edgeFan(top, layer.top, w),
-        ...edgeFan(bottom, layer.bottom, w),
+        ...edgeFan(top, layer.top, w, layer.blur),
+        ...edgeFan(bottom, layer.bottom, w, layer.blur),
     ].join('\n');
 }
 
 const escapeAttr = (s: string): string =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Build the paste-into-Figma SVG for the visible stack; `progressFor` supplies each layer's scroll progress. */
+/**
+ * Build the paste-into-Figma SVG for the visible stack; `progressFor` supplies each
+ * layer's scroll progress. `bleed` is the horizontal overscan per side (fraction of
+ * width, e4: 0.14) — layers are computed on the wider canvas and shifted left, so
+ * their visible sweep matches the preview.
+ */
 export function buildFigmaSvg(
     layers: ExportLayer[],
     width: number,
     height: number,
     progressFor: (layer: ExportLayer) => number,
     background?: string,
+    bleed = 0,
 ): string {
+    const layerW = width * (1 + 2 * bleed);
+    const dx = bleed * width;
     const bgRect = background
         ? `\n  <rect id="background" width="${r(width)}" height="${r(height)}" ${fillAttrs(background)} />`
         : '';
     const groups = layers.map(
         (layer) =>
-            `  <g id="${escapeAttr(layer.name)}">\n${
+            `  <g id="${escapeAttr(layer.name)}"${dx > 0 ? ` transform="translate(${r(-dx)} 0)"` : ''}>\n${
                 layer.mode === 'wave'
-                    ? waveGroup(layer, width, height, progressFor(layer))
-                    : bandGroup(layer, width, height, progressFor(layer))
+                    ? waveGroup(layer, layerW, height, progressFor(layer))
+                    : bandGroup(layer, layerW, height, progressFor(layer))
             }\n  </g>`,
     );
-    const note = layers.some((l) => l.featheredOut !== 'none')
-        ? '\n  <!-- featheredOut is a CSS mask and not part of this export -->'
-        : '';
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${r(width)}" height="${r(height)}" viewBox="0 0 ${r(width)} ${r(height)}" fill="none">${note}${bgRect}\n${groups.join('\n')}\n</svg>`;
+    const notes: string[] = [];
+    if (layers.some((l) => l.featheredOut !== 'none'))
+        notes.push('\n  <!-- featheredOut is a CSS mask and not part of this export -->');
+    for (const l of layers.filter((l) => l.blur > 0))
+        notes.push(`\n  <!-- "${escapeAttr(l.name)}" has a ${r(l.blur)}px blur — add it as a Figma layer blur -->`);
+    if (layers.some((l) => l.dissolve > 0))
+        notes.push('\n  <!-- grainy dissolve is an SVG displacement filter and not part of this export -->');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${r(width)}" height="${r(height)}" viewBox="0 0 ${r(width)} ${r(height)}" fill="none">${notes.join('')}${bgRect}\n${groups.join('\n')}\n</svg>`;
 }

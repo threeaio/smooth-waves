@@ -1,733 +1,151 @@
 'use client';
 
-import { Wave, WaveBand, type WaveAnimation, type WaveBandAnimation, type WaveConfig } from '@threeaio/smooth-waves';
-import { CopyButton } from '@/components/copy-button';
+import {
+    sampleConfig,
+    Wave,
+    WaveBand,
+    type WaveAnimation,
+    type WaveBandAnimation,
+    type WaveConfig,
+} from '@threeaio/smooth-waves';
 import { cn } from '@/lib/utils';
-import { CurveOverlay, keyframeColor, type OverlayEdge, type Selection } from './curve-overlay';
-import { buildFigmaSvg, layerProgress, normalizeColor } from './figma-export';
+import { CurveOverlay, type OverlayEdge, type Selection } from './curve-overlay';
+import {
+    grainTexture,
+    initialLayers,
+    MOCK_WIDTH,
+    palettePresets,
+    remapPaletteColor,
+    sage,
+    createLayer,
+    type EdgeState,
+    type LayerState,
+    type Mode,
+} from './defaults';
+import { buildFigmaSvg, effectiveCurveAmount, layerProgress } from './figma-export';
+import { layerContains, layerOutlines } from './hit-test';
+import { LayerInspector, PageInspector } from './inspector';
+import { LayersPanel } from './layers-panel';
+import { toStackSnippet } from './snippets';
+import { accentText, FlashButton, sliderCls, sliderFill } from './ui';
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-type FeatheredOut = 'none' | 'top' | 'bottom' | 'both';
-type Mode = 'wave' | 'band';
-
-interface EdgeState {
-    strokeStyle: string;
-    strokeWidth: number;
-    curveAmount: number;
-    offsetLeft: number;
-    offsetRight: number;
-    configs: WaveConfig[];
-}
-
-interface LayerState {
-    id: string;
-    name: string;
-    mode: Mode; // fixed at creation
-    visible: boolean;
-    fill: string;
-    featheredOut: FeatheredOut;
-    debug: boolean;
-    scrollStart: string;
-    scrollEnd: string;
-    // Wave
-    strokeStyle: string;
-    strokeWidth: number;
-    flip: boolean;
-    curveAmount: number;
-    offsetLeft: number;
-    offsetRight: number;
-    configs: WaveConfig[];
-    // WaveBand
-    top: EdgeState;
-    bottom: EdgeState;
-}
-
-const layerTemplate: Omit<LayerState, 'id' | 'name' | 'mode' | 'visible'> = {
-    // clearly visible against the page bg (hsl(160 10% ~12%)) — the lab should show, not hint
-    fill: 'hsl(160 12% 32%)',
-    featheredOut: 'none',
-    debug: false,
-    scrollStart: 'start end',
-    scrollEnd: 'end start',
-    strokeStyle: 'rgba(255,255,255,0.2)',
-    strokeWidth: 1,
-    flip: false,
-    curveAmount: 2,
-    offsetLeft: -8,
-    offsetRight: -42,
-    configs: [
-        {
-            left: [0.3, 0.2, 0.2],
-            right: [0.2, 0.4, -0.1],
-        },
-        {
-            left: [0.6, 0.2, 0.4],
-            right: [0.2, 0.6, -0.2],
-        },
-        {
-            left: [0.9, 0.6, 0.2],
-            right: [0.3, 0.4, -0.4],
-        },
-    ],
-    top: {
-        strokeStyle: 'rgba(255,255,255,0.2)',
-        strokeWidth: 1,
-        curveAmount: 2,
-        offsetLeft: -8,
-        offsetRight: -24,
-        configs: [
-            {
-                left: [0.35, 0.3, 0.2],
-                right: [0.5, 0.3, -0.2],
-            },
-            {
-                left: [0.6, 0.3, -0.2],
-                right: [0.4, 0.4, 0.2],
-            },
-        ],
-    },
-    bottom: {
-        strokeStyle: 'rgba(255,255,255,0.2)',
-        strokeWidth: 1,
-        curveAmount: 0,
-        offsetLeft: 8,
-        offsetRight: 24,
-        configs: [
-            {
-                left: [0.55, 0.3, 0.3],
-                right: [0.7, 0.4, -0.1],
-            },
-            {
-                left: [0.85, 0.3, -0.1],
-                right: [0.65, 0.3, 0.2],
-            },
-        ],
-    },
-};
-
-function createLayer(mode: Mode, n: number): LayerState {
-    return {
-        ...structuredClone(layerTemplate),
-        id: `layer-${n}`,
-        name: `${mode} ${n}`,
-        mode,
-        visible: true,
-        // bands float over other layers — a translucent contrast fill shows the stacking
-        ...(mode === 'band' ? { fill: 'hsl(20 40% 45% / 0.5)' } : {}),
-    };
-}
-
-// two layers out of the box so the stacking is visible immediately
-const initialLayers = [createLayer('wave', 1), createLayer('band', 2)];
-
-const scrollPresets: Array<{ label: string; start: string; end: string }> = [
-    { label: 'start end → end start (full pass)', start: 'start end', end: 'end start' },
-    { label: 'start start → end end (while pinned)', start: 'start start', end: 'end end' },
-    { label: '5% 0% → 150% 80% (hero)', start: '5% 0%', end: '150% 80%' },
-    { label: 'start 80% → end 30% (content)', start: 'start 80%', end: 'end 30%' },
-];
-
-/* ---------------------------------- code output --------------------------------- */
-
-const WAVE_DEFAULTS = {
-    strokeStyle: '#fff',
-    strokeWidth: 0.4,
-    curveAmount: 1,
-    offsetLeft: 0,
-    offsetRight: 0,
-} as const;
-
-// WaveBand edges default curveAmount to 0 (no hairline trap)
-const EDGE_DEFAULTS = {
-    strokeStyle: '#fff',
-    strokeWidth: 0.4,
-    curveAmount: 0,
-    offsetLeft: 0,
-    offsetRight: 0,
-} as const;
-
-function round(n: number): number {
-    return Math.round(n * 100) / 100;
-}
-
-const clamp = (min: number, max: number, value: number): number => Math.min(max, Math.max(min, value));
-
-function configLines(configs: WaveConfig[]): string[] {
-    const lines: string[] = ['configs: ['];
-    for (const c of configs) {
-        lines.push(`    {`);
-        lines.push(`        left: [${c.left.map(round).join(', ')}],`);
-        lines.push(`        right: [${c.right.map(round).join(', ')}],`);
-        lines.push(`    },`);
-    }
-    lines.push('],');
-    return lines;
-}
-
-/** Serialize one wave layer as a ready-to-paste `<Wave />` snippet, omitting defaults. */
-function toWaveSnippet(s: LayerState): string {
-    const lines: string[] = [];
-    lines.push(`fill: '${s.fill}',`);
-    if (s.strokeStyle !== WAVE_DEFAULTS.strokeStyle) lines.push(`strokeStyle: '${s.strokeStyle}',`);
-    if (s.strokeWidth !== WAVE_DEFAULTS.strokeWidth) lines.push(`strokeWidth: ${round(s.strokeWidth)},`);
-    if (s.curveAmount !== WAVE_DEFAULTS.curveAmount) lines.push(`curveAmount: ${s.curveAmount},`);
-    if (s.offsetLeft !== WAVE_DEFAULTS.offsetLeft) lines.push(`offsetLeft: ${s.offsetLeft},`);
-    if (s.offsetRight !== WAVE_DEFAULTS.offsetRight) lines.push(`offsetRight: ${s.offsetRight},`);
-    if (s.flip) lines.push(`flip: true,`);
-    if (s.featheredOut !== 'none') lines.push(`featheredOut: '${s.featheredOut}',`);
-    if (s.debug) lines.push(`debug: true,`);
-    lines.push(...configLines(s.configs));
-    lines.push(`scrollOffset: ['${s.scrollStart}', '${s.scrollEnd}'],`);
-
-    const body = lines.map((l) => `        ${l}`).join('\n');
-    return `<Wave\n    waveConfig={{\n${body}\n    }}\n/>`;
-}
-
-function edgeLines(name: 'top' | 'bottom', e: EdgeState): string[] {
-    const lines: string[] = [`${name}: {`];
-    if (e.strokeStyle !== EDGE_DEFAULTS.strokeStyle && e.curveAmount > 0)
-        lines.push(`    strokeStyle: '${e.strokeStyle}',`);
-    if (e.strokeWidth !== EDGE_DEFAULTS.strokeWidth && e.curveAmount > 0)
-        lines.push(`    strokeWidth: ${round(e.strokeWidth)},`);
-    if (e.curveAmount !== EDGE_DEFAULTS.curveAmount) lines.push(`    curveAmount: ${e.curveAmount},`);
-    if (e.offsetLeft !== EDGE_DEFAULTS.offsetLeft && e.curveAmount > 0) lines.push(`    offsetLeft: ${e.offsetLeft},`);
-    if (e.offsetRight !== EDGE_DEFAULTS.offsetRight && e.curveAmount > 0)
-        lines.push(`    offsetRight: ${e.offsetRight},`);
-    lines.push(...configLines(e.configs).map((l) => `    ${l}`));
-    lines.push('},');
-    return lines;
-}
-
-/** Serialize one band layer as a ready-to-paste `<WaveBand />` snippet, omitting defaults. */
-function toBandSnippet(s: LayerState): string {
-    const lines: string[] = [];
-    lines.push(`fill: '${s.fill}',`);
-    if (s.featheredOut !== 'none') lines.push(`featheredOut: '${s.featheredOut}',`);
-    if (s.debug) lines.push(`debug: true,`);
-    lines.push(...edgeLines('top', s.top));
-    lines.push(...edgeLines('bottom', s.bottom));
-    lines.push(`scrollOffset: ['${s.scrollStart}', '${s.scrollEnd}'],`);
-
-    const body = lines.map((l) => `        ${l}`).join('\n');
-    return `<WaveBand\n    waveConfig={{\n${body}\n    }}\n/>`;
-}
-
-/** The whole visible stack as one section snippet, in paint order. */
-function toStackSnippet(layers: LayerState[], sectionPx: number): string {
-    const parts = layers
-        .filter((l) => l.visible)
-        .map((l) => {
-            const snippet = l.mode === 'wave' ? toWaveSnippet(l) : toBandSnippet(l);
-            const indented = snippet
-                .split('\n')
-                .map((line) => `    ${line}`)
-                .join('\n');
-            return `    {/* ${l.name} */}\n${indented}`;
-        });
-    return `<div className="relative h-[${sectionPx}px]">\n${parts.join('\n')}\n</div>`;
-}
-
-/* --------------------------------- control atoms --------------------------------- */
-
-function Section({
-    title,
-    open,
-    onToggle,
-    children,
-}: {
-    title: string;
-    open: boolean;
-    onToggle: () => void;
-    children: React.ReactNode;
-}) {
+function Grain({ clipPath }: { clipPath?: string }) {
+    // clipPath crops the fixed layers to the frame column WITHOUT a wrapper — a clipping
+    // ancestor would isolate the stacking context and break the overlay blend
     return (
-        // boxed like the layer rows so the main sections instantly read as buttons
-        <section
-            className={cn(
-                'mx-3 my-1.5 overflow-hidden rounded-lg border transition-colors',
-                open
-                    ? 'border-3a-green/60 bg-3a-green/5'
-                    : 'border-ui-border/60 bg-white-washed/[0.03] hover:border-white-washed/40',
-            )}
-        >
-            <button
-                type="button"
-                onClick={onToggle}
-                className={cn(
-                    'flex w-full items-center justify-between px-4 py-3 text-xs font-medium transition-colors',
-                    open && 'text-3a-green',
-                )}
-            >
-                <span>{title}</span>
-                <span className={cn('text-xs transition-transform', open ? 'rotate-90' : 'opacity-60')}>▸</span>
-            </button>
-            {open && <div className="flex flex-col gap-3 px-4 pb-4">{children}</div>}
-        </section>
-    );
-}
-
-function SliderRow({
-    label,
-    value,
-    min,
-    max,
-    step,
-    onChange,
-}: {
-    label: string;
-    value: number;
-    min: number;
-    max: number;
-    step: number;
-    onChange: (value: number) => void;
-}) {
-    return (
-        <label className="grid grid-cols-[5.5rem_1fr_3rem] items-center gap-2 text-xs">
-            <span className="opacity-80">{label}</span>
-            <input
-                type="range"
-                min={min}
-                max={max}
-                step={step}
-                value={value}
-                onChange={(e) => onChange(Number(e.target.value))}
-                className="accent-3a-green h-1 w-full cursor-pointer"
+        <>
+            <div
+                aria-hidden
+                className="pointer-events-none fixed inset-0 z-30 mix-blend-overlay opacity-75"
+                style={{ backgroundImage: grainTexture, backgroundSize: '256px 256px', filter: 'contrast(170%)', clipPath }}
             />
-            <span className="text-right font-mono tabular-nums">{round(value)}</span>
-        </label>
-    );
-}
-
-/** Normalize any CSS color (hsl, rgba, named, …) to #rrggbb for the color input's swatch. */
-function toSwatchHex(value: string): string {
-    return normalizeColor(value).hex;
-}
-
-function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-    const hex = toSwatchHex(value);
-    return (
-        <label className="grid grid-cols-[5.5rem_1.5rem_1fr] items-center gap-2 text-xs">
-            <span className="opacity-80">{label}</span>
-            <input
-                type="color"
-                value={hex}
-                onChange={(e) => onChange(e.target.value)}
-                // SSR can't resolve CSS colors (no canvas) and renders the fallback swatch
-                suppressHydrationWarning
-                className="size-6 cursor-pointer rounded border border-ui-border/60 bg-transparent"
+            <div
+                aria-hidden
+                className="pointer-events-none fixed inset-0 z-30 opacity-[0.05]"
+                style={{ backgroundImage: grainTexture, backgroundSize: '256px 256px', clipPath }}
             />
-            <input
-                type="text"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                spellCheck={false}
-                className="w-full rounded border border-ui-border/60 bg-black-washed px-2 py-1 font-mono text-xs"
-            />
-        </label>
+        </>
     );
 }
 
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
-    return (
-        <label className="flex cursor-pointer items-center justify-between text-xs">
-            <span className="opacity-80">{label}</span>
-            <button
-                type="button"
-                role="switch"
-                aria-checked={checked}
-                onClick={() => onChange(!checked)}
-                className={cn(
-                    'relative h-5 w-9 rounded-full border border-ui-border/60 transition-colors',
-                    checked ? 'bg-3a-green/80' : 'bg-black-washed',
-                )}
-            >
-                <span
-                    className={cn(
-                        'absolute top-0.5 size-3.5 rounded-full bg-white-washed transition-all',
-                        checked ? 'left-[1.15rem]' : 'left-0.5',
-                    )}
-                />
-            </button>
-        </label>
-    );
-}
+// editor chrome dimensions — the fit calculation needs them in px
+const TOOLBAR_H = 44;
+const TIMELINE_H = 40;
+const LEFT_W = 224;
+const RIGHT_W = 288;
+/** Breathing room between the artboard (incl. its bleed overscan) and the docked chrome. */
+const MARGIN = 24;
 
-function Segmented<T extends string>({
-    label,
-    options,
-    value,
-    onChange,
-}: {
-    label: string;
-    options: readonly T[];
-    value: T;
-    onChange: (value: T) => void;
-}) {
-    return (
-        <div className="flex flex-col gap-1.5 text-xs">
-            <span className="opacity-80">{label}</span>
-            <div className="grid grid-flow-col gap-px overflow-hidden rounded border border-ui-border/60">
-                {options.map((option) => (
-                    <button
-                        key={option}
-                        type="button"
-                        onClick={() => onChange(option)}
-                        className={cn(
-                            'px-2 py-1.5 text-xs transition-colors',
-                            option === value ? 'bg-3a-green/20 text-3a-green' : 'bg-black-washed opacity-75',
-                        )}
-                    >
-                        {option}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-/* ------------------------------------- layers ------------------------------------- */
-
-const iconBtn =
-    'flex size-6 items-center justify-center rounded text-[10px] opacity-60 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-15';
-
-function LayerRow({
-    layer,
-    isActive,
-    isFront,
-    isBack,
-    canRemove,
-    onActivate,
-    onToggleVisible,
-    onMoveForward,
-    onMoveBackward,
-    onRemove,
-}: {
-    layer: LayerState;
-    isActive: boolean;
-    isFront: boolean;
-    isBack: boolean;
-    canRemove: boolean;
-    onActivate: () => void;
-    onToggleVisible: () => void;
-    onMoveForward: () => void;
-    onMoveBackward: () => void;
-    onRemove: () => void;
-}) {
-    return (
-        <div
-            className={cn(
-                'flex items-center gap-0.5 rounded border px-2 py-0.5 text-xs transition-colors',
-                isActive ? 'border-3a-green/70 bg-3a-green/10' : 'border-ui-border/40',
-                !layer.visible && 'opacity-40',
-            )}
-        >
-            <button
-                type="button"
-                onClick={onActivate}
-                className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"
-            >
-                <span className="truncate font-mono">{layer.name}</span>
-                <span
-                    className={cn(
-                        'rounded-sm border px-1 font-mono text-[10px]',
-                        isActive ? 'border-3a-green/50 text-3a-green' : 'border-ui-border/60 opacity-60',
-                    )}
-                >
-                    {layer.mode}
-                </span>
-            </button>
-            <button type="button" title="toggle visibility" onClick={onToggleVisible} className={iconBtn}>
-                {layer.visible ? '●' : '○'}
-            </button>
-            <button type="button" title="bring forward" disabled={isFront} onClick={onMoveForward} className={iconBtn}>
-                ▲
-            </button>
-            <button type="button" title="send backward" disabled={isBack} onClick={onMoveBackward} className={iconBtn}>
-                ▼
-            </button>
-            <button
-                type="button"
-                title="delete layer"
-                disabled={!canRemove}
-                onClick={onRemove}
-                className={cn(iconBtn, 'text-3a-red')}
-            >
-                ✕
-            </button>
-        </div>
-    );
-}
-
-/** Copy/download the visible stack as SVG at the current scroll position — pasteable straight into Figma. */
-function FigmaExportButtons({ build }: { build: () => { svg: string; t: number } | null }) {
-    const [feedback, setFeedback] = useState<string | null>(null);
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const flash = (message: string) => {
-        setFeedback(message);
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => setFeedback(null), 2000);
-    };
-
-    const copy = async () => {
-        const result = build();
-        if (!result) return;
-        await navigator.clipboard.writeText(result.svg);
-        flash(`copied @ ${result.t.toFixed(2)} ✓`);
-    };
-
-    const download = () => {
-        const result = build();
-        if (!result) return;
-        const url = URL.createObjectURL(new Blob([result.svg], { type: 'image/svg+xml' }));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'wave-composition.svg';
-        a.click();
-        URL.revokeObjectURL(url);
-        flash(`saved @ ${result.t.toFixed(2)} ✓`);
-    };
-
-    return (
-        <div className="grid grid-cols-[1fr_auto] gap-1.5 text-xs">
-            <button
-                type="button"
-                onClick={copy}
-                title="copies an SVG snapshot at the current scroll position — paste directly into Figma (⌘V)"
-                className={cn(
-                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono transition-colors',
-                    feedback
-                        ? 'border-3a-green/70 text-3a-green'
-                        : 'border-ui-border/60 opacity-85 hover:border-3a-green/60 hover:text-3a-green hover:opacity-100',
-                )}
-            >
-                {feedback ?? 'copy figma svg'}
-            </button>
-            <button
-                type="button"
-                onClick={download}
-                title="download the same snapshot as .svg"
-                className="rounded border border-ui-border/60 px-2.5 font-mono opacity-85 transition-colors hover:border-3a-green/60 hover:text-3a-green hover:opacity-100"
-            >
-                ⤓
-            </button>
-        </div>
-    );
-}
-
-/* ------------------------------------ keyframes ----------------------------------- */
-
-function NumberField({
-    value,
-    min,
-    max,
-    step = 0.01,
-    onChange,
-}: {
-    value: number;
-    min: number;
-    max: number;
-    step?: number;
-    onChange: (value: number) => void;
-}) {
-    return (
-        <input
-            type="number"
-            value={value}
-            min={min}
-            max={max}
-            step={step}
-            onChange={(e) => {
-                const v = e.target.valueAsNumber;
-                if (!Number.isNaN(v)) onChange(round(clamp(min, max, v)));
-            }}
-            className="w-full rounded border border-ui-border/60 bg-black-washed px-1.5 py-1 text-center font-mono text-xs tabular-nums"
-        />
-    );
-}
-
-/**
- * Chip strip for one edge's keyframes. Clicking a chip selects (pins) that
- * keyframe for canvas editing; clicking again deselects. `+` duplicates the
- * last keyframe and selects the copy.
- */
-function KeyframeChips({
-    label,
-    edge,
-    configs,
-    selection,
-    onSelect,
-    onChange,
-}: {
-    label?: string;
-    edge: Selection['edge'];
-    configs: WaveConfig[];
-    selection: Selection | null;
-    onSelect: (selection: Selection | null) => void;
-    onChange: (configs: WaveConfig[]) => void;
-}) {
-    return (
-        <div className="flex items-center gap-2 text-xs">
-            {label && <span className="w-14 opacity-80">{label}</span>}
-            <div className="flex flex-wrap gap-1.5">
-                {configs.map((_, i) => {
-                    const isSelected = selection?.edge === edge && selection.index === i;
-                    return (
-                        <button
-                            key={i}
-                            type="button"
-                            onClick={() => onSelect(isSelected ? null : { edge, index: i })}
-                            className={cn(
-                                'size-7 rounded border font-mono transition-colors',
-                                isSelected
-                                    ? 'border-3a-green bg-3a-green/20 text-3a-green'
-                                    : 'bg-black-washed opacity-90 hover:opacity-100',
-                            )}
-                            // unselected chips carry their keyframe's system color — same as the ghost curve
-                            style={
-                                isSelected
-                                    ? undefined
-                                    : { borderColor: `${keyframeColor(i)}99`, color: keyframeColor(i) }
-                            }
-                        >
-                            {i + 1}
-                        </button>
-                    );
-                })}
-                <button
-                    type="button"
-                    onClick={() => {
-                        const last = configs[configs.length - 1];
-                        onChange([...configs, { left: [...last.left], right: [...last.right] }]);
-                        onSelect({ edge, index: configs.length });
-                    }}
-                    className="size-7 rounded border border-dashed border-ui-border/60 opacity-70 transition-opacity hover:opacity-100"
-                >
-                    +
-                </button>
-            </div>
-        </div>
-    );
-}
-
-/** Numeric fine-tune readout for the selected keyframe — the canvas handles are the primary editor. */
-function SelectedKeyframe({
-    config,
-    count,
-    onChange,
-    onDuplicate,
-    onRemove,
-}: {
-    config: WaveConfig;
-    count: number;
-    onChange: (config: WaveConfig) => void;
-    onDuplicate: () => void;
-    onRemove: () => void;
-}) {
-    const set = (side: keyof WaveConfig, i: number, v: number) => {
-        const next: WaveConfig = { left: [...config.left], right: [...config.right] };
-        next[side][i] = v;
-        onChange(next);
-    };
-    const ranges: Array<[number, number]> = [
-        [0, 1],
-        [0, 1],
-        [-1, 1],
-    ];
-    return (
-        <div className="flex flex-col gap-2 rounded-lg border border-3a-green/40 p-3 text-xs">
-            <div className="grid grid-cols-[3rem_1fr_1fr_1fr] items-center gap-2">
-                <span />
-                <span className="text-center opacity-60">y</span>
-                <span className="text-center opacity-60">x-off</span>
-                <span className="text-center opacity-60">y-off</span>
-                {(['left', 'right'] as const).map((side) => (
-                    <Fragment key={side}>
-                        <span className="opacity-80">{side}</span>
-                        {config[side].map((v, i) => (
-                            <NumberField
-                                key={`${side}-${i}`}
-                                value={v}
-                                min={ranges[i][0]}
-                                max={ranges[i][1]}
-                                onChange={(next) => set(side, i, next)}
-                            />
-                        ))}
-                    </Fragment>
-                ))}
-            </div>
-            <div className="flex gap-1.5">
-                <button
-                    type="button"
-                    onClick={onDuplicate}
-                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] opacity-85 transition-opacity hover:opacity-100"
-                >
-                    duplicate
-                </button>
-                <button
-                    type="button"
-                    disabled={count <= 1}
-                    onClick={onRemove}
-                    className="rounded border border-ui-border/60 px-2 py-1 text-[11px] text-3a-red opacity-85 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
-                >
-                    remove
-                </button>
-            </div>
-        </div>
-    );
-}
-
-/* ------------------------------------- page --------------------------------------- */
-
-type SectionId = 'page' | 'scroll' | 'appearance' | 'curves' | 'top' | 'bottom' | 'keyframes' | 'config';
+// docked chrome, Figma-UI3 style — opaque panels with hairline borders; the canvas
+// area between them stays completely clear (handles must never hide under UI)
+const panelCls = 'border-black/[0.08] bg-white text-zinc-700';
 
 export default function Playground() {
     const [layers, setLayers] = useState<LayerState[]>(initialLayers);
-    const [activeLayerId, setActiveLayerId] = useState(initialLayers[0].id);
+    // canvas/list selection: 'page' (composition settings) or a layer id
+    const [activeId, setActiveId] = useState<string>('page');
     const [selection, setSelection] = useState<Selection | null>(null);
     const [onion, setOnion] = useState(false);
     // the composition should read as a real page — its background is part of the design
-    const [pageBg, setPageBg] = useState('hsl(160 10% 16%)');
-    // fullscreen preview: hides all editor chrome (sidebar, markers, overlay)
+    const [pageBg, setPageBg] = useState(sage);
+    // e4 lays its grain over the whole page — part of the mood, so on by default
+    const [grainOn, setGrainOn] = useState(true);
+    // horizontal overscan per layer (e4: -inset-x-[14%]) — curves bleed off-canvas,
+    // so their steep outer parts are cropped and the visible sweep looks calmer
+    const [bleedX, setBleedX] = useState(14);
+    // working palette (editable + presets) — offered as quick swatches in every color field
+    const [palette, setPalette] = useState<string[]>([...palettePresets[0].colors]);
+    // fit view: the page laid out at a mocked wide-screen width, scaled down so the
+    // whole section fits between the chrome — the composer opens here; Z / toolbar → 100%
+    const [mockWide, setMockWide] = useState(true);
+    const [viewport, setViewport] = useState({ w: 1728, h: 1000 });
+    // hovering a layer (row or canvas) highlights that layer's curve(s) in the preview
+    const [hoveredLayerId, setHoveredLayerId] = useState<string | null>(null);
+    // in the fitted overview there is no scroll room — the progress slider drives
+    // a virtual scroll position instead (0..1 across the mocked page)
+    const [scrubT, setScrubT] = useState(0);
+    // playback: loops the virtual progress in fit view, so motion is judged without scrolling
+    const [playing, setPlaying] = useState(false);
+    // fullscreen preview: hides all editor chrome (panels, markers, overlay)
     const [fullscreen, setFullscreen] = useState(false);
-    // pages may start or end with the waves themselves — the surrounding scroll room is optional
-    const [spaceBefore, setSpaceBefore] = useState(true);
-    const [spaceAfter, setSpaceAfter] = useState(true);
+    // pages may start or end with the waves themselves — the surrounding scroll room is
+    // optional; the default composition fills its section edge to edge, so both are off
+    const [spaceBefore, setSpaceBefore] = useState(false);
+    const [spaceAfter, setSpaceAfter] = useState(false);
     // the wave section's height in px — the main driver of the page's total height
-    const [sectionPx, setSectionPx] = useState(1500);
-    const [openSection, setOpenSection] = useState<SectionId>('keyframes');
+    const [sectionPx, setSectionPx] = useState(2500);
     const scrubberRef = useRef<HTMLInputElement>(null);
+    const tLabelRef = useRef<HTMLSpanElement>(null);
     const sectionRef = useRef<HTMLDivElement>(null);
     const layerCounter = useRef(initialLayers.length + 1);
 
-    const active = layers.find((l) => l.id === activeLayerId) ?? layers[0];
+    const active = layers.find((l) => l.id === activeId);
 
     const patch = (partial: Partial<LayerState>) =>
-        setLayers((ls) => ls.map((l) => (l.id === activeLayerId ? { ...l, ...partial } : l)));
+        setLayers((ls) => ls.map((l) => (l.id === activeId ? { ...l, ...partial } : l)));
     const patchEdge = (edge: 'top' | 'bottom', partial: Partial<EdgeState>) =>
-        setLayers((ls) => ls.map((l) => (l.id === activeLayerId ? { ...l, [edge]: { ...l[edge], ...partial } } : l)));
+        setLayers((ls) => ls.map((l) => (l.id === activeId ? { ...l, [edge]: { ...l[edge], ...partial } } : l)));
+
+    // Palette edits recolor every color that was taken from the old palette
+    // (fills, strokes, page bg — alpha preserved), so preset switches restyle
+    // the whole composition live.
+    const applyPalette = (next: string[]) => {
+        const remap = (value: string) => remapPaletteColor(value, palette, next);
+        setLayers((ls) =>
+            ls.map((l) => ({
+                ...l,
+                fill: remap(l.fill),
+                strokeStyle: remap(l.strokeStyle),
+                top: { ...l.top, strokeStyle: remap(l.top.strokeStyle) },
+                bottom: { ...l.bottom, strokeStyle: remap(l.bottom.strokeStyle) },
+            })),
+        );
+        setPageBg(remap(pageBg));
+        setPalette(next);
+    };
 
     /* ---- layer management ---- */
-    const activateLayer = (id: string) => {
-        if (id !== activeLayerId) setSelection(null); // selection always belongs to the active layer
-        setActiveLayerId(id);
+    const selectTarget = (id: string) => {
+        if (id !== activeId) setSelection(null); // selection always belongs to the active layer
+        setActiveId(id);
     };
 
     const addLayer = (mode: Mode) => {
         const layer = createLayer(mode, layerCounter.current++);
         setLayers((ls) => [...ls, layer]);
         setSelection(null);
-        setActiveLayerId(layer.id);
+        setActiveId(layer.id);
     };
 
     const removeLayer = (id: string) => {
         if (layers.length <= 1) return;
         const next = layers.filter((l) => l.id !== id);
         setLayers(next);
-        if (id === activeLayerId) {
+        if (id === activeId) {
             setSelection(null);
-            setActiveLayerId(next[next.length - 1].id);
+            setActiveId(next[next.length - 1].id);
         }
     };
 
@@ -744,17 +162,73 @@ export default function Playground() {
 
     const toggleVisible = (id: string) =>
         setLayers((ls) => ls.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)));
+    const renameLayer = (id: string, name: string) =>
+        setLayers((ls) => ls.map((l) => (l.id === id ? { ...l, name } : l)));
 
     /* ---- preview ---- */
+    // The progress a layer would have at the virtual scroll position `scrubT` on the
+    // mocked page (as if it were laid out unscaled) — drives the fitted overview.
+    const virtualProgress = useCallback(
+        (layer: Pick<LayerState, 'scrollStart' | 'scrollEnd'>): number => {
+            const totalH = ((spaceBefore ? 0.8 : 0) + (spaceAfter ? 0.8 : 0)) * viewport.h + sectionPx;
+            const virtualScrollY = scrubT * Math.max(0, totalH - viewport.h);
+            const sectionTop = spaceBefore ? 0.8 * viewport.h : 0;
+            return layerProgress(layer.scrollStart, layer.scrollEnd, sectionTop, sectionPx, viewport.h, virtualScrollY);
+        },
+        [scrubT, viewport.h, spaceBefore, spaceAfter, sectionPx],
+    );
+
+    // A layer's current progress, wherever the preview is (fit view or real scroll).
+    const layerT = useCallback(
+        (layer: LayerState): number => {
+            if (mockWide) return virtualProgress(layer);
+            const el = sectionRef.current;
+            if (!el) return 0;
+            const rect = el.getBoundingClientRect();
+            return layerProgress(
+                layer.scrollStart,
+                layer.scrollEnd,
+                rect.top + window.scrollY,
+                rect.height,
+                window.innerHeight,
+                window.scrollY,
+            );
+        },
+        [mockWide, virtualProgress],
+    );
+
     // Only the active layer gets pinned while editing — the rest of the stack keeps animating.
     // Per-layer keys remount only the affected component (motion's useScroll reads `offset` at hook setup).
     const previewLayers = useMemo(() => {
+        // e4's Field wrapper: horizontal overscan + optional blur/dissolve around every layer
+        const wrap = (key: string, layer: LayerState, child: React.ReactNode) => {
+            const filter = [
+                layer.blur > 0 ? `blur(${layer.blur}px)` : null,
+                layer.dissolve > 0 ? `url(#dissolve-${layer.id})` : null,
+            ]
+                .filter(Boolean)
+                .join(' ');
+            return (
+                <div
+                    key={key}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-0"
+                    style={{
+                        left: `-${bleedX}%`,
+                        right: `-${bleedX}%`,
+                        filter: filter || undefined,
+                    }}
+                >
+                    {child}
+                </div>
+            );
+        };
         return layers
             .filter((l) => l.visible)
             .map((layer) => {
-                const pinned = layer.id === activeLayerId && selection ? selection : null;
+                const pinned = layer.id === activeId && selection ? selection : null;
                 // spacer/height changes shift the section in the document — remount so useScroll re-anchors
-                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${spaceBefore}|${spaceAfter}|${sectionPx}|${
+                const key = `${layer.id}|${layer.scrollStart}|${layer.scrollEnd}|${spaceBefore}|${spaceAfter}|${sectionPx}|${mockWide}|${
                     pinned ? `pin-${pinned.edge}-${pinned.index}` : 'live'
                 }`;
                 const featheredOut = layer.featheredOut === 'none' ? undefined : layer.featheredOut;
@@ -764,22 +238,29 @@ export default function Playground() {
                         fill: layer.fill,
                         strokeStyle: layer.strokeStyle,
                         strokeWidth: layer.strokeWidth,
-                        curveAmount: layer.curveAmount,
+                        curveAmount: effectiveCurveAmount(layer.blur, layer.curveAmount),
                         offsetLeft: layer.offsetLeft,
                         offsetRight: layer.offsetRight,
                         flip: layer.flip,
                         debug: layer.debug,
                         featheredOut,
-                        // pinned: a single keyframe renders static, so the shape holds still while editing
+                        // pinned: a single keyframe renders static, so the shape holds still while
+                        // editing; in the fitted overview a sampled snapshot follows the scrubber
                         configs: pinned
                             ? [layer.configs[Math.min(pinned.index, layer.configs.length - 1)]]
-                            : layer.configs,
+                            : mockWide
+                              ? [sampleConfig(layer.configs, virtualProgress(layer))]
+                              : layer.configs,
                         scrollOffset,
                     };
-                    return <Wave key={key} waveConfig={config} />;
+                    return wrap(key, layer, <Wave waveConfig={config} />);
                 }
-                const pin = (e: EdgeState): EdgeState =>
-                    pinned ? { ...e, configs: [e.configs[Math.min(pinned.index, e.configs.length - 1)]] } : e;
+                const pin = (e: EdgeState): EdgeState => {
+                    const edge = { ...e, curveAmount: effectiveCurveAmount(layer.blur, e.curveAmount) };
+                    if (pinned) return { ...edge, configs: [e.configs[Math.min(pinned.index, e.configs.length - 1)]] };
+                    if (mockWide) return { ...edge, configs: [sampleConfig(e.configs, virtualProgress(layer))] };
+                    return edge;
+                };
                 const config: WaveBandAnimation = {
                     fill: layer.fill,
                     debug: layer.debug,
@@ -788,18 +269,19 @@ export default function Playground() {
                     bottom: pin(layer.bottom),
                     scrollOffset,
                 };
-                return <WaveBand key={key} waveConfig={config} />;
+                return wrap(key, layer, <WaveBand waveConfig={config} />);
             });
-    }, [layers, activeLayerId, selection, spaceBefore, spaceAfter, sectionPx]);
+    }, [layers, activeId, selection, spaceBefore, spaceAfter, sectionPx, bleedX, mockWide, virtualProgress]);
 
-    const code = useMemo(() => toStackSnippet(layers, sectionPx), [layers, sectionPx]);
+    const code = useMemo(() => toStackSnippet(layers, sectionPx, bleedX), [layers, sectionPx, bleedX]);
 
     // ghosts + handles only for the active layer — all layers at once would be chaos
     const overlayEdges = useMemo<OverlayEdge[]>(() => {
+        if (!active) return [];
         const updateConfig = (edge: 'wave' | 'top' | 'bottom', i: number, config: WaveConfig) =>
             setLayers((ls) =>
                 ls.map((l) => {
-                    if (l.id !== activeLayerId) return l;
+                    if (l.id !== activeId) return l;
                     if (edge === 'wave') return { ...l, configs: l.configs.map((c, j) => (j === i ? config : c)) };
                     return {
                         ...l,
@@ -826,7 +308,49 @@ export default function Playground() {
                 onChange: (i, config) => updateConfig('bottom', i, config),
             },
         ];
-    }, [active, activeLayerId]);
+    }, [active, activeId]);
+
+    /* ---- canvas interaction: click to select, hover to highlight ---- */
+    const hitsAt = (e: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>): string[] => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        // the overlay spans the bleed-wide canvas — normalized coords match the layer geometry
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const hits: string[] = [];
+        for (let i = layers.length - 1; i >= 0; i--) {
+            const l = layers[i];
+            if (!l.visible) continue;
+            if (layerContains(l, layerT(l), x, y)) hits.push(l.id);
+        }
+        return hits;
+    };
+
+    const onCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        const hits = hitsAt(e);
+        if (hits.length === 0) {
+            selectTarget('page');
+            return;
+        }
+        // click selects the topmost shape; clicking again drills to the next one below (deep select)
+        const i = hits.indexOf(activeId);
+        selectTarget(hits[(i + 1) % hits.length]);
+    };
+
+    // hover + selection outlines at the layers' current progress, in normalized
+    // coords (the svg stretches them over the bleed-wide canvas)
+    const hoveredLayer = hoveredLayerId ? layers.find((l) => l.id === hoveredLayerId) : undefined;
+    const outlineCurves = useMemo(() => {
+        const items: Array<{ d: string; kind: 'hover' | 'selected' }> = [];
+        if (hoveredLayer?.visible) {
+            for (const d of layerOutlines(hoveredLayer, layerT(hoveredLayer))) items.push({ d, kind: 'hover' });
+        }
+        // while a keyframe is pinned the CurveOverlay owns the canvas — no extra outline
+        if (active && active.visible && !selection && active.id !== hoveredLayerId) {
+            for (const d of layerOutlines(active, layerT(active))) items.push({ d, kind: 'selected' });
+        }
+        return items;
+    }, [hoveredLayer, active, selection, hoveredLayerId, layerT]);
 
     /* ---- figma export ---- */
     const buildExport = (): { svg: string; t: number } | null => {
@@ -836,6 +360,14 @@ export default function Playground() {
         const sectionTop = rect.top + window.scrollY;
         const visible = layers.filter((l) => l.visible);
         if (visible.length === 0) return null;
+        // fitted overview: the on-screen rect is scaled down — export the mocked
+        // screen at its true size, at the scrubber's virtual progress
+        if (mockWide) {
+            return {
+                svg: buildFigmaSvg(visible, MOCK_WIDTH, sectionPx, virtualProgress, pageBg, bleedX / 100),
+                t: scrubT,
+            };
+        }
         const svg = buildFigmaSvg(
             visible,
             rect.width,
@@ -850,494 +382,547 @@ export default function Playground() {
                     window.scrollY,
                 ),
             pageBg,
+            bleedX / 100,
         );
         // headline progress for the feedback label: the section's full pass
         const t = layerProgress('start end', 'end start', sectionTop, rect.height, window.innerHeight, window.scrollY);
         return { svg, t };
     };
 
-    // Keep the scrubber in sync with real scrolling without re-rendering on every frame.
+    /* ---- effects ---- */
+    // Viewport size feeds the fit calculation (scale factor + height compensation).
+    useEffect(() => {
+        const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+
+    // Keep the timeline in sync with real scrolling without re-rendering on every frame.
     useEffect(() => {
         const onScroll = () => {
             const el = scrubberRef.current;
             if (!el) return;
             const max = document.documentElement.scrollHeight - window.innerHeight;
-            el.value = max > 0 ? String(Math.round((window.scrollY / max) * 100)) : '0';
+            const t = max > 0 ? window.scrollY / max : 0;
+            el.value = String(Math.round(t * 100));
+            el.style.background = sliderFill(t * 100);
+            if (tLabelRef.current) tLabelRef.current.textContent = t.toFixed(2);
         };
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
+    // …and with the virtual progress in fit view (play + scrub share one input).
+    useEffect(() => {
+        if (!mockWide) return;
+        if (scrubberRef.current) {
+            scrubberRef.current.value = String(scrubT * 100);
+            scrubberRef.current.style.background = sliderFill(scrubT * 100);
+        }
+        if (tLabelRef.current) tLabelRef.current.textContent = scrubT.toFixed(2);
+    }, [scrubT, mockWide]);
+
+    // Playback: loop the virtual progress — one full pass every 12s.
+    useEffect(() => {
+        if (!playing || !mockWide) return;
+        let raf = 0;
+        let last = performance.now();
+        const step = (now: number) => {
+            const dt = (now - last) / 1000;
+            last = now;
+            setScrubT((t) => (t + dt / 12) % 1);
+            raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(raf);
+    }, [playing, mockWide]);
+
     // Allow deep links like /playground?mode=band — activates the first layer of that type.
     useEffect(() => {
         const mode = new URLSearchParams(window.location.search).get('mode');
         if (mode === 'band' || mode === 'wave') {
             const target = initialLayers.find((l) => l.mode === mode);
-            if (target) setActiveLayerId(target.id);
+            if (target) setActiveId(target.id);
         }
     }, []);
 
-    // Escape leaves fullscreen preview, then releases the pinned keyframe; F toggles fullscreen.
+    // Escape backs out (fullscreen → pinned keyframe → layer selection);
+    // F fullscreen, Z fit/100%, space plays in fit view.
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            const typing = !!(target && (target.closest('input, textarea, select') || target.isContentEditable));
             if (e.key === 'Escape') {
                 if (fullscreen) setFullscreen(false);
-                else setSelection(null);
+                else if (selection) setSelection(null);
+                else setActiveId('page');
                 return;
             }
-            const target = e.target as HTMLElement | null;
-            const typing = target && (target.closest('input, textarea, select') || target.isContentEditable);
-            if ((e.key === 'f' || e.key === 'F') && !typing) {
+            if (typing) return;
+            if (e.key === 'f' || e.key === 'F') {
                 setSelection(null);
                 setFullscreen((v) => !v);
+            }
+            if (e.key === 'z' || e.key === 'Z') setMockWide((v) => !v);
+            if (e.key === ' ' && mockWide) {
+                e.preventDefault();
+                setSelection(null);
+                setPlaying((v) => !v);
             }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [fullscreen]);
+    }, [fullscreen, selection, mockWide]);
 
     const scrubTo = (percent: number) => {
         // scrubbing means "show me the animation" — release a pinned keyframe first,
         // otherwise the preview stays static and the slider seems to do nothing
         setSelection(null);
+        setPlaying(false);
+        // fitted overview: no scroll room — drive the virtual scroll position instead
+        if (mockWide) {
+            setScrubT(percent / 100);
+            return;
+        }
         const max = document.documentElement.scrollHeight - window.innerHeight;
         window.scrollTo({ top: (percent / 100) * max });
     };
 
-    const section = (id: SectionId, title: string, children: React.ReactNode) => (
-        <Section title={title} open={openSection === id} onToggle={() => setOpenSection(id)}>
-            {children}
-        </Section>
-    );
+    /* ---- canvas area layout ---- */
+    // The canvas is the clear rect between the docked chrome (nothing floats over it).
+    // In fit view the page is laid out at MOCK_WIDTH and scaled so the whole section
+    // INCLUDING its bleed overscan fits that rect — curve handles live at the bleed
+    // edges and must stay visible and reachable next to the artboard, Figma-style.
+    // The outer wrapper keeps the document height honest (transforms don't affect
+    // layout, so without it the page would scroll into a void).
+    const chrome = !fullscreen;
+    const lg = viewport.w >= 1024;
+    const leftW = chrome && lg ? LEFT_W : 0;
+    const rightW = chrome && lg ? RIGHT_W : 0;
+    const topH = chrome ? TOOLBAR_H : 0;
+    const bottomH = chrome ? TIMELINE_H : 0;
+    const availW = viewport.w - leftW - rightW;
+    const availH = viewport.h - topH - bottomH;
+    const margin = chrome ? MARGIN : 12;
+    // reserve room for the bleed only while editing — fullscreen is a clean preview
+    const bleedFactor = chrome ? 1 + (2 * bleedX) / 100 : 1;
+    const mockScale = Math.min((availW - 2 * margin) / (MOCK_WIDTH * bleedFactor), (availH - 2 * margin) / sectionPx, 1);
+    const mockOffsetX = leftW + Math.max(0, (availW - MOCK_WIDTH * mockScale) / 2);
+    const mockContentH = ((spaceBefore ? 0.8 : 0) + (spaceAfter ? 0.8 : 0)) * viewport.h + sectionPx;
+    const mockOffsetY = topH + Math.max(chrome ? margin : 0, (availH - mockContentH * mockScale) / 2);
+    // 100% view: the real-scroll preview also stays inside the clear canvas area
+    // (bleed included), so even here "100%" is a bit less than the full window
+    const scrollW = chrome ? Math.max(320, (availW - 2 * margin) / bleedFactor) : viewport.w;
+    const scrollOffsetX = chrome ? leftW + Math.max(0, (availW - scrollW) / 2) : 0;
 
-    /* ---- keyframe helpers for the selected keyframe ---- */
-    const selectedConfigs =
-        selection?.edge === 'wave' ? active.configs : selection ? active[selection.edge].configs : null;
-    const setSelectedConfigs = (configs: WaveConfig[]) => {
-        if (!selection) return;
-        if (selection.edge === 'wave') patch({ configs });
-        else patchEdge(selection.edge, { configs });
+    const deselectToPage = (e: React.MouseEvent<HTMLElement>) => {
+        if (e.target === e.currentTarget) selectTarget('page');
     };
-
-    // layer palette convention: top row = frontmost = last in paint order
-    const reversedLayers = [...layers].reverse();
 
     return (
         <div
-            className="relative min-h-screen max-w-full overflow-x-hidden text-white-washed"
-            style={{ backgroundColor: pageBg }}
+            onClick={deselectToPage}
+            className="relative min-h-screen max-w-full overflow-x-hidden"
+            // in fit view the page bg lives INSIDE the frame — around it: neutral editor canvas
+            style={{ backgroundColor: mockWide || chrome ? '#e8e8eb' : pageBg }}
         >
-            {/* --------------- preview: bare page impression, no lab copy --------------- */}
-            <main className={cn(!fullscreen && 'lg:pr-[360px]')}>
-                {spaceBefore && <div className="h-[80vh]" />}
+            {/* --------------------------------- canvas --------------------------------- */}
+            <main onClick={deselectToPage}>
+                <div
+                    onClick={deselectToPage}
+                    style={
+                        mockWide
+                            ? { height: mockContentH * mockScale, paddingTop: mockOffsetY }
+                            : { paddingTop: chrome ? topH + margin : 0, paddingBottom: chrome ? bottomH + margin : 0 }
+                    }
+                >
+                    <div
+                        // framed like a device/artboard — the ARTWORK clips inside the frame
+                        // (see below), while overlays and handles may overflow into the clear
+                        // editor canvas around it
+                        className={cn('relative', chrome && 'ring-1 ring-black/10', mockWide && chrome && 'shadow-2xl')}
+                        style={
+                            mockWide
+                                ? {
+                                      width: MOCK_WIDTH,
+                                      transform: `scale(${mockScale})`,
+                                      transformOrigin: 'top left',
+                                      marginLeft: mockOffsetX,
+                                      backgroundColor: pageBg,
+                                  }
+                                : { width: scrollW, marginLeft: scrollOffsetX, backgroundColor: pageBg }
+                        }
+                    >
+                        {spaceBefore && <div className="h-[80vh]" />}
 
-                <div ref={sectionRef} className="relative" style={{ height: `${sectionPx}px` }}>
-                    {!fullscreen && (
-                        <div className="absolute inset-x-0 top-0 z-10 border-t border-dashed border-white-washed/20 px-4 md:px-16">
-                            <span className="font-mono text-[11px] opacity-60">wave section — start</span>
+                        <div ref={sectionRef} className="relative" style={{ height: `${sectionPx}px` }}>
+                            {!mockWide && chrome && (
+                                <div className="absolute inset-x-0 top-0 z-10 border-t border-dashed border-white/20 px-4 md:px-16">
+                                    <span className="font-mono text-[10px] text-white/50">wave section — start</span>
+                                </div>
+                            )}
+                            {/* the artwork clips at the frame like a real viewport — the bleed
+                                overscan is cropped here, NOT further out at the editor panels */}
+                            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                                {/* grainy-dissolve filters (per layer): dense fractal noise displaces
+                                    the soft edge's pixels into speckle, then the original blends back
+                                    underneath — soft falloff + grain, solid core stays solid */}
+                                <svg width={0} height={0} aria-hidden className="absolute">
+                                    <defs>
+                                        {layers
+                                            .filter((l) => l.visible && l.dissolve > 0)
+                                            .map((l) => (
+                                                <filter
+                                                    key={l.id}
+                                                    id={`dissolve-${l.id}`}
+                                                    colorInterpolationFilters="sRGB"
+                                                >
+                                                    <feTurbulence
+                                                        type="fractalNoise"
+                                                        // grain size scales the noise frequency inversely —
+                                                        // 1 = per-pixel speckle, higher = coarser clumps
+                                                        baseFrequency={(0.9713 / Math.max(1, l.dissolveSize)).toFixed(4)}
+                                                        numOctaves="4"
+                                                    />
+                                                    <feDisplacementMap
+                                                        in="SourceGraphic"
+                                                        scale={l.dissolve}
+                                                        xChannelSelector="R"
+                                                    />
+                                                    <feBlend in2="SourceGraphic" />
+                                                </filter>
+                                            ))}
+                                    </defs>
+                                </svg>
+                                {previewLayers}
+                            </div>
+                            {/* click-select: hit testing on the real curve shapes; while a keyframe
+                                is pinned the CurveOverlay owns all pointer input instead */}
+                            {chrome && !selection && (
+                                <div
+                                    className="absolute inset-y-0 z-10"
+                                    style={{ left: `-${bleedX}%`, right: `-${bleedX}%` }}
+                                    onClick={onCanvasClick}
+                                    onPointerMove={(e) => setHoveredLayerId(hitsAt(e)[0] ?? null)}
+                                    onPointerLeave={() => setHoveredLayerId(null)}
+                                />
+                            )}
+                            {/* hover: bold dashed outline · selected: solid accent outline */}
+                            {chrome && outlineCurves.length > 0 && (
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-y-0 z-20"
+                                    style={{ left: `-${bleedX}%`, right: `-${bleedX}%` }}
+                                >
+                                    <svg className="size-full" viewBox="0 0 1 1" preserveAspectRatio="none">
+                                        {outlineCurves.map(({ d, kind }, i) => (
+                                            // non-scaling strokes stay at screen px, so the fitted
+                                            // view gets extra weight to keep the highlight loud
+                                            <g key={i}>
+                                                <path
+                                                    d={d}
+                                                    fill="none"
+                                                    stroke={kind === 'hover' ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.35)'}
+                                                    strokeWidth={kind === 'hover' ? (mockWide ? 5 : 4) : 4}
+                                                    vectorEffect="non-scaling-stroke"
+                                                />
+                                                <path
+                                                    d={d}
+                                                    fill="none"
+                                                    stroke={kind === 'hover' ? '#fff' : '#0d99ff'}
+                                                    strokeWidth={kind === 'hover' ? 2 : 2}
+                                                    strokeDasharray={kind === 'hover' ? '8 6' : undefined}
+                                                    vectorEffect="non-scaling-stroke"
+                                                />
+                                            </g>
+                                        ))}
+                                    </svg>
+                                </div>
+                            )}
+                            {/* handle overlay spans the same bleed-wide rect as the artwork —
+                                ghost curves and handles land exactly on the rendered curves,
+                                and the edge anchors stay visible just outside the frame */}
+                            {chrome && active && (
+                                <div className="absolute inset-y-0" style={{ left: `-${bleedX}%`, right: `-${bleedX}%` }}>
+                                    <CurveOverlay
+                                        edges={overlayEdges}
+                                        selection={selection}
+                                        onSelect={setSelection}
+                                        // no pin yet → all keyframes show as labeled ghosts, so picking
+                                        // one to edit happens right on the canvas; while pinned the
+                                        // onion toggle decides
+                                        showGhosts={onion || !selection}
+                                        scale={mockWide ? mockScale : 1}
+                                    />
+                                </div>
+                            )}
+                            {!mockWide && chrome && (
+                                <div className="absolute inset-x-0 bottom-0 z-10 border-b border-dashed border-white/20 px-4 md:px-16">
+                                    <span className="font-mono text-[10px] text-white/50">wave section — end</span>
+                                </div>
+                            )}
                         </div>
-                    )}
-                    {previewLayers}
-                    {!fullscreen && (
-                        <CurveOverlay
-                            edges={overlayEdges}
-                            selection={selection}
-                            onSelect={setSelection}
-                            showGhosts={onion}
-                            context={active.name}
-                        />
-                    )}
-                    {!fullscreen && (
-                        <div className="absolute inset-x-0 bottom-0 z-10 border-b border-dashed border-white-washed/20 px-4 md:px-16">
-                            <span className="font-mono text-[11px] opacity-60">wave section — end</span>
-                        </div>
-                    )}
+
+                        {spaceAfter && <div className="h-[80vh]" />}
+                        {/* inside the frame, `fixed` is relative to the transformed wrapper —
+                            the grain covers exactly the mocked screen, not the editor canvas */}
+                        {mockWide && grainOn && <Grain />}
+                    </div>
                 </div>
-
-                {spaceAfter && <div className="h-[80vh]" />}
             </main>
 
-            {/* fullscreen preview: a single quiet affordance to get the chrome back */}
-            {fullscreen && (
-                <button
-                    type="button"
-                    onClick={() => setFullscreen(false)}
-                    className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-ui-border/60 bg-black-washed/90 px-4 py-2 font-mono text-xs opacity-70 backdrop-blur transition-opacity hover:opacity-100"
-                >
-                    <span>⛶</span>
-                    <span>controls</span>
-                </button>
+            {/* 100% view: the grain stays viewport-fixed, cropped to the frame column */}
+            {!mockWide && grainOn && (
+                <Grain
+                    clipPath={
+                        chrome
+                            ? `inset(0 ${Math.max(0, viewport.w - scrollOffsetX - scrollW)}px 0 ${scrollOffsetX}px)`
+                            : undefined
+                    }
+                />
             )}
 
-            {/* ------------------------------ controls ------------------------------ */}
-            {/* real editor chrome: opaque full-height sidebar, clearly separated from the page preview */}
-            {/* data-lenis-prevent: Lenis hijacks wheel events globally; without it this nested scroll container never scrolls */}
-            <aside
-                data-lenis-prevent
-                className={cn(
-                    'flex flex-col border-t border-ui-border/40 bg-black-washed lg:fixed lg:inset-y-0 lg:right-0 lg:z-40 lg:w-[360px] lg:border-l lg:border-t-0',
-                    fullscreen && 'hidden',
-                )}
-            >
-                <div className="flex items-center justify-between border-b border-ui-border/40 px-5 py-4">
-                    <span className="font-mono text-sm">wave composer</span>
-                    <div className="flex items-center gap-1">
+            {/* --------------------------------- toolbar -------------------------------- */}
+            {chrome && (
+                <header
+                    className={cn('fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b px-3', panelCls)}
+                    style={{ height: TOOLBAR_H }}
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="font-mono text-[11px] font-medium text-zinc-800">wave composer</span>
+                        <Link
+                            href="/"
+                            title="exit composer"
+                            className="font-mono text-[10px] text-zinc-400 transition-colors hover:text-zinc-900"
+                        >
+                            exit
+                        </Link>
+                    </div>
+                    {/* view switch lives centered over the canvas, like a zoom control */}
+                    <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+                        <div className="grid grid-flow-col overflow-hidden rounded-md border border-black/10">
+                            {([true, false] as const).map((fit) => (
+                                <button
+                                    key={String(fit)}
+                                    type="button"
+                                    title={fit ? 'fit the whole section (Z)' : 'real 100% scroll view (Z)'}
+                                    onClick={() => setMockWide(fit)}
+                                    className={cn(
+                                        'px-2.5 py-1 font-mono text-[10px] transition-colors',
+                                        mockWide === fit
+                                            ? cn('bg-[#0d99ff]/10 font-medium', accentText)
+                                            : 'bg-black/[0.02] text-zinc-500 hover:text-zinc-800',
+                                    )}
+                                >
+                                    {fit ? 'fit' : '100%'}
+                                </button>
+                            ))}
+                        </div>
                         <button
                             type="button"
-                            title="fullscreen preview (F)"
+                            title="fullscreen preview — hides all chrome (F)"
                             onClick={() => {
                                 setSelection(null);
                                 setFullscreen(true);
                             }}
-                            className={iconBtn}
+                            className="rounded-md border border-black/10 px-2 py-[3px] font-mono text-[11px] leading-none text-zinc-500 transition-colors hover:border-black/25 hover:text-zinc-900"
                         >
                             ⛶
                         </button>
-                        {/* the site nav is hidden on this page — this is the way back */}
-                        <Link href="/" title="exit composer" className={iconBtn}>
-                            ✕
-                        </Link>
+                        {mockWide && (
+                            <span className="font-mono text-[10px] tabular-nums text-zinc-400">
+                                {MOCK_WIDTH} × {sectionPx} · {Math.round(mockScale * 100)}%
+                            </span>
+                        )}
                     </div>
-                </div>
+                    <div className="flex items-center gap-1.5">
+                        <FlashButton
+                            label="copy jsx"
+                            title="copy the whole visible stack as a ready-to-paste JSX section"
+                            onAction={async () => {
+                                await navigator.clipboard.writeText(code);
+                                return 'jsx ✓';
+                            }}
+                        />
+                        <FlashButton
+                            label="copy figma svg"
+                            title="copies an SVG snapshot at the current progress — paste directly into Figma (⌘V)"
+                            onAction={async () => {
+                                const result = buildExport();
+                                if (!result) return null;
+                                await navigator.clipboard.writeText(result.svg);
+                                return `svg @ ${result.t.toFixed(2)} ✓`;
+                            }}
+                        />
+                        <FlashButton
+                            label="⤓"
+                            title="download the same snapshot as .svg"
+                            onAction={() => {
+                                const result = buildExport();
+                                if (!result) return null;
+                                const url = URL.createObjectURL(new Blob([result.svg], { type: 'image/svg+xml' }));
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'wave-composition.svg';
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                return '✓';
+                            }}
+                        />
+                    </div>
+                </header>
+            )}
 
-                <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-                    {/* always visible: layer palette + page bg + scroll scrubber + figma export */}
-                    <div className="flex flex-col gap-3 border-b border-ui-border/40 px-5 py-5">
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-xs opacity-80">layers (top = front)</span>
-                            {reversedLayers.map((layer) => {
-                                const index = layers.indexOf(layer);
-                                return (
-                                    <LayerRow
-                                        key={layer.id}
-                                        layer={layer}
-                                        isActive={layer.id === active.id}
-                                        isFront={index === layers.length - 1}
-                                        isBack={index === 0}
-                                        canRemove={layers.length > 1}
-                                        onActivate={() => activateLayer(layer.id)}
-                                        onToggleVisible={() => toggleVisible(layer.id)}
-                                        onMoveForward={() => moveLayer(layer.id, 1)}
-                                        onMoveBackward={() => moveLayer(layer.id, -1)}
-                                        onRemove={() => removeLayer(layer.id)}
-                                    />
-                                );
-                            })}
-                            <div className="grid grid-cols-2 gap-1.5">
-                                <button
-                                    type="button"
-                                    onClick={() => addLayer('wave')}
-                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs opacity-70 transition-opacity hover:opacity-100"
-                                >
-                                    + wave
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => addLayer('band')}
-                                    className="rounded border border-dashed border-ui-border/60 py-1 text-xs opacity-70 transition-opacity hover:opacity-100"
-                                >
-                                    + band
-                                </button>
-                            </div>
-                        </div>
-                        <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
-                            <span className="opacity-80">progress</span>
-                            <input
-                                ref={scrubberRef}
-                                type="range"
-                                min={0}
-                                max={100}
-                                step={1}
-                                defaultValue={0}
-                                onChange={(e) => scrubTo(Number(e.target.value))}
-                                className="accent-3a-green h-1 w-full cursor-pointer"
+            {/* ------------------------------- layers panel ------------------------------ */}
+            {chrome && (
+                <aside
+                    data-lenis-prevent
+                    className={cn('fixed bottom-0 left-0 z-40 hidden w-[224px] overflow-hidden border-r lg:block', panelCls)}
+                    style={{ top: TOOLBAR_H }}
+                >
+                    <LayersPanel
+                        layers={layers}
+                        activeId={activeId}
+                        hoveredLayerId={hoveredLayerId}
+                        onSelect={selectTarget}
+                        onToggleVisible={toggleVisible}
+                        onMove={moveLayer}
+                        onRemove={removeLayer}
+                        onRename={renameLayer}
+                        onHover={setHoveredLayerId}
+                        onAdd={addLayer}
+                    />
+                </aside>
+            )}
+
+            {/* -------------------------------- inspector -------------------------------- */}
+            {chrome && (
+                <aside
+                    data-lenis-prevent
+                    className={cn('fixed bottom-0 right-0 z-40 hidden w-[288px] flex-col overflow-hidden border-l lg:flex', panelCls)}
+                    style={{ top: TOOLBAR_H }}
+                >
+                    <div className="flex items-center gap-2 border-b border-black/[0.06] px-3 py-2">
+                        <span className="font-mono text-[11px] font-medium text-zinc-800">
+                            {active ? active.name : 'page'}
+                        </span>
+                        {active && (
+                            <span className="rounded border border-black/15 px-1 font-mono text-[9px] text-zinc-500">
+                                {active.mode}
+                            </span>
+                        )}
+                    </div>
+                    <div className="min-h-0 flex-1 overflow-y-auto">
+                        {active ? (
+                            <LayerInspector
+                                layer={active}
+                                palette={palette}
+                                selection={selection}
+                                onSelection={setSelection}
+                                onion={onion}
+                                onOnion={setOnion}
+                                patch={patch}
+                                patchEdge={patchEdge}
                             />
-                        </label>
-                        <FigmaExportButtons build={buildExport} />
-                        <Toggle label="onion skin (all keyframes)" checked={onion} onChange={setOnion} />
+                        ) : (
+                            <PageInspector
+                                palette={palette}
+                                onApplyPalette={applyPalette}
+                                pageBg={pageBg}
+                                onPageBg={setPageBg}
+                                sectionPx={sectionPx}
+                                onSectionPx={setSectionPx}
+                                bleedX={bleedX}
+                                onBleedX={setBleedX}
+                                grainOn={grainOn}
+                                onGrainOn={setGrainOn}
+                                spaceBefore={spaceBefore}
+                                onSpaceBefore={setSpaceBefore}
+                                spaceAfter={spaceAfter}
+                                onSpaceAfter={setSpaceAfter}
+                                code={code}
+                            />
+                        )}
                     </div>
+                </aside>
+            )}
 
-                    {section(
-                        'page',
-                        'Page',
-                        <>
-                            <ColorRow label="page bg" value={pageBg} onChange={setPageBg} />
-                            <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
-                                <span className="opacity-80">section px</span>
-                                <NumberField
-                                    value={sectionPx}
-                                    min={200}
-                                    max={20000}
-                                    step={10}
-                                    onChange={setSectionPx}
-                                />
-                            </label>
-                            <Toggle label="space before waves" checked={spaceBefore} onChange={setSpaceBefore} />
-                            <Toggle label="space after waves" checked={spaceAfter} onChange={setSpaceAfter} />
-                        </>,
+            {/* --------------------------------- timeline -------------------------------- */}
+            {chrome && (
+                <footer
+                    // docked between the two panels — the canvas above stays completely clear
+                    className={cn(
+                        'fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3 border-t px-4 lg:left-[224px] lg:right-[288px]',
+                        panelCls,
                     )}
-
-                    {section(
-                        'keyframes',
-                        active.mode === 'wave' ? `Keyframes (${active.configs.length})` : 'Keyframes',
-                        <>
-                            {/* end editing and show the scroll-driven interpolation; doubles as a mode indicator */}
+                    style={{ height: TIMELINE_H }}
+                >
+                    {mockWide && (
+                        <button
+                            type="button"
+                            title={playing ? 'pause (space)' : 'play the scroll pass (space)'}
+                            onClick={() => {
+                                setSelection(null);
+                                setPlaying((v) => !v);
+                            }}
+                            className={cn(
+                                'flex size-6 items-center justify-center rounded-full border text-[10px] transition-colors',
+                                playing
+                                    ? cn('border-[#0d99ff]/50 bg-[#0d99ff]/10', accentText)
+                                    : 'border-black/10 text-zinc-600 hover:border-black/25 hover:text-zinc-900',
+                            )}
+                        >
+                            {playing ? '❚❚' : '▶'}
+                        </button>
+                    )}
+                    <span className="font-mono text-[10px] text-zinc-400">t</span>
+                    <span ref={tLabelRef} className="w-8 font-mono text-[11px] tabular-nums text-zinc-800">
+                        {scrubT.toFixed(2)}
+                    </span>
+                    <input
+                        ref={scrubberRef}
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={0.5}
+                        defaultValue={0}
+                        onChange={(e) => scrubTo(Number(e.target.value))}
+                        className={cn(sliderCls, 'flex-1')}
+                        style={{ background: sliderFill(0) }}
+                    />
+                    {/* keyframe edit status lives in the docked bar — never on the canvas */}
+                    {selection && active && (
+                        <div className="flex min-w-0 items-center gap-2 font-mono text-[10px]">
+                            <span className="truncate text-zinc-500">
+                                editing keyframe {selection.index + 1}
+                                {active.mode === 'band' ? ` · ${selection.edge}` : ''} · {active.name}
+                            </span>
                             <button
                                 type="button"
                                 onClick={() => setSelection(null)}
-                                className={cn(
-                                    'flex items-center justify-center gap-2 rounded border py-1.5 font-mono text-xs transition-colors',
-                                    selection
-                                        ? 'border-ui-border/60 opacity-85 hover:border-3a-green/60 hover:text-3a-green hover:opacity-100'
-                                        : 'border-3a-green bg-3a-green/20 text-3a-green',
-                                )}
+                                className={cn('shrink-0 transition-opacity hover:opacity-80', accentText)}
                             >
-                                <span>▶</span>
-                                <span>{selection ? 'show live result' : 'live result'}</span>
+                                done
                             </button>
-                            {active.mode === 'wave' ? (
-                                <KeyframeChips
-                                    edge="wave"
-                                    configs={active.configs}
-                                    selection={selection}
-                                    onSelect={setSelection}
-                                    onChange={(configs) => patch({ configs })}
-                                />
-                            ) : (
-                                <>
-                                    <KeyframeChips
-                                        label="top"
-                                        edge="top"
-                                        configs={active.top.configs}
-                                        selection={selection}
-                                        onSelect={setSelection}
-                                        onChange={(configs) => patchEdge('top', { configs })}
-                                    />
-                                    <KeyframeChips
-                                        label="bottom"
-                                        edge="bottom"
-                                        configs={active.bottom.configs}
-                                        selection={selection}
-                                        onSelect={setSelection}
-                                        onChange={(configs) => patchEdge('bottom', { configs })}
-                                    />
-                                </>
-                            )}
-                            {selection && selectedConfigs ? (
-                                <SelectedKeyframe
-                                    config={selectedConfigs[selection.index]}
-                                    count={selectedConfigs.length}
-                                    onChange={(config) =>
-                                        setSelectedConfigs(
-                                            selectedConfigs.map((c, i) => (i === selection.index ? config : c)),
-                                        )
-                                    }
-                                    onDuplicate={() => {
-                                        const c = selectedConfigs[selection.index];
-                                        setSelectedConfigs([
-                                            ...selectedConfigs.slice(0, selection.index + 1),
-                                            { left: [...c.left], right: [...c.right] },
-                                            ...selectedConfigs.slice(selection.index + 1),
-                                        ]);
-                                        setSelection({ ...selection, index: selection.index + 1 });
-                                    }}
-                                    onRemove={() => {
-                                        setSelectedConfigs(selectedConfigs.filter((_, i) => i !== selection.index));
-                                        setSelection(null);
-                                    }}
-                                />
-                            ) : (
-                                <p className="text-xs leading-relaxed opacity-70">
-                                    Pick a keyframe chip to pin and edit it — drag the anchors and handles on the
-                                    canvas. Onion skin shows all keyframes as dashed system curves (clickable too). 1
-                                    keyframe is static, 2 blend linearly, 3+ flow through a smooth spline.
-                                </p>
-                            )}
-                        </>,
+                        </div>
                     )}
+                </footer>
+            )}
 
-                    {section(
-                        'scroll',
-                        'Scroll',
-                        <>
-                            <label className="grid grid-cols-[5.5rem_1fr] items-center gap-2 text-xs">
-                                <span className="opacity-80">preset</span>
-                                <select
-                                    value={
-                                        scrollPresets.find(
-                                            (p) => p.start === active.scrollStart && p.end === active.scrollEnd,
-                                        )?.label ?? 'custom'
-                                    }
-                                    onChange={(e) => {
-                                        const preset = scrollPresets.find((p) => p.label === e.target.value);
-                                        if (preset) patch({ scrollStart: preset.start, scrollEnd: preset.end });
-                                    }}
-                                    className="w-full rounded border border-ui-border/60 bg-black-washed px-2 py-1 font-mono text-xs"
-                                >
-                                    <option value="custom" disabled>
-                                        custom
-                                    </option>
-                                    {scrollPresets.map((p) => (
-                                        <option key={p.label} value={p.label}>
-                                            {p.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <details className="text-xs">
-                                <summary className="cursor-pointer opacity-70 transition-opacity hover:opacity-100">
-                                    custom offsets
-                                </summary>
-                                <div className="mt-2 grid grid-cols-2 gap-2">
-                                    {(['scrollStart', 'scrollEnd'] as const).map((key) => (
-                                        <label key={key} className="flex flex-col gap-1">
-                                            <span className="opacity-80">
-                                                {key === 'scrollStart' ? 'start' : 'end'}
-                                            </span>
-                                            <input
-                                                type="text"
-                                                value={active[key]}
-                                                onChange={(e) => patch({ [key]: e.target.value })}
-                                                spellCheck={false}
-                                                className="w-full rounded border border-ui-border/60 bg-black-washed px-2 py-1 font-mono text-xs"
-                                            />
-                                        </label>
-                                    ))}
-                                </div>
-                            </details>
-                        </>,
-                    )}
-
-                    {section(
-                        'appearance',
-                        'Appearance',
-                        <>
-                            <ColorRow label="fill" value={active.fill} onChange={(fill) => patch({ fill })} />
-                            {active.mode === 'wave' && (
-                                <>
-                                    <ColorRow
-                                        label="stroke"
-                                        value={active.strokeStyle}
-                                        onChange={(strokeStyle) => patch({ strokeStyle })}
-                                    />
-                                    <SliderRow
-                                        label="stroke width"
-                                        value={active.strokeWidth}
-                                        min={0}
-                                        max={4}
-                                        step={0.1}
-                                        onChange={(strokeWidth) => patch({ strokeWidth })}
-                                    />
-                                </>
-                            )}
-                            <Segmented
-                                label="feathered out"
-                                options={['none', 'top', 'bottom', 'both'] as const}
-                                value={active.featheredOut}
-                                onChange={(featheredOut) => patch({ featheredOut })}
-                            />
-                            {active.mode === 'wave' && (
-                                <Toggle label="flip" checked={active.flip} onChange={(flip) => patch({ flip })} />
-                            )}
-                            <Toggle label="debug" checked={active.debug} onChange={(debug) => patch({ debug })} />
-                        </>,
-                    )}
-
-                    {active.mode === 'wave'
-                        ? section(
-                              'curves',
-                              'Decorative curves',
-                              <>
-                                  <SliderRow
-                                      label="amount"
-                                      value={active.curveAmount}
-                                      min={0}
-                                      max={8}
-                                      step={1}
-                                      onChange={(curveAmount) => patch({ curveAmount })}
-                                  />
-                                  <SliderRow
-                                      label="offset left"
-                                      value={active.offsetLeft}
-                                      min={-150}
-                                      max={150}
-                                      step={1}
-                                      onChange={(offsetLeft) => patch({ offsetLeft })}
-                                  />
-                                  <SliderRow
-                                      label="offset right"
-                                      value={active.offsetRight}
-                                      min={-150}
-                                      max={150}
-                                      step={1}
-                                      onChange={(offsetRight) => patch({ offsetRight })}
-                                  />
-                              </>,
-                          )
-                        : (['top', 'bottom'] as const).map((key) => (
-                              <Fragment key={key}>
-                                  {section(
-                                      key,
-                                      `${key} edge strokes`,
-                                      <>
-                                          <ColorRow
-                                              label="stroke"
-                                              value={active[key].strokeStyle}
-                                              onChange={(strokeStyle) => patchEdge(key, { strokeStyle })}
-                                          />
-                                          <SliderRow
-                                              label="stroke width"
-                                              value={active[key].strokeWidth}
-                                              min={0}
-                                              max={4}
-                                              step={0.1}
-                                              onChange={(strokeWidth) => patchEdge(key, { strokeWidth })}
-                                          />
-                                          <SliderRow
-                                              label="fan amount"
-                                              value={active[key].curveAmount}
-                                              min={0}
-                                              max={8}
-                                              step={1}
-                                              onChange={(curveAmount) => patchEdge(key, { curveAmount })}
-                                          />
-                                          <SliderRow
-                                              label="offset left"
-                                              value={active[key].offsetLeft}
-                                              min={-150}
-                                              max={150}
-                                              step={1}
-                                              onChange={(offsetLeft) => patchEdge(key, { offsetLeft })}
-                                          />
-                                          <SliderRow
-                                              label="offset right"
-                                              value={active[key].offsetRight}
-                                              min={-150}
-                                              max={150}
-                                              step={1}
-                                              onChange={(offsetRight) => patchEdge(key, { offsetRight })}
-                                          />
-                                      </>,
-                                  )}
-                              </Fragment>
-                          ))}
-
-                    {section(
-                        'config',
-                        'Config',
-                        <div className="relative">
-                            <pre className="max-h-96 overflow-auto rounded-lg border border-ui-border/40 bg-gray-darkest-washed p-3 font-mono text-[11px] leading-relaxed">
-                                {code}
-                            </pre>
-                            <CopyButton
-                                textToCopy={code}
-                                className="absolute right-2 top-2 rounded border border-ui-border/60 bg-black-washed p-1.5 opacity-80 transition-opacity hover:opacity-100"
-                            />
-                        </div>,
-                    )}
-                </div>
-            </aside>
+            {/* fullscreen preview: a single quiet affordance at the top to get the chrome back */}
+            {fullscreen && (
+                <button
+                    type="button"
+                    title="back to the editor (Esc)"
+                    onClick={() => setFullscreen(false)}
+                    className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-black/10 bg-white/90 px-4 py-2 font-mono text-[11px] text-zinc-600 shadow-lg backdrop-blur transition-colors hover:text-zinc-900"
+                >
+                    <span>⛶</span>
+                    <span>back</span>
+                </button>
+            )}
         </div>
     );
 }

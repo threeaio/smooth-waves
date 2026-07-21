@@ -71,16 +71,18 @@ export function CurveOverlay({
     selection,
     onSelect,
     showGhosts,
-    context,
+    scale = 1,
 }: {
     edges: OverlayEdge[];
     selection: Selection | null;
     onSelect: (selection: Selection | null) => void;
     /** Onion-skin toggle — when off, only the pinned keyframe's curve + handles render. */
     showGhosts: boolean;
-    /** Extra label in the edit chip, e.g. the layer name. */
-    context?: string;
+    /** The preview's on-screen scale (fit view) — handles/labels compensate so they keep their screen size. */
+    scale?: number;
 }) {
+    // everything hand-sized is specified in screen px and blown up by 1/scale
+    const k = 1 / scale;
     const svgRef = useRef<SVGSVGElement>(null);
     const dragRef = useRef<DragKind | null>(null);
     const [size, setSize] = useState({ w: 0, h: 0 });
@@ -105,8 +107,10 @@ export function CurveOverlay({
         if (!kind || !svg || !selection || !selectedEdge || !selectedConfig) return;
 
         const rect = svg.getBoundingClientRect();
-        const px = e.clientX - rect.left;
-        const py = e.clientY - rect.top;
+        // map screen px into the svg's layout space — the preview may be scaled
+        // down by the zoom-out mock, so rect and clientWidth can differ
+        const px = (e.clientX - rect.left) * (w / rect.width);
+        const py = (e.clientY - rect.top) * (h / rect.height);
         const flip = selectedEdge.flip;
 
         const next: WaveConfig = {
@@ -146,7 +150,9 @@ export function CurveOverlay({
         onPointerUp: endDrag,
         className: cn(
             'pointer-events-auto touch-none',
-            kind.startsWith('anchor') ? 'cursor-ns-resize fill-black-washed stroke-3a-green' : 'cursor-move fill-3a-green',
+            kind.startsWith('anchor')
+                ? 'cursor-ns-resize fill-white stroke-[#0d99ff]'
+                : 'cursor-move fill-[#0d99ff]',
         ),
     });
 
@@ -168,29 +174,31 @@ export function CurveOverlay({
                                     <path
                                         d={d}
                                         fill="none"
-                                        className={cn(isSelected && 'stroke-3a-green')}
+                                        className={cn(isSelected && 'stroke-[#0d99ff]')}
                                         style={isSelected ? undefined : { stroke: color }}
-                                        strokeDasharray={isSelected ? undefined : edge.dashed ? '2 5' : '7 5'}
-                                        strokeWidth={isSelected ? 2 : 1}
+                                        strokeDasharray={
+                                            isSelected ? undefined : edge.dashed ? `${2 * k} ${5 * k}` : `${7 * k} ${5 * k}`
+                                        }
+                                        strokeWidth={(isSelected ? 2 : 1) * k}
                                     />
                                     {/* invisible fat hit path — click to select/deselect */}
                                     <path
                                         d={d}
                                         fill="none"
                                         stroke="transparent"
-                                        strokeWidth={18}
+                                        strokeWidth={18 * k}
                                         className="pointer-events-auto cursor-pointer"
                                         style={{ pointerEvents: 'stroke' }}
                                         onClick={() => onSelect(isSelected ? null : { edge: edge.edge, index: i })}
                                     />
                                     <text
-                                        x={10}
-                                        y={eg.ly - 8}
+                                        x={10 * k}
+                                        y={eg.ly - 8 * k}
                                         className={cn(
-                                            'pointer-events-auto cursor-pointer select-none font-mono text-[11px]',
-                                            isSelected && 'fill-3a-green',
+                                            'pointer-events-auto cursor-pointer select-none font-mono',
+                                            isSelected && 'fill-[#0d99ff]',
                                         )}
-                                        style={isSelected ? undefined : { fill: color }}
+                                        style={{ fontSize: 11 * k, ...(isSelected ? {} : { fill: color }) }}
                                         onClick={() => onSelect(isSelected ? null : { edge: edge.edge, index: i })}
                                     >
                                         {edges.length > 1 ? `${edge.edge} ${i + 1}` : i + 1}
@@ -203,34 +211,31 @@ export function CurveOverlay({
                 {/* handles for the selected keyframe */}
                 {g && (
                     <g>
-                        <line x1={0} y1={g.ly} x2={g.lcx} y2={g.lcy} className="stroke-3a-green/50" strokeDasharray="3 3" />
-                        <line x1={w} y1={g.ry} x2={g.rcx} y2={g.rcy} className="stroke-3a-green/50" strokeDasharray="3 3" />
-                        <circle cx={g.lcx} cy={g.lcy} r={6} {...handleProps('ctrlL')} />
-                        <circle cx={g.rcx} cy={g.rcy} r={6} {...handleProps('ctrlR')} />
-                        <circle cx={0} cy={g.ly} r={8} strokeWidth={2} {...handleProps('anchorL')} />
-                        <circle cx={w} cy={g.ry} r={8} strokeWidth={2} {...handleProps('anchorR')} />
+                        <line
+                            x1={0}
+                            y1={g.ly}
+                            x2={g.lcx}
+                            y2={g.lcy}
+                            className="stroke-[#0d99ff]/50"
+                            strokeDasharray={`${3 * k} ${3 * k}`}
+                            strokeWidth={k}
+                        />
+                        <line
+                            x1={w}
+                            y1={g.ry}
+                            x2={g.rcx}
+                            y2={g.rcy}
+                            className="stroke-[#0d99ff]/50"
+                            strokeDasharray={`${3 * k} ${3 * k}`}
+                            strokeWidth={k}
+                        />
+                        <circle cx={g.lcx} cy={g.lcy} r={6 * k} {...handleProps('ctrlL')} />
+                        <circle cx={g.rcx} cy={g.rcy} r={6 * k} {...handleProps('ctrlR')} />
+                        <circle cx={0} cy={g.ly} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorL')} />
+                        <circle cx={w} cy={g.ry} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorR')} />
                     </g>
                 )}
             </svg>
-
-            {selection && (
-                // fixed to the viewport (the 150vh section's own corners are usually off-screen),
-                // left-20 keeps it clear of the floating logo button in the corner
-                <div className="pointer-events-auto fixed bottom-6 left-20 z-50 flex items-center gap-3 rounded-full border border-ui-border/60 bg-black-washed/90 px-4 py-2 font-mono text-xs backdrop-blur">
-                    <span>
-                        editing keyframe {selection.index + 1}
-                        {edges.length > 1 ? ` · ${selection.edge}` : ''}
-                        {context ? ` · ${context}` : ''}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => onSelect(null)}
-                        className="text-3a-green transition-opacity hover:opacity-80"
-                    >
-                        done
-                    </button>
-                </div>
-            )}
         </div>
     );
 }
