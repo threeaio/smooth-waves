@@ -42,3 +42,22 @@ html.lenis body {
 .lenis.lenis-smooth iframe {
     pointer-events: none;
 }
+
+@layer utilities {
+  @supports (corner-shape: squircle) {
+    .rounded-xl,
+    .rounded-2xl,
+    .rounded-3xl {
+      corner-shape: squircle;
+    }
+    .rounded-xl {
+      border-radius: 0.9rem;
+    }
+    .rounded-2xl {
+      border-radius: 1.2rem;
+    }
+    .rounded-3xl {
+      border-radius: 1.8rem;
+    }
+  }
+}
