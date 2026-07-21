@@ -61,21 +61,24 @@ export const sage = '#9dafa1';
 
 /**
  * A small working palette, editable in the page inspector and offered as quick
- * swatches in every color field. Presets: e4's own colors, Alex Cristache's
- * #MindfulPalettes no. 217 (the only one with publicly verifiable hex codes —
- * the rest live in image posts / the ebooks), plus a few proven classics in the
- * same mindful spirit. Paste hex codes from favorite palettes to add more.
+ * swatches in every color field. Presets: the two house palettes first, then
+ * user-picked Alex Cristache #MindfulPalettes (mp### = palette number) and the
+ * threeaio "liquid neon" set. Slot order is tuned for `applyPalette` remapping:
+ * 0 = dark ink, 1 = hot accent, 2 = light ground, rest = extras.
  */
 export const palettePresets: Array<{ name: string; colors: string[] }> = [
     { name: 'ink & pink', colors: [ink, pink, sage, '#f81683', '#0c0542'] },
     { name: 'e4 ink & neon', colors: ['#231112', '#FF015E', '#FFBB00', '#FF5E2F', '#FFF3E0'] },
-    { name: 'mindful no. 217', colors: ['#051040', '#1C2E63', '#E56024', '#FADE79', '#F2F2ED'] },
-    { name: 'terracotta & sage', colors: ['#4C4643', '#C97B5D', '#D9A441', '#A5A78F', '#1A1914'] },
-    { name: 'violet flame', colors: ['#390099', '#9E0059', '#FF0054', '#FF5400', '#FFBD00'] },
-    { name: 'deep ocean', colors: ['#001219', '#005F73', '#0A9396', '#EE9B00', '#AE2012'] },
-    { name: 'neon pop', colors: ['#04E762', '#F5B700', '#DC0073', '#008BF8', '#89FC00'] },
-    { name: 'pastel sky', colors: ['#CDB4DB', '#FFC8DD', '#FFAFCC', '#BDE0FE', '#A2D2FF'] },
-    { name: 'dusk & blush', colors: ['#355070', '#6D597A', '#B56576', '#E56B6F', '#EAAC8B'] },
+    // from the user's Figma landing-page WIP (coral sweep, ink fields, sage midfield, cream type)
+    { name: 'coral & sage', colors: ['#272B38', '#FF6467', '#8EC199', '#F7F6D3'] },
+    { name: 'liquid neon', colors: ['#0C121B', '#C8FF00', '#F4F5FA', '#0247FE'] },
+    { name: 'patrinia violet', colors: ['#17184B', '#8547B5', '#C9D2DF', '#D9B611', '#553592', '#F2F2F4'] },
+    { name: 'mp047 neon berry', colors: ['#040348', '#FD177B', '#DEDBFF', '#FFB800', '#330099', '#F8F0FB'] },
+    { name: 'mp234 often orange', colors: ['#111122', '#FF714E', '#F0EEEE', '#004466', '#9698A3', '#3A383F'] },
+    { name: 'mp274 screech owl', colors: ['#161820', '#C93F38', '#EAE4D8', '#2D4B65', '#2F323D', '#FAF7F0'] },
+    { name: 'mp275 butternut', colors: ['#014B43', '#E3664C', '#FFD978', '#F4A461', '#005A85', '#FFFAF0'] },
+    { name: 'mp281 wisteria', colors: ['#231C4D', '#A87DC2', '#E1DEE8', '#514B98', '#3F74B1', '#F8F8FF'] },
+    { name: 'mp282 ocean bowl', colors: ['#082D4F', '#68DFBB', '#F0F4F8', '#FBEC5E', '#2599B2', '#225288'] },
 ];
 
 // the template mirrors e4's ink field (wave) / blend band (band) — new layers
@@ -153,7 +156,9 @@ export function createLayer(mode: Mode, n: number): LayerState {
     };
 }
 
-// e4 scene 1 out of the box: blend band behind, ink field on top, magenta glow at the top edge
+// e4 scene 1 stretched to landing-page height (4000px): blend band behind,
+// ink field on top, magenta glow at the top edge — plus a violet band and a
+// thin pink ribbon filling the midfield, and a soft glow under the bottom ink
 export const initialLayers: LayerState[] = [
     {
         ...structuredClone(layerTemplate),
@@ -195,6 +200,94 @@ export const initialLayers: LayerState[] = [
     },
     {
         ...structuredClone(layerTemplate),
+        id: 'layer-5',
+        name: 'violet band',
+        mode: 'band',
+        visible: true,
+        fill: '#0c0542',
+        scrollStart: 'start 80%',
+        scrollEnd: 'end 30%',
+        top: {
+            strokeStyle: pink,
+            strokeWidth: 0.4,
+            curveAmount: 0,
+            offsetLeft: 0,
+            offsetRight: 0,
+            configs: [
+                {
+                    left: [0.5, 0.3, 0.15],
+                    right: [0.58, 0.4, -0.2],
+                },
+                {
+                    left: [0.62, 0.5, -0.25],
+                    right: [0.48, 0.3, 0.2],
+                },
+            ],
+        },
+        bottom: {
+            strokeStyle: pink,
+            strokeWidth: 0.4,
+            curveAmount: 0,
+            offsetLeft: 0,
+            offsetRight: 0,
+            configs: [
+                {
+                    left: [0.62, 0.35, 0.12],
+                    right: [0.68, 0.45, -0.15],
+                },
+                {
+                    left: [0.72, 0.5, -0.2],
+                    right: [0.6, 0.3, 0.18],
+                },
+            ],
+        },
+    },
+    {
+        ...structuredClone(layerTemplate),
+        id: 'layer-6',
+        name: 'pink ribbon',
+        mode: 'band',
+        visible: true,
+        fill: pink,
+        scrollStart: 'start end',
+        scrollEnd: 'end start',
+        top: {
+            strokeStyle: ink,
+            strokeWidth: 0.4,
+            curveAmount: 0,
+            offsetLeft: 0,
+            offsetRight: 0,
+            configs: [
+                {
+                    left: [0.38, 0.25, -0.12],
+                    right: [0.32, 0.5, 0.18],
+                },
+                {
+                    left: [0.3, 0.6, 0.2],
+                    right: [0.4, 0.2, -0.15],
+                },
+            ],
+        },
+        bottom: {
+            strokeStyle: ink,
+            strokeWidth: 0.4,
+            curveAmount: 0,
+            offsetLeft: 0,
+            offsetRight: 0,
+            configs: [
+                {
+                    left: [0.42, 0.3, -0.1],
+                    right: [0.37, 0.45, 0.15],
+                },
+                {
+                    left: [0.35, 0.55, 0.18],
+                    right: [0.45, 0.25, -0.12],
+                },
+            ],
+        },
+    },
+    {
+        ...structuredClone(layerTemplate),
         id: 'layer-4',
         name: 'ink bottom',
         mode: 'wave',
@@ -208,6 +301,29 @@ export const initialLayers: LayerState[] = [
             {
                 left: [0.06, 0.1, -0.17],
                 right: [0.08, 0.5, -0.22],
+            },
+        ],
+    },
+    {
+        ...structuredClone(layerTemplate),
+        id: 'layer-7',
+        name: 'glow bottom',
+        mode: 'wave',
+        visible: true,
+        fill: pink,
+        flip: true,
+        blur: 36,
+        curveAmount: 0,
+        scrollStart: 'start end',
+        scrollEnd: 'end start',
+        configs: [
+            {
+                left: [0.05, 0.4, 0.15],
+                right: [0.1, 0.3, -0.1],
+            },
+            {
+                left: [0.12, 0.6, -0.2],
+                right: [0.04, 0.3, 0.12],
             },
         ],
     },

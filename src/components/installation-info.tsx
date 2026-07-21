@@ -22,7 +22,8 @@ export const InstallationInfo = ({ className }: InstallationInfoProps) => {
                         </code>
                         <CopyButton
                             textToCopy={installCommand}
-                            className="absolute hidden md:block right-3 top-1/2 -translate-y-1/2 text-white-washed hover:text-3a-green transition-colors"
+                            aria-label="copy install command"
+                            className="absolute hidden md:block right-3 top-1/2 -translate-y-1/2 text-white-washed"
                         />
                     </div>
                     <div className="flex w-full sm:w-auto items-center gap-1 justify-center md:justify-start">

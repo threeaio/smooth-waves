@@ -14,7 +14,7 @@ export default function Home() {
                 <div
                     className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-60"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
+                        background: 'radial-gradient(ellipse at center, var(--site-glow-indigo) 0%, transparent 60%, transparent 100%)',
                     }}
                 />
                 <div className="absolute inset-0 ">
@@ -65,7 +65,7 @@ export default function Home() {
                 <div
                     className="absolute -right-1/2 -top-1/3 rotate-12 w-[140%] h-full opacity-60"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
+                        background: 'radial-gradient(ellipse at center, var(--site-glow-indigo) 0%, transparent 60%, transparent 100%)',
                     }}
                 />
                 <div className="absolute left-0 top-0 w-full h-full">
@@ -132,7 +132,7 @@ export default function Home() {
                 <div
                     className="absolute -left-1/2 -top-1/3 -rotate-12 w-[140%] h-full opacity-60"
                     style={{
-                        background: 'radial-gradient(ellipse at center, #2d3a64 0%, transparent 60%, transparent 100%)',
+                        background: 'radial-gradient(ellipse at center, var(--site-glow-indigo) 0%, transparent 60%, transparent 100%)',
                     }}
                 />
                 <Wave

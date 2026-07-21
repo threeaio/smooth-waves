@@ -3,6 +3,7 @@
 import { type WaveConfig } from '@threeaio/smooth-waves';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
+import { curveControls, curvePath, scaleControls, type CurveControls } from '../wave-geometry';
 
 export type EdgeKey = 'wave' | 'top' | 'bottom';
 
@@ -33,31 +34,9 @@ export const KEYFRAME_COLORS = ['#7dd3fc', '#fbbf24', '#c4b5fd', '#fb7185', '#fd
 
 export const keyframeColor = (index: number): string => KEYFRAME_COLORS[index % KEYFRAME_COLORS.length];
 
-interface Geometry {
-    ly: number;
-    ry: number;
-    lcx: number;
-    lcy: number;
-    rcx: number;
-    rcy: number;
-}
-
-function geometry(config: WaveConfig, w: number, h: number, flip?: boolean): Geometry {
-    const ly = (flip ? 1 - config.left[0] : config.left[0]) * h;
-    const ry = (flip ? 1 - config.right[0] : config.right[0]) * h;
-    return {
-        ly,
-        ry,
-        lcx: config.left[1] * w,
-        lcy: ly + config.left[2] * h,
-        rcx: w - config.right[1] * w,
-        rcy: ry + config.right[2] * h,
-    };
-}
-
-function curvePath(g: Geometry, w: number): string {
-    return `M 0 ${g.ly} C ${g.lcx} ${g.lcy}, ${g.rcx} ${g.rcy}, ${w} ${g.ry}`;
-}
+// px-space controls: p0/p3 are the left/right anchors, p1/p2 the drag handles
+const geometry = (config: WaveConfig, w: number, h: number, flip?: boolean): CurveControls =>
+    scaleControls(curveControls(config, flip), w, h);
 
 type DragKind = 'anchorL' | 'anchorR' | 'ctrlL' | 'ctrlR';
 
@@ -151,8 +130,8 @@ export function CurveOverlay({
         className: cn(
             'pointer-events-auto touch-none',
             kind.startsWith('anchor')
-                ? 'cursor-ns-resize fill-white stroke-[#0d99ff]'
-                : 'cursor-move fill-[#0d99ff]',
+                ? 'cursor-ns-resize fill-white stroke-ed-accent'
+                : 'cursor-move fill-ed-accent',
         ),
     });
 
@@ -167,14 +146,14 @@ export function CurveOverlay({
                             const isSelected = selection?.edge === edge.edge && selection.index === i;
                             if (!isSelected && !showGhosts) return null;
                             const eg = geometry(config, w, h, edge.flip);
-                            const d = curvePath(eg, w);
+                            const d = curvePath(eg);
                             const color = keyframeColor(i);
                             return (
                                 <g key={`${edge.edge}-${i}`}>
                                     <path
                                         d={d}
                                         fill="none"
-                                        className={cn(isSelected && 'stroke-[#0d99ff]')}
+                                        className={cn(isSelected && 'stroke-ed-accent')}
                                         style={isSelected ? undefined : { stroke: color }}
                                         strokeDasharray={
                                             isSelected ? undefined : edge.dashed ? `${2 * k} ${5 * k}` : `${7 * k} ${5 * k}`
@@ -193,10 +172,10 @@ export function CurveOverlay({
                                     />
                                     <text
                                         x={10 * k}
-                                        y={eg.ly - 8 * k}
+                                        y={eg.p0.y - 8 * k}
                                         className={cn(
                                             'pointer-events-auto cursor-pointer select-none font-mono',
-                                            isSelected && 'fill-[#0d99ff]',
+                                            isSelected && 'fill-ed-accent',
                                         )}
                                         style={{ fontSize: 11 * k, ...(isSelected ? {} : { fill: color }) }}
                                         onClick={() => onSelect(isSelected ? null : { edge: edge.edge, index: i })}
@@ -212,27 +191,27 @@ export function CurveOverlay({
                 {g && (
                     <g>
                         <line
-                            x1={0}
-                            y1={g.ly}
-                            x2={g.lcx}
-                            y2={g.lcy}
-                            className="stroke-[#0d99ff]/50"
+                            x1={g.p0.x}
+                            y1={g.p0.y}
+                            x2={g.p1.x}
+                            y2={g.p1.y}
+                            className="stroke-ed-accent/50"
                             strokeDasharray={`${3 * k} ${3 * k}`}
                             strokeWidth={k}
                         />
                         <line
-                            x1={w}
-                            y1={g.ry}
-                            x2={g.rcx}
-                            y2={g.rcy}
-                            className="stroke-[#0d99ff]/50"
+                            x1={g.p3.x}
+                            y1={g.p3.y}
+                            x2={g.p2.x}
+                            y2={g.p2.y}
+                            className="stroke-ed-accent/50"
                             strokeDasharray={`${3 * k} ${3 * k}`}
                             strokeWidth={k}
                         />
-                        <circle cx={g.lcx} cy={g.lcy} r={6 * k} {...handleProps('ctrlL')} />
-                        <circle cx={g.rcx} cy={g.rcy} r={6 * k} {...handleProps('ctrlR')} />
-                        <circle cx={0} cy={g.ly} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorL')} />
-                        <circle cx={w} cy={g.ry} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorR')} />
+                        <circle cx={g.p1.x} cy={g.p1.y} r={6 * k} {...handleProps('ctrlL')} />
+                        <circle cx={g.p2.x} cy={g.p2.y} r={6 * k} {...handleProps('ctrlR')} />
+                        <circle cx={g.p0.x} cy={g.p0.y} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorL')} />
+                        <circle cx={g.p3.x} cy={g.p3.y} r={8 * k} strokeWidth={2 * k} {...handleProps('anchorR')} />
                     </g>
                 )}
             </svg>

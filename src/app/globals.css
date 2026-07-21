@@ -15,6 +15,35 @@
     --ui-gradient-top: 165 10% 19%;
     --ui-border: var(--ui-gradient-top);
     --ui-shadow: var(--gray-darkest-washed);
+
+    /* editor chrome (composer) — rgb channel triplets so Tailwind's <alpha-value> works (ed-accent/10 etc.) */
+    --ed-accent: 13 153 255;
+    --ed-accent-hover: 11 140 232;
+    --ed-canvas: 232 232 235;
+    --ed-panel: 255 255 255;
+    --ed-code: 23 23 26;
+
+    /* editor hairlines & fills — alpha baked in */
+    --ed-hairline: rgba(0, 0, 0, 0.06);
+    --ed-border: rgba(0, 0, 0, 0.1);
+    --ed-border-strong: rgba(0, 0, 0, 0.25);
+    --ed-fill: rgba(0, 0, 0, 0.05);
+    --ed-fill-faint: rgba(0, 0, 0, 0.02);
+
+    /* editor text — strong for hover/active, default, muted for labels (zinc-900/700/500) */
+    --ed-text-strong: 24 24 27;
+    --ed-text: 63 63 70;
+    --ed-text-muted: 113 113 122;
+
+    /* landing page glow gradients */
+    --site-glow-indigo: #2d3a64;
+    --site-glow-violet: #414795;
+
+    /* composer panel geometry — fallbacks; the composer root overrides these from layout-constants.ts */
+    --ed-left-w: 224px;
+    --ed-right-w: 288px;
+    --ed-toolbar-h: 44px;
+    --ed-timeline-h: 40px;
 }
 
 html {
@@ -41,6 +70,15 @@ html.lenis body {
 
 .lenis.lenis-smooth iframe {
     pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ed-chrome *,
+    .ed-chrome *::before,
+    .ed-chrome *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }
 
 @layer utilities {
