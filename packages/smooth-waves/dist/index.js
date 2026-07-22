@@ -96,6 +96,49 @@ function drawDebug(ctx, width, height, scrollProgress) {
   ctx.fillStyle = "#f00";
   ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
 }
+function cubicYRange(p0, p1, p2, p3) {
+  let min = Math.min(p0, p3);
+  let max = Math.max(p0, p3);
+  for (let i = 1; i < 24; i++) {
+    const t = i / 24;
+    const u = 1 - t;
+    const y = u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
+    if (y < min) min = y;
+    if (y > max) max = y;
+  }
+  return [min, max];
+}
+function eraseFade(ctx, width, height, from, to) {
+  const a = clamp(0, 1, from / height);
+  const b = clamp(0, 1, to / height);
+  if (a === b) return;
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  if (a < b) {
+    gradient.addColorStop(0, "rgba(0,0,0,1)");
+    gradient.addColorStop(a, "rgba(0,0,0,1)");
+    gradient.addColorStop(b, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+  } else {
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(b, "rgba(0,0,0,0)");
+    gradient.addColorStop(a, "rgba(0,0,0,1)");
+    gradient.addColorStop(1, "rgba(0,0,0,1)");
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
+}
+function featherErase(ctx, width, height, featheredOut, depth, extent) {
+  if (depth <= 0 || height <= 0) return;
+  if (featheredOut === "top" || featheredOut === "both") {
+    eraseFade(ctx, width, height, extent.top, extent.top + depth);
+  }
+  if (featheredOut === "bottom" || featheredOut === "both") {
+    eraseFade(ctx, width, height, extent.bottom, extent.bottom - depth);
+  }
+}
 function featherMask(featheredOut) {
   switch (featheredOut) {
     case "top":
@@ -223,7 +266,7 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
     }
   });
   (0, import_react.useAnimationFrame)(() => {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     if (!needsRedrawRef.current) return;
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
@@ -249,6 +292,24 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
       height,
       (_g = curveConfig.flip) != null ? _g : false
     );
+    if (curveConfig.featheredOut && curveConfig.featherDepth) {
+      const flip = (_h = curveConfig.flip) != null ? _h : false;
+      const leftY = flip ? height - targetConfig.left[0] * height : targetConfig.left[0] * height;
+      const rightY = flip ? height - targetConfig.right[0] * height : targetConfig.right[0] * height;
+      const [curveMin, curveMax] = cubicYRange(
+        rightY,
+        rightY + targetConfig.right[2] * height,
+        leftY + targetConfig.left[2] * height,
+        leftY
+      );
+      const fan = (_i = curveConfig.curveAmount) != null ? _i : 1;
+      const fanLeft = ((_j = curveConfig.offsetLeft) != null ? _j : 0) * fan;
+      const fanRight = ((_k = curveConfig.offsetRight) != null ? _k : 0) * fan;
+      featherErase(ctx, width, height, curveConfig.featheredOut, curveConfig.featherDepth, {
+        top: flip ? curveMin + Math.min(0, fanLeft, fanRight) : 0,
+        bottom: flip ? height : curveMax + Math.max(0, fanLeft, fanRight)
+      });
+    }
     if (curveConfig.debug) {
       drawDebug(ctx, width, height, sp);
     }
@@ -257,7 +318,7 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
     "div",
     {
       className: "absolute inset-0",
-      style: { mask: featherMask(curveConfig.featheredOut) },
+      style: { mask: curveConfig.featherDepth ? void 0 : featherMask(curveConfig.featheredOut) },
       children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", { ref: canvasRef, className: "size-full" })
     }
   ) });
@@ -386,6 +447,24 @@ function WaveBand({ waveConfig }) {
     drawBandPath(ctx, topGeometry, bottomGeometry, width);
     strokeEdgeFan(ctx, topGeometry, top, width);
     strokeEdgeFan(ctx, bottomGeometry, bottom, width);
+    if (waveConfig.featheredOut && waveConfig.featherDepth) {
+      const fanReach = (edge) => {
+        var _a, _b, _c;
+        const fan = (_a = edge.curveAmount) != null ? _a : 0;
+        return [((_b = edge.offsetLeft) != null ? _b : 0) * fan, ((_c = edge.offsetRight) != null ? _c : 0) * fan];
+      };
+      const [topMin] = cubicYRange(topGeometry.leftY, topGeometry.leftCy, topGeometry.rightCy, topGeometry.rightY);
+      const [, bottomMax] = cubicYRange(
+        bottomGeometry.leftY,
+        bottomGeometry.leftCy,
+        bottomGeometry.rightCy,
+        bottomGeometry.rightY
+      );
+      featherErase(ctx, width, height, waveConfig.featheredOut, waveConfig.featherDepth, {
+        top: topMin + Math.min(0, ...fanReach(top)),
+        bottom: bottomMax + Math.max(0, ...fanReach(bottom))
+      });
+    }
     if (waveConfig.debug) {
       drawDebug(ctx, width, height, sp);
     }
@@ -394,7 +473,7 @@ function WaveBand({ waveConfig }) {
     "div",
     {
       className: "absolute inset-0",
-      style: { mask: featherMask(waveConfig.featheredOut) },
+      style: { mask: waveConfig.featherDepth ? void 0 : featherMask(waveConfig.featheredOut) },
       children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("canvas", { ref: canvasRef, className: "size-full" })
     }
   ) });

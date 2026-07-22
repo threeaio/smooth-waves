@@ -1,7 +1,7 @@
 'use client';
 import { useAnimationFrame, useMotionValueEvent, useScroll, useSpring } from 'motion/react';
 import { useEffect, useMemo, useRef } from 'react';
-import { clamp, drawDebug, extractChannels, featherMask, resolveConfig } from './core';
+import { clamp, cubicYRange, drawDebug, extractChannels, featherErase, featherMask, resolveConfig } from './core';
 import type { ScrollOffset, WaveConfig } from './core';
 
 /**
@@ -45,6 +45,14 @@ export interface WaveBandAnimation {
     bottom: WaveBandEdge;
     scrollOffset?: ScrollOffset;
     featheredOut?: 'top' | 'bottom' | 'both';
+    /**
+     * Fade depth of `featheredOut` in px. When set, the feather is drawn into
+     * the canvas anchored at the BAND's drawn extent — `top` fades the band's
+     * first `depth` px in, `bottom` its last `depth` px out, wherever the band
+     * currently sits. When omitted, the legacy %-based CSS mask applies
+     * (40% of the canvas height, anchored at the canvas edges).
+     */
+    featherDepth?: number;
     debug?: boolean;
 }
 
@@ -211,6 +219,26 @@ export default function WaveBand({ waveConfig }: { waveConfig: WaveBandAnimation
         strokeEdgeFan(ctx, topGeometry, top, width);
         strokeEdgeFan(ctx, bottomGeometry, bottom, width);
 
+        if (waveConfig.featheredOut && waveConfig.featherDepth) {
+            // the band's drawn y-extent: the top edge's highest point and the
+            // bottom edge's lowest, each pushed out by its fan lines' reach
+            const fanReach = (edge: WaveBandEdge) => {
+                const fan = edge.curveAmount ?? 0;
+                return [(edge.offsetLeft ?? 0) * fan, (edge.offsetRight ?? 0) * fan];
+            };
+            const [topMin] = cubicYRange(topGeometry.leftY, topGeometry.leftCy, topGeometry.rightCy, topGeometry.rightY);
+            const [, bottomMax] = cubicYRange(
+                bottomGeometry.leftY,
+                bottomGeometry.leftCy,
+                bottomGeometry.rightCy,
+                bottomGeometry.rightY,
+            );
+            featherErase(ctx, width, height, waveConfig.featheredOut, waveConfig.featherDepth, {
+                top: topMin + Math.min(0, ...fanReach(top)),
+                bottom: bottomMax + Math.max(0, ...fanReach(bottom)),
+            });
+        }
+
         if (waveConfig.debug) {
             drawDebug(ctx, width, height, sp);
         }
@@ -220,7 +248,7 @@ export default function WaveBand({ waveConfig }: { waveConfig: WaveBandAnimation
         <div className="absolute inset-0 overflow-hidden" ref={containerRef}>
             <div
                 className="absolute inset-0"
-                style={{ mask: featherMask(waveConfig.featheredOut) }}
+                style={{ mask: waveConfig.featherDepth ? undefined : featherMask(waveConfig.featheredOut) }}
             >
                 <canvas ref={canvasRef} className="size-full" />
             </div>

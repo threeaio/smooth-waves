@@ -29,6 +29,14 @@ declare function sampleConfig(configs: WaveConfig[], t: number): WaveConfig;
 
 interface WaveAnimation {
     featheredOut?: 'top' | 'bottom' | 'both';
+    /**
+     * Fade depth of `featheredOut` in px. When set, the feather is drawn into
+     * the canvas anchored at the SHAPE's drawn extent — `top` fades the shape's
+     * first `depth` px in, `bottom` its last `depth` px out, wherever the shape
+     * currently sits. When omitted, the legacy %-based CSS mask applies
+     * (40% of the canvas height, anchored at the canvas edges).
+     */
+    featherDepth?: number;
     strokeStyle?: string;
     strokeWidth?: number;
     fill: string;
@@ -84,6 +92,14 @@ interface WaveBandAnimation {
     bottom: WaveBandEdge;
     scrollOffset?: ScrollOffset;
     featheredOut?: 'top' | 'bottom' | 'both';
+    /**
+     * Fade depth of `featheredOut` in px. When set, the feather is drawn into
+     * the canvas anchored at the BAND's drawn extent — `top` fades the band's
+     * first `depth` px in, `bottom` its last `depth` px out, wherever the band
+     * currently sits. When omitted, the legacy %-based CSS mask applies
+     * (40% of the canvas height, anchored at the canvas edges).
+     */
+    featherDepth?: number;
     debug?: boolean;
 }
 declare function WaveBand({ waveConfig }: {

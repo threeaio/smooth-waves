@@ -177,6 +177,16 @@ export function LayerInspector({ layer }: { layer: LayerState }) {
                         aria-label="feather"
                     />
                 </FieldRow>
+                {layer.featheredOut !== 'none' && (
+                    <SliderField
+                        label="feather px"
+                        value={layer.featherDepth}
+                        min={0}
+                        max={2000}
+                        step={10}
+                        onChange={(featherDepth) => patch({ featherDepth })}
+                    />
+                )}
                 {layer.mode === 'wave' && (
                     <Toggle label="flip (fill from bottom)" checked={layer.flip} onChange={(flip) => patch({ flip })} />
                 )}

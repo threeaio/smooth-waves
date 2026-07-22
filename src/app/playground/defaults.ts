@@ -20,6 +20,11 @@ export interface LayerState {
     visible: boolean;
     fill: string;
     featheredOut: FeatheredOut;
+    /**
+     * Fade depth of the feather in px (height-invariant, drawn in-canvas).
+     * 0 falls back to the legacy %-based CSS mask (40% of the section height).
+     */
+    featherDepth: number;
     /** CSS blur on the layer's wrapper (px) — e4 softens its big fields with 60px. */
     blur: number;
     /**
@@ -86,6 +91,7 @@ export const palettePresets: Array<{ name: string; colors: string[] }> = [
 const layerTemplate: Omit<LayerState, 'id' | 'name' | 'mode' | 'visible'> = {
     fill: ink,
     featheredOut: 'none',
+    featherDepth: 600,
     blur: 0,
     dissolve: 0,
     dissolveSize: 1,

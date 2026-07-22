@@ -1,13 +1,21 @@
 'use client';
 import { useAnimationFrame, useMotionValueEvent, useScroll, useSpring } from 'motion/react';
 import { useEffect, useMemo, useRef } from 'react';
-import { clamp, drawDebug, extractChannels, featherMask, resolveConfig } from './core';
+import { clamp, cubicYRange, drawDebug, extractChannels, featherErase, featherMask, resolveConfig } from './core';
 import type { ScrollOffset, WaveConfig } from './core';
 
 export type { WaveConfig } from './core';
 
 export interface WaveAnimation {
     featheredOut?: 'top' | 'bottom' | 'both';
+    /**
+     * Fade depth of `featheredOut` in px. When set, the feather is drawn into
+     * the canvas anchored at the SHAPE's drawn extent — `top` fades the shape's
+     * first `depth` px in, `bottom` its last `depth` px out, wherever the shape
+     * currently sits. When omitted, the legacy %-based CSS mask applies
+     * (40% of the canvas height, anchored at the canvas edges).
+     */
+    featherDepth?: number;
     strokeStyle?: string;
     strokeWidth?: number;
     fill: string;
@@ -200,6 +208,27 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
             curveConfig.flip ?? false,
         );
 
+        if (curveConfig.featheredOut && curveConfig.featherDepth) {
+            // the shape's drawn y-extent: flat canvas edge on one side, the
+            // resolved curve (plus the fan lines' reach) on the other
+            const flip = curveConfig.flip ?? false;
+            const leftY = flip ? height - targetConfig.left[0] * height : targetConfig.left[0] * height;
+            const rightY = flip ? height - targetConfig.right[0] * height : targetConfig.right[0] * height;
+            const [curveMin, curveMax] = cubicYRange(
+                rightY,
+                rightY + targetConfig.right[2] * height,
+                leftY + targetConfig.left[2] * height,
+                leftY,
+            );
+            const fan = curveConfig.curveAmount ?? 1;
+            const fanLeft = (curveConfig.offsetLeft ?? 0) * fan;
+            const fanRight = (curveConfig.offsetRight ?? 0) * fan;
+            featherErase(ctx, width, height, curveConfig.featheredOut, curveConfig.featherDepth, {
+                top: flip ? curveMin + Math.min(0, fanLeft, fanRight) : 0,
+                bottom: flip ? height : curveMax + Math.max(0, fanLeft, fanRight),
+            });
+        }
+
         if (curveConfig.debug) {
             drawDebug(ctx, width, height, sp);
         }
@@ -209,7 +238,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         <div className="absolute inset-0 overflow-hidden" ref={containerRef}>
             <div
                 className="absolute inset-0"
-                style={{ mask: featherMask(curveConfig.featheredOut) }}
+                style={{ mask: curveConfig.featherDepth ? undefined : featherMask(curveConfig.featheredOut) }}
             >
                 <canvas ref={canvasRef} className="size-full" />
             </div>

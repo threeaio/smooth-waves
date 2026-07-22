@@ -205,6 +205,7 @@ function makeVeil(r: Rng, roles: Roles, amp: number, id: number): LayerState {
     const side = r.pick<Side>(['top', 'bottom']);
     layer.flip = side === 'bottom';
     layer.featheredOut = side;
+    layer.featherDepth = r.int(500, 1000); // px — height-invariant by design
     const pool = roles.extras.length ? roles.extras : [roles.accent];
     layer.fill = r.pick(pool);
     layer.curveAmount = 0;
@@ -264,7 +265,10 @@ function makeBand(r: Rng, roles: Roles, center: number, thickness: number, amp: 
             offsetRight: dir * r.int(4, 14),
         };
     }
-    if (r.chance(0.15)) layer.featheredOut = 'both';
+    if (r.chance(0.15)) {
+        layer.featheredOut = 'both';
+        layer.featherDepth = r.int(200, 450); // px — bands are thin, keep the fade shallow
+    }
     return layer;
 }
 

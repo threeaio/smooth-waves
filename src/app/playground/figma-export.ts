@@ -247,7 +247,7 @@ export function buildFigmaSvg(
     );
     const notes: string[] = [];
     if (layers.some((l) => l.featheredOut !== 'none'))
-        notes.push('\n  <!-- featheredOut is a CSS mask and not part of this export -->');
+        notes.push('\n  <!-- featheredOut (edge fade) is not part of this export — add it as a Figma mask -->');
     for (const l of layers.filter((l) => l.blur > 0))
         notes.push(`\n  <!-- "${escapeAttr(l.name)}" has a ${r(l.blur)}px blur — add it as a Figma layer blur -->`);
     if (layers.some((l) => l.dissolve > 0))

@@ -127,6 +127,75 @@ export function drawDebug(ctx: CanvasRenderingContext2D, width: number, height: 
     ctx.fillText(scrollProgress.toFixed(3), width - 50, clamp(20, height, scrollProgress * height));
 }
 
+/**
+ * Min/max y a cubic bezier reaches (only the y channel matters here) —
+ * sampled, which is plenty for anchoring a fade band.
+ */
+export function cubicYRange(p0: number, p1: number, p2: number, p3: number): [number, number] {
+    let min = Math.min(p0, p3);
+    let max = Math.max(p0, p3);
+    for (let i = 1; i < 24; i++) {
+        const t = i / 24;
+        const u = 1 - t;
+        const y = u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
+        if (y < min) min = y;
+        if (y > max) max = y;
+    }
+    return [min, max];
+}
+
+// One directional alpha ramp: fully erased at `from`, untouched at `to` and
+// beyond — `from > to` fades upward, `from < to` fades downward.
+function eraseFade(ctx: CanvasRenderingContext2D, width: number, height: number, from: number, to: number): void {
+    const a = clamp(0, 1, from / height);
+    const b = clamp(0, 1, to / height);
+    if (a === b) return;
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    if (a < b) {
+        gradient.addColorStop(0, 'rgba(0,0,0,1)');
+        gradient.addColorStop(a, 'rgba(0,0,0,1)');
+        gradient.addColorStop(b, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    } else {
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(b, 'rgba(0,0,0,0)');
+        gradient.addColorStop(a, 'rgba(0,0,0,1)');
+        gradient.addColorStop(1, 'rgba(0,0,0,1)');
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+}
+
+/**
+ * Px-based feather, applied INSIDE the canvas instead of via the CSS mask:
+ * after the shape (fill + stroke fans) is painted, an alpha gradient erases it
+ * with `destination-out`. Color-agnostic — no need to know the fill color.
+ *
+ * The fade is anchored at the SHAPE's drawn extent (`extent.top`/`.bottom`,
+ * resolved per frame), not at the canvas edges: `top` fades the first `depth`
+ * px of the shape in, `bottom` fades its last `depth` px out. Everything
+ * outside the extent on a faded side is erased entirely.
+ */
+export function featherErase(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    featheredOut: 'top' | 'bottom' | 'both',
+    depth: number,
+    extent: { top: number; bottom: number },
+): void {
+    if (depth <= 0 || height <= 0) return;
+    if (featheredOut === 'top' || featheredOut === 'both') {
+        eraseFade(ctx, width, height, extent.top, extent.top + depth);
+    }
+    if (featheredOut === 'bottom' || featheredOut === 'both') {
+        eraseFade(ctx, width, height, extent.bottom, extent.bottom - depth);
+    }
+}
+
 export function featherMask(featheredOut?: 'top' | 'bottom' | 'both'): string | undefined {
     switch (featheredOut) {
         case 'top':

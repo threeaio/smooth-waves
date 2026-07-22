@@ -68,6 +68,7 @@ export function PreviewLayers() {
                         flip: layer.flip,
                         debug: layer.debug,
                         featheredOut,
+                        featherDepth: layer.featherDepth || undefined,
                         // pinned: a single keyframe renders static, so the shape holds still while
                         // editing; in the fitted overview a sampled snapshot follows the scrubber
                         configs: pinned
@@ -89,6 +90,7 @@ export function PreviewLayers() {
                     fill: layer.fill,
                     debug: layer.debug,
                     featheredOut,
+                    featherDepth: layer.featherDepth || undefined,
                     top: pin(layer.top),
                     bottom: pin(layer.bottom),
                     scrollOffset,

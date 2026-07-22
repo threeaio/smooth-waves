@@ -44,6 +44,7 @@ export function toWaveSnippet(s: LayerState): string {
     if (s.offsetRight !== WAVE_DEFAULTS.offsetRight) lines.push(`offsetRight: ${s.offsetRight},`);
     if (s.flip) lines.push(`flip: true,`);
     if (s.featheredOut !== 'none') lines.push(`featheredOut: '${s.featheredOut}',`);
+    if (s.featheredOut !== 'none' && s.featherDepth > 0) lines.push(`featherDepth: ${s.featherDepth},`);
     if (s.debug) lines.push(`debug: true,`);
     lines.push(...configLines(s.configs));
     lines.push(`scrollOffset: ['${s.scrollStart}', '${s.scrollEnd}'],`);
@@ -73,6 +74,7 @@ export function toBandSnippet(s: LayerState): string {
     const lines: string[] = [];
     lines.push(`fill: '${s.fill}',`);
     if (s.featheredOut !== 'none') lines.push(`featheredOut: '${s.featheredOut}',`);
+    if (s.featheredOut !== 'none' && s.featherDepth > 0) lines.push(`featherDepth: ${s.featherDepth},`);
     if (s.debug) lines.push(`debug: true,`);
     lines.push(...edgeLines('top', s.top, s.blur));
     lines.push(...edgeLines('bottom', s.bottom, s.blur));
