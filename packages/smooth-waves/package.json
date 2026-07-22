@@ -1,6 +1,6 @@
 {
   "name": "@threeaio/smooth-waves",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A simple React component for creating beautiful, scroll-based wave animations.",
   "license": "MIT",
   "author": "Nikolaj Sokolowski (threea.io)",
@@ -9,7 +9,8 @@
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "publishConfig": {
     "access": "public"

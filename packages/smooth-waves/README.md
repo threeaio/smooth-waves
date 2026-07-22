@@ -15,6 +15,14 @@ yarn add @threeaio/smooth-waves
 pnpm add @threeaio/smooth-waves
 ```
 
+## Agent skill
+
+The package ships an [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that teaches coding agents how to use the library (embedding rules, keyframe semantics, recipes, pitfalls). To make it available in a project:
+
+```bash
+cp -r node_modules/@threeaio/smooth-waves/skills/smooth-waves .claude/skills/
+```
+
 ## Requirements
 
 Peer dependencies (installed alongside the package):

@@ -5,7 +5,7 @@ import { effectiveCurveAmount } from './figma-export';
 const WAVE_DEFAULTS = {
     strokeStyle: '#fff',
     strokeWidth: 0.4,
-    curveAmount: 1,
+    curveAmount: 0,
     offsetLeft: 0,
     offsetRight: 0,
 } as const;
