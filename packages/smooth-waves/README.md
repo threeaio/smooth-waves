@@ -55,6 +55,7 @@ The Wave component accepts a `waveConfig` prop of type `WaveAnimation`:
 ```typescript
 interface WaveAnimation {
     featheredOut?: 'top' | 'bottom' | 'both';
+    featherDepth?: number;
     strokeStyle?: string;
     strokeWidth?: number;
     fill: string;
@@ -76,11 +77,12 @@ interface WaveAnimation {
 - `strokeStyle`: Color of the wave lines (default: '#fff')
 - `strokeWidth`: Width of the wave lines (default: 0.4)
 - `featheredOut`: Adds a fade-out effect ('top', 'bottom', or 'both')
+- `featherDepth`: Fade depth in px. When set, the fade is drawn into the canvas anchored at the shape's drawn extent — `top` fades the shape's first `featherDepth` px in, `bottom` its last px out, wherever the shape currently sits (follows the scroll animation, includes the stroke fans). When omitted, a legacy %-based CSS mask applies (40% of the canvas height, anchored at the canvas edges).
 
 #### Wave Behavior
 
 - `configs`: Array of wave configurations defining the shape and movement
-- `curveAmount`: Number of decorative additional curve-lines to draw (default: 1)
+- `curveAmount`: Number of decorative additional curve-lines to draw (default: 0 — changed from 1 in 0.3.0; add `curveAmount: 1` to keep the old look)
 - `offsetLeft`: Left side offset for decorative curves
 - `offsetRight`: Right side offset for decorative curves
 - `flip`: Flips the wave vertically when true
@@ -198,6 +200,7 @@ interface WaveBandAnimation {
     bottom: WaveBandEdge;
     scrollOffset?: ScrollOffset;
     featheredOut?: 'top' | 'bottom' | 'both';
+    featherDepth?: number; // same semantics as Wave — px fade anchored at the band's drawn extent
     debug?: boolean;
 }
 
@@ -214,7 +217,7 @@ interface WaveBandEdge {
 Notes:
 
 - There is no `flip` — both edges are explicit, and y-values are always fractions from the top.
-- `curveAmount` defaults to `0` here (unlike Wave's `1`), so no stroke appears unless you ask for one.
+- `curveAmount` defaults to `0` (same as Wave since 0.3.0), so no stroke appears unless you ask for one.
 - Decorative fans need `curveAmount × offset` px of room inside the canvas before they get clipped.
 - If the top curve crosses below the bottom curve the path self-intersects and canvas fills the twist (nonzero winding). Usable as an effect, but watch the Catmull-Rom overshoot with 3+ keyframes.
 

@@ -21,6 +21,7 @@ export interface WaveAnimation {
     fill: string;
     configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
+    /** Number of decorative stroke lines fanning off the curve (default 0). */
     curveAmount?: number;
     offsetLeft?: number;
     offsetRight?: number;
@@ -52,7 +53,7 @@ const defaultCurveConfig: WaveAnimation = {
 function drawWavePath(
     ctx: CanvasRenderingContext2D,
     config: WaveConfig,
-    curveAmount = 1,
+    curveAmount = 0,
     lineOffsetLeft = 0,
     lineOffsetRight = 0,
     width: number,
@@ -200,7 +201,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
         drawWavePath(
             ctx,
             targetConfig,
-            curveConfig.curveAmount ?? 1,
+            curveConfig.curveAmount ?? 0,
             curveConfig.offsetLeft ?? 0,
             curveConfig.offsetRight ?? 0,
             width,
@@ -220,7 +221,7 @@ export default function Wave({ waveConfig: curveConfig = defaultCurveConfig }: {
                 leftY + targetConfig.left[2] * height,
                 leftY,
             );
-            const fan = curveConfig.curveAmount ?? 1;
+            const fan = curveConfig.curveAmount ?? 0;
             const fanLeft = (curveConfig.offsetLeft ?? 0) * fan;
             const fanRight = (curveConfig.offsetRight ?? 0) * fan;
             featherErase(ctx, width, height, curveConfig.featheredOut, curveConfig.featherDepth, {

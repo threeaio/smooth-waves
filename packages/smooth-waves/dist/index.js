@@ -174,7 +174,7 @@ var defaultCurveConfig = {
   ],
   scrollOffset: ["end end", "start start"]
 };
-function drawWavePath(ctx, config, curveAmount = 1, lineOffsetLeft = 0, lineOffsetRight = 0, width, height, flip = false) {
+function drawWavePath(ctx, config, curveAmount = 0, lineOffsetLeft = 0, lineOffsetRight = 0, width, height, flip = false) {
   const leftX = 0;
   const leftY = flip ? height - config.left[0] * height : config.left[0] * height;
   const leftXOffset = config.left[1] * width;
@@ -285,7 +285,7 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
     drawWavePath(
       ctx,
       targetConfig,
-      (_d = curveConfig.curveAmount) != null ? _d : 1,
+      (_d = curveConfig.curveAmount) != null ? _d : 0,
       (_e = curveConfig.offsetLeft) != null ? _e : 0,
       (_f = curveConfig.offsetRight) != null ? _f : 0,
       width,
@@ -302,7 +302,7 @@ function Wave({ waveConfig: curveConfig = defaultCurveConfig }) {
         leftY + targetConfig.left[2] * height,
         leftY
       );
-      const fan = (_i = curveConfig.curveAmount) != null ? _i : 1;
+      const fan = (_i = curveConfig.curveAmount) != null ? _i : 0;
       const fanLeft = ((_j = curveConfig.offsetLeft) != null ? _j : 0) * fan;
       const fanRight = ((_k = curveConfig.offsetRight) != null ? _k : 0) * fan;
       featherErase(ctx, width, height, curveConfig.featheredOut, curveConfig.featherDepth, {

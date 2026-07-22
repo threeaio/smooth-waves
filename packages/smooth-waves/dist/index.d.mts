@@ -42,6 +42,7 @@ interface WaveAnimation {
     fill: string;
     configs: WaveConfig[];
     scrollOffset?: ScrollOffset;
+    /** Number of decorative stroke lines fanning off the curve (default 0). */
     curveAmount?: number;
     offsetLeft?: number;
     offsetRight?: number;
