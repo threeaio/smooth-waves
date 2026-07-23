@@ -114,6 +114,17 @@ export function PageInspector() {
                         className="absolute right-1.5 top-1.5"
                     />
                 </div>
+                {/* the snippet imports Wave/WaveBand — tell people where those come from.
+                    Inverted like the code block so it reads as part of the handoff, not as a footnote. */}
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-ed-code px-3 py-2">
+                    <code className="truncate text-2xs text-zinc-100">npm i @threeaio/smooth-waves</code>
+                    <CopyButton
+                        textToCopy="npm i @threeaio/smooth-waves"
+                        variant="overlay"
+                        aria-label="copy install command"
+                        className="shrink-0"
+                    />
+                </div>
             </Section>
         </>
     );

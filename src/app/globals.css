@@ -85,7 +85,8 @@ html.lenis body {
   @supports (corner-shape: squircle) {
     .rounded-xl,
     .rounded-2xl,
-    .rounded-3xl {
+    .rounded-3xl,
+    .rounded-huge {
       corner-shape: squircle;
     }
     .rounded-xl {

@@ -15,6 +15,7 @@ export function NavBarLight() {
         { href: '/', label: 'H' },
         { href: '/example-1', label: 'E.1' },
         { href: '/example-2', label: 'E.2' },
+        { href: '/example-3', label: 'E.3' },
         { href: '/example-4', label: 'E.4' },
         { href: '/playground', label: 'LAB' },
     ];
@@ -23,7 +24,8 @@ export function NavBarLight() {
     // you scroll). On the bright E.4 page that reads as noise, so keep it solid white.
     const white = pathname === '/' || pathname === '/example-4' || pathname === '/playground';
     const dark = pathname === '/example-1';
-    const needsContrast = pathname === '/example-2';
+    // example-3 is split light/dark — blend-difference keeps logo AND links readable
+    const needsContrast = pathname === '/example-2' || pathname === '/example-3';
 
     return (
         <nav

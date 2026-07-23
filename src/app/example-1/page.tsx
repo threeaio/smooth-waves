@@ -14,7 +14,6 @@ export default function Home() {
                     waveConfig={{
                         fill: 'hsl(0 0% 85%)',
                         flip: false,
-                        debug: true,
                         strokeStyle: 'hsl(35 15% 12%)',
                         curveAmount: 2,
                         strokeWidth: 0.4,
@@ -53,7 +52,6 @@ export default function Home() {
                     <div className="absolute left-0 top-0 w-full h-full ">
                         <Wave
                             waveConfig={{
-                                debug: true,
                                 fill: 'hsl(160 10% 9%)',
                                 strokeStyle: 'hsl(35 15% 42%)',
                                 curveAmount: 5,
@@ -100,7 +98,6 @@ export default function Home() {
                     waveConfig={{
                         fill: 'rgba(20, 20, 55, 0.1)',
                         featheredOut: 'top',
-                        debug: true,
                         strokeStyle: 'hsl(35 15% 12%)',
                         curveAmount: 3,
                         strokeWidth: 0.4,
@@ -152,7 +149,6 @@ export default function Home() {
                     <Wave
                         waveConfig={{
                             flip: true,
-                            debug: true,
                             fill: 'hsl(0 0% 85%)',
                             strokeStyle: 'hsl(165 5% 72%)',
                             strokeWidth: 2,
@@ -204,7 +200,6 @@ export default function Home() {
                             curveAmount: 4,
                             offsetLeft: -32,
                             offsetRight: -12,
-                            debug: true,
                             configs: [
                                 {
                                     left: [1, 0.3, -0.3],

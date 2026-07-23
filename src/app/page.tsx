@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Wave } from '@threeaio/smooth-waves';
 import { NsLogo } from '@/components/logos/ns-logo';
 import { MotionDiv } from '@/components/motion-div';
@@ -53,6 +54,20 @@ export default function Home() {
                         <p className="text-balance">
                             A simple motion based react-component to create smooth, scroll-based wave animations.
                         </p>
+                        <div className="flex flex-wrap items-center gap-3 pt-2">
+                            <Link
+                                href="/playground"
+                                className="font-mono text-sm text-white border border-white/30 rounded-full px-5 py-2 hover:bg-white/10 transition-colors"
+                            >
+                                open the wave composer →
+                            </Link>
+                            <Link
+                                href="/example-1"
+                                className="font-mono text-sm text-white/70 px-2 py-2 hover:text-white transition-colors"
+                            >
+                                browse the examples
+                            </Link>
+                        </div>
                     </div>
                     <div className="xl:col-span-3 xl:col-start-5 flex flex-row gap-8 items-center">
                         <ReactIcon className="size-10 text-white-washed" />
